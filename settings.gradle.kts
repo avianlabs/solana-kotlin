@@ -1,8 +1,36 @@
 pluginManagement {
-    repositories {
-        mavenCentral()
-        gradlePluginPortal()
-    }
-
+  repositories {
+    gradlePluginPortal()
+    google()
+    mavenCentral()
+  }
 }
-rootProject.name = "solana-kotlin"
+
+dependencyResolutionManagement {
+//  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+  repositories {
+    google {
+      content {
+        includeGroupByRegex("""com\.android\..*""")
+        includeGroupByRegex("""androidx\..*""")
+        includeGroupByRegex("""com\.google\..*""")
+      }
+    }
+    mavenCentral()
+    maven {
+      url = uri("https://jitpack.io")
+      content {
+      }
+    }
+  }
+}
+
+include(":lib")
+
+dependencyResolutionManagement {
+  versionCatalogs {
+    create("libs") {
+      from(files("libs.versions.toml"))
+    }
+  }
+}
