@@ -1,18 +1,16 @@
 package net.avianlabs.solana.methods
 
+import io.ktor.util.encodeBase64
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse.RPC
-import net.avianlabs.solana.domain.core.PublicKey
 
-public suspend fun SolanaClient.getBalance(
-  account: PublicKey,
-): Long {
-  val result = invoke<RPC<Long>>("getBalance", params(account))
+public suspend fun SolanaClient.getFeeForMessage(message: ByteArray): Long {
+  val result = invoke<RPC<Long>>("getFeeForMessage", params(message))
   return result!!.value!!
 }
 
 private fun SolanaClient.params(
-  account: PublicKey,
-) = JsonArray(listOf(json.encodeToJsonElement(account)))
+  message: ByteArray,
+) = JsonArray(listOf(json.encodeToJsonElement(message.encodeBase64())))

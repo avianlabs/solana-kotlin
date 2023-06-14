@@ -6,22 +6,21 @@ import kotlinx.serialization.json.JsonElement
 import net.avianlabs.solana.client.RpcInvocation
 import net.avianlabs.solana.client.RpcKtorClient
 
-public class SolanaService(
+public class SolanaClient(
   private val client: RpcKtorClient,
 ) {
 
-  internal val json: Json = Json
-
-  internal suspend fun invoke(
-    method: String,
-    params: JsonArray? = null,
-  ): JsonElement? {
-    val invocation = makeInvocation(method, params)
-    return client.invoke(invocation).result
+  internal val json: Json = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    allowSpecialFloatingPointValues = true
   }
 
-  private fun makeInvocation(
+  internal suspend inline fun <reified T> invoke(
     method: String,
     params: JsonArray? = null,
-  ): RpcInvocation = RpcInvocation(method, params)
+  ): T? {
+    val invocation = RpcInvocation(method, params)
+    return client.invoke<JsonArray, T>(invocation).result
+  }
 }

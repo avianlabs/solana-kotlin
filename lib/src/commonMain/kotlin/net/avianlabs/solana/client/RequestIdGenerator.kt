@@ -1,4 +1,5 @@
 package net.avianlabs.solana.client
+
 public class RequestIdGenerator {
 
   private var lastIdx = 0
