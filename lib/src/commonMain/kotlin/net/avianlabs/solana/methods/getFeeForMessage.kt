@@ -1,6 +1,6 @@
 package net.avianlabs.solana.methods
 
-import io.ktor.util.encodeBase64
+import io.ktor.util.*
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient

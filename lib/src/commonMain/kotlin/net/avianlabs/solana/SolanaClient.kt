@@ -2,7 +2,6 @@ package net.avianlabs.solana
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
 import net.avianlabs.solana.client.RpcInvocation
 import net.avianlabs.solana.client.RpcKtorClient
 

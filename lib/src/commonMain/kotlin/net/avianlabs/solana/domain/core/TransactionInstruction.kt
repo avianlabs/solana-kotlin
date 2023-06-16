@@ -1,8 +1,5 @@
 package net.avianlabs.solana.domain.core
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 public data class TransactionInstruction(
   val programId: PublicKey,
   val keys: List<AccountMeta>,

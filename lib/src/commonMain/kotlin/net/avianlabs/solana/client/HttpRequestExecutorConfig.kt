@@ -1,6 +1,6 @@
 package net.avianlabs.solana.client
 
-import io.ktor.http.Url
+import io.ktor.http.*
 
 public data class HttpRequestExecutorConfig(
   val baseURL: Url,

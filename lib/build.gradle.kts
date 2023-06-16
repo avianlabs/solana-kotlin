@@ -32,8 +32,13 @@ kotlin {
   }
 
   sourceSets {
+    val jvmMain by getting
+    val jvmTest by getting
+
     val commonMain by getting {
       dependencies {
+        implementation(project(":vendor"))
+
         implementation(libs.ktorClientCore)
         implementation(libs.ktorClientLogging)
         implementation(libs.serializationJson)
@@ -46,6 +51,7 @@ kotlin {
     }
     val commonTest by getting {
       dependencies {
+        implementation(libs.kotlinTest)
       }
     }
 
@@ -89,14 +95,18 @@ android {
     }
   }
 
-  packaging {
-    resources.excludes.addAll(
-      listOf(
-        "META-INF/AL2.0",
-        "META-INF/LGPL2.1",
-      )
-    )
+  packagingOptions {
+    exclude("META-INF/AL2.0")
+    exclude("META-INF/LGPL2.1")
   }
+//  packaging {
+//    resources.excludes.addAll(
+//      listOf(
+//        "META-INF/AL2.0",
+//        "META-INF/LGPL2.1",
+//      )
+//    )
+//  }
   compileOptions {
     isCoreLibraryDesugaringEnabled = true
     sourceCompatibility = JavaVersion.VERSION_18

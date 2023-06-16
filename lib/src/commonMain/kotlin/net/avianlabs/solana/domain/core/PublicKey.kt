@@ -10,11 +10,9 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.komputing.kbase58.decodeBase58
 import org.komputing.kbase58.encodeToBase58String
-import kotlin.jvm.JvmInline
 
-@JvmInline
 @Serializable(with = PublicKeySerializer::class)
-public value class PublicKey(public val bytes: ByteArray) {
+public data class PublicKey(public val bytes: ByteArray) {
 
   init {
     require(bytes.size == PUBLIC_KEY_LENGTH) { "Invalid public key input size ${bytes.size} (must be $PUBLIC_KEY_LENGTH)" }
@@ -24,65 +22,22 @@ public value class PublicKey(public val bytes: ByteArray) {
 
   override fun toString(): String = toBase58()
 
+  public fun toByteArray(): ByteArray = bytes
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || this::class != other::class) return false
+
+    other as PublicKey
+
+    return bytes.contentEquals(other.bytes)
+  }
+
+  override fun hashCode(): Int = bytes.contentHashCode()
+
   public companion object {
 
     public const val PUBLIC_KEY_LENGTH: Int = 32
-
-//    public fun createProgramAddress(seeds: List<ByteArray>, programId: PublicKey): PublicKey {
-//      val bytes = (seeds + programId.bytes + "ProgramDerivedAddress".toByteArray()).let {
-//        // join into one single byte array
-//        val buffer = ByteArray(it.sumOf { it.size })
-//        var offset = 0
-//        for (seed in it) {
-//          seed.copyInto(buffer, offset)
-//          offset += seed.size
-//        }
-//        buffer
-//      }
-//      val hash = Sha256.digest(bytes)
-//
-//      if (TweetNaclFast.is_on_curve(hash) != 0) {
-//        throw RuntimeException("Invalid seeds, address must fall off the curve")
-//      }
-//      return PublicKey(hash)
-//    }
-
-//    public fun findProgramAddress(
-//      seeds: List<ByteArray>,
-//      programId: PublicKey,
-//    ): ProgramDerivedAddress {
-//      var nonce = 255
-//      val address: PublicKey
-//      val seedsWithNonce = mutableListOf<ByteArray>()
-//      seedsWithNonce.addAll(seeds)
-//      while (nonce != 0) {
-//        address = try {
-//          seedsWithNonce.add(byteArrayOf(nonce.toByte()))
-//          createProgramAddress(seedsWithNonce, programId)
-//        } catch (e: Exception) {
-//          seedsWithNonce.removeAt(seedsWithNonce.size - 1)
-//          nonce--
-//          continue
-//        }
-//        return ProgramDerivedAddress(address, nonce)
-//      }
-//      throw Exception("Unable to find a viable program address nonce")
-//    }
-
-//    @Throws(Exception::class)
-//    public fun associatedTokenAddress(
-//      walletAddress: PublicKey,
-//      tokenMintAddress: PublicKey,
-//    ): ProgramDerivedAddress {
-//      return findProgramAddress(
-//        listOf(
-//          walletAddress.bytes,
-//          TokenProgram.PROGRAM_ID.toByteArray(),
-//          tokenMintAddress.toByteArray()
-//        ),
-//        fromBase58("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
-//      )
-//    }
 
     public fun fromBase58(base58: String): PublicKey = PublicKey(base58.decodeBase58())
   }

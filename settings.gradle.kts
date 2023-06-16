@@ -26,6 +26,7 @@ dependencyResolutionManagement {
 }
 
 include(":lib")
+include(":vendor")
 
 dependencyResolutionManagement {
   versionCatalogs {
