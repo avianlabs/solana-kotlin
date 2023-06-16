@@ -4,7 +4,7 @@ import net.avianlabs.solana.domain.core.PublicKey
 
 public data class Ed25519Keypair(
   public val publicKey: PublicKey,
-  public val secretKey: ByteArray
+  public val secretKey: ByteArray,
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -23,14 +23,13 @@ public data class Ed25519Keypair(
   }
 
   public companion object {
-    public fun fromByteArray(bytes: ByteArray): Ed25519Keypair {
-      require(bytes.size == 64) { "Invalid keypair length" }
+    public fun fromSecretKeyBytes(bytes: ByteArray): Ed25519Keypair {
+      require(bytes.size == 64) { "Invalid key length" }
       val publicKey = PublicKey(bytes.sliceArray(32 until 64))
-      val secretKey = bytes.sliceArray(0 until 32)
-      return Ed25519Keypair(publicKey, secretKey)
+      return Ed25519Keypair(publicKey, bytes.copyOf())
     }
   }
 }
 
 public fun Ed25519Keypair.sign(message: ByteArray): ByteArray =
-  defaultCryptoEngine.sign(message, secretKey)
+  defaultCryptoEngine.sign(message = message, secretKey = secretKey)
