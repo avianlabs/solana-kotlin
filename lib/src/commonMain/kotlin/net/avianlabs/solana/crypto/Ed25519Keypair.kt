@@ -1,6 +1,7 @@
 package net.avianlabs.solana.crypto
 
 import net.avianlabs.solana.domain.core.PublicKey
+import org.komputing.kbase58.decodeBase58
 
 public data class Ed25519Keypair(
   public val publicKey: PublicKey,
@@ -28,6 +29,9 @@ public data class Ed25519Keypair(
       val publicKey = PublicKey(bytes.sliceArray(32 until 64))
       return Ed25519Keypair(publicKey, bytes.copyOf())
     }
+
+    public fun fromBase58(base58: String): Ed25519Keypair =
+      fromSecretKeyBytes(base58.decodeBase58())
   }
 }
 

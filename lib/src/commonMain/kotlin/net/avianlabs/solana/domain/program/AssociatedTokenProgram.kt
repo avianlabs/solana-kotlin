@@ -27,7 +27,7 @@ public object AssociatedTokenProgram : Program(
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(SystemProgram.programId, isSigner = false, isWritable = false),
       AccountMeta(programId, isSigner = false, isWritable = false),
-      AccountMeta(TokenProgram.sysvarRentAccount, isSigner = false, isWritable = false)
+      AccountMeta(SystemProgram.SYSVAR_RENT_ACCOUNT, isSigner = false, isWritable = false)
     )
 
     return TransactionInstruction(

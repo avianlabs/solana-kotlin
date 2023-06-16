@@ -11,9 +11,6 @@ public object TokenProgram : Program(
   programId = TOKEN_PROGRAM_ID
 ) {
 
-  public val sysvarRentAccount: PublicKey =
-    PublicKey.fromBase58("SysvarRent111111111111111111111111111111111")
-
   public enum class Instruction(
     public val index: UByte,
   ) {

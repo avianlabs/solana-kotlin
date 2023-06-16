@@ -32,7 +32,11 @@ kotlin {
   }
 
   sourceSets {
-    val jvmMain by getting
+    val jvmMain by getting {
+      dependencies {
+        implementation(libs.ktorClientOkHttp)
+      }
+    }
     val jvmTest by getting
 
     val commonMain by getting {
@@ -52,6 +56,7 @@ kotlin {
     val commonTest by getting {
       dependencies {
         implementation(libs.kotlinTest)
+        implementation(libs.coroutinesTest)
       }
     }
 

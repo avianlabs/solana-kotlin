@@ -30,7 +30,11 @@ kotlin {
     val jvmTest by getting
 
     val commonMain by getting
-    val commonTest by getting
+    val commonTest by getting {
+      dependencies {
+        implementation(libs.kotlinTest)
+      }
+    }
 
     val jsMain by getting
     val jsTest by getting

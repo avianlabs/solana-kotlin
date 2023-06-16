@@ -10,6 +10,15 @@ private val SYSTEM_PROGRAM_ID = PublicKey.fromBase58("11111111111111111111111111
 public object SystemProgram : Program(
   programId = SYSTEM_PROGRAM_ID
 ) {
+
+  public val SYSVAR_RENT_ACCOUNT: PublicKey =
+    PublicKey.fromBase58("SysvarRent111111111111111111111111111111111")
+
+  public val SYSVAR_RECENT_BLOCKHASH: PublicKey =
+    PublicKey.fromBase58("SysvarRecentB1ockHashes11111111111111111111")
+
+  public val NONCE_ACCOUNT_LENGTH: Long = 80L
+
   public enum class Instruction(
     public val index: UInt,
   ) {
@@ -67,6 +76,73 @@ public object SystemProgram : Program(
     data = Buffer()
       .writeIntLe(Instruction.Transfer.index.toInt())
       .writeLongLe(lamports)
+      .readByteArray(),
+  )
+
+  public fun nonceInitialize(
+    nonceAccount: PublicKey,
+    authorized: PublicKey,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+      AccountMeta(nonceAccount, isSigner = false, isWritable = true),
+      AccountMeta(SYSVAR_RECENT_BLOCKHASH, isSigner = false, isWritable = false),
+      AccountMeta(SYSVAR_RENT_ACCOUNT, isSigner = false, isWritable = false),
+    ),
+    data = Buffer()
+      .writeIntLe(Instruction.InitializeNonceAccount.index.toInt())
+      .write(authorized.bytes)
+      .readByteArray(),
+  )
+
+  public fun nonceAdvance(
+    nonceAccount: PublicKey,
+    authorized: PublicKey,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+      AccountMeta(nonceAccount, isSigner = false, isWritable = true),
+      AccountMeta(SYSVAR_RECENT_BLOCKHASH, isSigner = false, isWritable = false),
+      AccountMeta(authorized, isSigner = true, isWritable = false),
+    ),
+    data = Buffer()
+      .writeIntLe(Instruction.AdvanceNonceAccount.index.toInt())
+      .readByteArray(),
+  )
+
+  public fun nonceWithdraw(
+    nonceAccount: PublicKey,
+    authorized: PublicKey,
+    toPublicKey: PublicKey,
+    lamports: Long,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+      AccountMeta(nonceAccount, isSigner = false, isWritable = true),
+      AccountMeta(toPublicKey, isSigner = false, isWritable = true),
+      AccountMeta(SYSVAR_RECENT_BLOCKHASH, isSigner = false, isWritable = false),
+      AccountMeta(SYSVAR_RENT_ACCOUNT, isSigner = false, isWritable = false),
+      AccountMeta(authorized, isSigner = true, isWritable = false),
+    ),
+    data = Buffer()
+      .writeIntLe(Instruction.WithdrawNonceAccount.index.toInt())
+      .writeLongLe(lamports)
+      .readByteArray(),
+  )
+
+  public fun nonceAuthorize(
+    nonceAccount: PublicKey,
+    authorized: PublicKey,
+    newAuthorized: PublicKey,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+      AccountMeta(nonceAccount, isSigner = false, isWritable = true),
+      AccountMeta(authorized, isSigner = true, isWritable = false),
+    ),
+    data = Buffer()
+      .writeIntLe(Instruction.AuthorizeNonceAccount.index.toInt())
+      .write(newAuthorized.bytes)
       .readByteArray(),
   )
 }
