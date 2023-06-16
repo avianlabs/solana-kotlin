@@ -12,7 +12,7 @@ public suspend fun SolanaClient.isBlockHashValid(
   minContextSlot: Long? = null,
 ): Boolean {
   val result =
-    invoke<RPC<Boolean>>("isBlockHashValid", params(blockHash, commitment, minContextSlot))
+    invoke<RPC<Boolean>>("isBlockhashValid", params(blockHash, commitment, minContextSlot))
   return result!!.value!!
 }
 
