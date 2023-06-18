@@ -90,6 +90,7 @@ android {
   defaultConfig {
     minSdk = libs.versions.androidMinSdk.get().toInt()
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    consumerProguardFiles("src/androidMain/consumer-rules.pro")
   }
 
   sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
