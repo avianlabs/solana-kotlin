@@ -114,6 +114,9 @@ public data class SignaturePublicKeyPair(
     return result
   }
 
+  override fun toString(): String {
+    return "SignaturePublicKeyPair(signature=${signature?.encodeToBase58String()}, publicKey=$publicKey)"
+  }
 }
 
 private val defaultSignature = ByteArray(64) { 0 }.encodeToBase58String()
@@ -160,7 +163,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
           SystemProgram.Instruction.Transfer.index -> DecodedInstruction.SystemProgram.Transfer(
             from = accountsMeta!![0].publicKey,
             to = accountsMeta[1].publicKey,
-            lamports = buffer.readLong(),
+            lamports = buffer.readLongLe(),
           )
 
           else -> raw
@@ -176,7 +179,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
               source = source.publicKey,
               destination = destination.publicKey,
               owner = owner.publicKey,
-              amount = buffer.readLong(),
+              amount = buffer.readLongLe(),
             )
           }
 
@@ -187,7 +190,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
               destination = destination.publicKey,
               mint = mint.publicKey,
               owner = owner.publicKey,
-              amount = buffer.readLong(),
+              amount = buffer.readLongLe(),
               decimals = buffer.readByte().toUByte(),
             )
           }
