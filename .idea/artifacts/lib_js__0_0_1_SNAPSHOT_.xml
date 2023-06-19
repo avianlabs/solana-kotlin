@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="lib-js-&quot;0.0.1-SNAPSHOT&quot;">
-    <output-path>$PROJECT_DIR$/lib/build/libs</output-path>
-    <root id="archive" name="lib-js-_0.0.1-SNAPSHOT_.jar">
-      <element id="module-output" name="solana-kotlin.lib.jsMain" />
-    </root>
-  </artifact>
-</component>

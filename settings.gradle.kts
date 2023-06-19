@@ -25,7 +25,7 @@ dependencyResolutionManagement {
   }
 }
 
-include(":lib")
+include(":solana-kotlin")
 include(":vendor")
 
 dependencyResolutionManagement {

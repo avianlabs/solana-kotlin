@@ -1,5 +1,6 @@
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.mavenPublish)
 }
 
 group = "net.avianlabs.solana"
@@ -13,7 +14,7 @@ kotlin {
     // set the target JVM version
     compilations.all {
       kotlinOptions {
-        jvmTarget = "18"
+        jvmTarget = "17"
       }
     }
   }
@@ -46,6 +47,12 @@ kotlin {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   kotlinOptions {
-    jvmTarget = "18"
+    jvmTarget = "17"
+  }
+}
+
+publishing {
+  repositories {
+    mavenLocal()
   }
 }

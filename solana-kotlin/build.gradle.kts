@@ -6,6 +6,7 @@ plugins {
 }
 
 group = "net.avianlabs.solana"
+version = properties["version"] as String
 
 kotlin {
   targetHierarchy.default()
@@ -15,7 +16,7 @@ kotlin {
     // set the target JVM version
     compilations.all {
       kotlinOptions {
-        jvmTarget = "18"
+        jvmTarget = "17"
       }
     }
   }
@@ -115,8 +116,8 @@ android {
 //  }
   compileOptions {
     isCoreLibraryDesugaringEnabled = true
-    sourceCompatibility = JavaVersion.VERSION_18
-    targetCompatibility = JavaVersion.VERSION_18
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
   }
 }
 
@@ -126,6 +127,12 @@ dependencies {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   kotlinOptions {
-    jvmTarget = "18"
+    jvmTarget = "17"
+  }
+}
+
+publishing {
+  repositories {
+    mavenLocal()
   }
 }
