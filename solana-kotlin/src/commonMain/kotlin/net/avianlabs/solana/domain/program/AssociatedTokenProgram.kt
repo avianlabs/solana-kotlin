@@ -42,7 +42,7 @@ public fun PublicKey.associatedTokenAddress(
   tokenMintAddress: PublicKey,
 ): ProgramDerivedAddress = Program.findProgramAddress(
   listOf(
-    bytes,
+    bytes.copyOf(),
     TokenProgram.programId.toByteArray(),
     tokenMintAddress.toByteArray()
   ),
