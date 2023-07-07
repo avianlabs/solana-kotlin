@@ -1,5 +1,6 @@
 package net.avianlabs.solana.crypto
 
+import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.vendor.TweetNaclFast
 
 internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
@@ -9,4 +10,12 @@ internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
   }
 
   override fun isOnCurve(publicKey: ByteArray): Boolean = TweetNaclFast.is_on_curve(publicKey) != 0
+
+  override fun generateKey(): Ed25519Keypair {
+    val keypair = TweetNaclFast.Signature.keyPair()
+    return Ed25519Keypair(
+      publicKey = PublicKey(keypair.publicKey),
+      secretKey = keypair.secretKey,
+    )
+  }
 }

@@ -2,6 +2,7 @@ package net.avianlabs.solana.crypto
 
 import net.avianlabs.solana.domain.core.PublicKey
 import org.komputing.kbase58.decodeBase58
+import org.komputing.kbase58.encodeToBase58String
 
 public data class Ed25519Keypair(
   public val publicKey: PublicKey,
@@ -22,6 +23,8 @@ public data class Ed25519Keypair(
     result = 31 * result + secretKey.contentHashCode()
     return result
   }
+
+  public override fun toString(): String = "Ed25519Keypair(publicKey=$publicKey, secretKey=*****)"
 
   public companion object {
     public fun fromSecretKeyBytes(bytes: ByteArray): Ed25519Keypair {
