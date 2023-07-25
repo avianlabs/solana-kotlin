@@ -36,14 +36,14 @@ kotlin {
     val jvmMain by getting {
       dependencies {
         implementation(libs.ktorClientOkHttp)
+        implementation(libs.tweetNaClJava)
+        implementation(libs.bouncyCastle)
       }
     }
     val jvmTest by getting
 
     val commonMain by getting {
       dependencies {
-        implementation(project(":vendor"))
-
         implementation(libs.ktorClientCore)
         implementation(libs.ktorClientLogging)
         implementation(libs.serializationJson)
@@ -64,6 +64,8 @@ kotlin {
     val androidMain by getting {
       dependencies {
         implementation(libs.ktorClientOkHttp)
+        implementation(libs.tweetNaClJava)
+        implementation(libs.bouncyCastle)
       }
     }
 

@@ -1,7 +1,8 @@
 package net.avianlabs.solana.crypto
 
+import com.iwebpp.crypto.TweetNaclFast
 import net.avianlabs.solana.domain.core.PublicKey
-import net.avianlabs.solana.vendor.TweetNaclFast
+import org.bouncycastle.math.ec.rfc8032.Ed25519
 
 internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
   override fun sign(message: ByteArray, secretKey: ByteArray): ByteArray {
@@ -9,7 +10,8 @@ internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
     return signatureProvider.detached(message)
   }
 
-  override fun isOnCurve(publicKey: ByteArray): Boolean = TweetNaclFast.is_on_curve(publicKey) != 0
+  override fun isOnCurve(publicKey: ByteArray): Boolean =
+    Ed25519.validatePublicKeyFull(publicKey, 0)
 
   override fun generateKey(): Ed25519Keypair {
     val keypair = TweetNaclFast.Signature.keyPair()

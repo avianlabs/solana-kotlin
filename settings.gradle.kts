@@ -26,7 +26,6 @@ dependencyResolutionManagement {
 }
 
 include(":solana-kotlin")
-include(":vendor")
 
 dependencyResolutionManagement {
   versionCatalogs {
