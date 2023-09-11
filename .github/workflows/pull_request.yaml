@@ -35,95 +35,33 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Run tests
+      - name: Cache gradle
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.konan
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build run tests
         run: >-
           ./gradlew
           testDebugUnitTest
-          -PfirebasePerformanceInstrumentationEnabled=true
-          -PfirebaseCrashlyticsEnabled=true
+          jvmTest
+      #          jsTest
+      #          iosTest
 
-      - uses: actions/upload-artifact@v3
-        name: Upload Test Reports Folder
-        if: always()
+      - name: Bundle the failed build report
+        if: failure()
+        run: find ./build -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the failed build report
+        if: failure()
+        uses: actions/upload-artifact@v2
         with:
-          name: reports
-          path: '**/build/test-results'
-
-      - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v4
-        if: always()
-        with:
-          report_paths: '**/build/test-results/**/TEST-*.xml'
-
-      - name: Build the app
-        run: >-
-          ./gradlew
-          :app:assembleDebug
-          -PfirebasePerformanceInstrumentationEnabled=true
-          -PfirebaseCrashlyticsEnabled=true
-
-      - name: Archive debug artifacts
-        uses: actions/upload-artifact@v3
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*
-
-      - name: Decode GCP Service Account
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        env:
-          SECRET_GCP_SERVICE_ACCOUNT: ${{ secrets.SECRET_GCP_SERVICE_ACCOUNT }}
-        run: base64 -d <<<"$SECRET_GCP_SERVICE_ACCOUNT" >gcp-service-account.json
-
-      - name: Decode Firebase Service Account
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        env:
-          SECRET_FIREBASE_SERVICE_ACCOUNT: ${{ secrets.SECRET_FIREBASE_SERVICE_ACCOUNT }}
-        run: base64 -d <<<"$SECRET_FIREBASE_SERVICE_ACCOUNT" >firebase-service-account.json
-
-      - name: Build and publish debug version on Firebase App Distribution
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        run: >-
-          ./gradlew
-          :app:appDistributionUploadDebug
-          -PfirebasePerformanceInstrumentationEnabled=true
-          -PfirebaseCrashlyticsEnabled=true
-          -PreleaseNotes="Built from ${{ github.ref }} \\n\\n ${{ github.event.head_commit.message }}"
-
-      - name: Archive debug artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-debug
-          path: app/build/outputs/apk/debug/*
-
-      - name: Decode Production Keystore
-        env:
-          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        run: base64 -d <<<"$ANDROID_KEYSTORE" >keys.keystore
-
-      - name: Decode Firebase Service Account (Prod)
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        env:
-          SECRET_FIREBASE_SERVICE_ACCOUNT_PROD: ${{ secrets.SECRET_FIREBASE_SERVICE_ACCOUNT_PROD }}
-        run: base64 -d <<<"$SECRET_FIREBASE_SERVICE_ACCOUNT_PROD" >firebase-service-account-prod.json
-
-      - name: Publish release version on Firebase App Distribution
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        env:
-          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: >-
-          ./gradlew
-          :app:assembleRelease
-          :app:appDistributionUploadRelease
-          -PreleaseNotes="Built from ${{ github.ref }} \\n\\n ${{ github.event.head_commit.message }}"
-
-      - name: Archive release artifacts
-        uses: actions/upload-artifact@v3
-        if: (contains(github.event.pull_request.labels.*.name, 'publish'))
-        with:
-          name: app-release
-          path: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*
+          name: error-report
+          path: build-reports.zip
+          retention-days: 7

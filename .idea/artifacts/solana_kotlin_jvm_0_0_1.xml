@@ -1,8 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" name="solana-kotlin-jvm-0.0.1">
     <output-path>$PROJECT_DIR$/solana-kotlin/build/libs</output-path>
-    <root id="archive" name="solana-kotlin-jvm-0.0.1.jar">
-      <element id="module-output" name="solana-kotlin.solana-kotlin.jvmMain" />
-    </root>
+    <root id="archive" name="solana-kotlin-jvm-0.0.1.jar" />
   </artifact>
 </component>

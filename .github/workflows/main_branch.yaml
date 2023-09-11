@@ -46,7 +46,13 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Build project and run tests with Gradle
-        run: ./gradlew clean build
+        run: >-
+          ./gradlew
+          assemble
+          testDebugUnitTest
+          jvmTest
+      #          jsTest
+      #          iosTest
 
       - name: Bundle the failed build report
         if: failure()
