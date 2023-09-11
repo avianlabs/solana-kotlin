@@ -2,9 +2,9 @@ package net.avianlabs.solana.domain.core
 
 import net.avianlabs.solana.crypto.defaultCryptoEngine
 import net.avianlabs.solana.vendor.ShortvecEncoding
+import net.avianlabs.solana.vendor.decodeBase58
+import net.avianlabs.solana.vendor.encodeToBase58String
 import okio.Buffer
-import org.komputing.kbase58.decodeBase58
-import org.komputing.kbase58.encodeToBase58String
 
 public class Transaction(
   public val message: Message = Message(),

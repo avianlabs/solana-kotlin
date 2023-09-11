@@ -4,8 +4,8 @@ import net.avianlabs.solana.crypto.isOnCurve
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
+import net.avianlabs.solana.vendor.Sha256
 import okio.Buffer
-import org.komputing.khash.sha256.Sha256
 
 public abstract class Program(
   public val programId: PublicKey,

@@ -1,8 +1,8 @@
 package net.avianlabs.solana.domain.core
 
 import net.avianlabs.solana.vendor.ShortvecEncoding
+import net.avianlabs.solana.vendor.decodeBase58
 import okio.Buffer
-import org.komputing.kbase58.decodeBase58
 
 public class Message(
   public var feePayer: PublicKey? = null,

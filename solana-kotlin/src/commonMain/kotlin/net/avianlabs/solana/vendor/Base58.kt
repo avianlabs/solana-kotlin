@@ -1,6 +1,5 @@
-package org.komputing.kbase58
+package net.avianlabs.solana.vendor
 
-import org.komputing.khash.sha256.extensions.sha256
 
 /**
  * Base58 is a way to encode addresses (or arbitrary data) as alphanumeric strings.
@@ -160,3 +159,14 @@ public fun String.decodeBase58WithChecksum(): ByteArray {
     throw IllegalArgumentException("Checksum mismatch: $checksum is not computed checksum $computedChecksum")
   }
 }
+
+
+/**
+ * Returns the SHA256 digest of this byte array.
+ */
+public fun ByteArray.sha256(): ByteArray = Sha256.digest(this)
+
+/**
+ * Returns the SHA256 digest of this string.
+ */
+public fun String.sha256(): ByteArray = this.encodeToByteArray().sha256()

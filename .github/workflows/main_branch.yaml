@@ -1,0 +1,61 @@
+name: 'Main Branch Build'
+
+concurrency:
+  group: main
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+  deployments: write
+  checks: write
+  statuses: write
+  contents: write
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '18'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Cache gradle
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.konan
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Build project and run tests with Gradle
+        run: ./gradlew clean build
+
+      - name: Bundle the failed build report
+        if: failure()
+        run: find ./build -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the failed build report
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: error-report
+          path: build-reports.zip
+          retention-days: 7

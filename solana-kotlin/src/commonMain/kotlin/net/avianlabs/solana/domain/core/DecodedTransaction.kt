@@ -4,9 +4,9 @@ import net.avianlabs.solana.domain.program.AssociatedTokenProgram
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.program.TokenProgram
 import net.avianlabs.solana.methods.TransactionResponse
+import net.avianlabs.solana.vendor.decodeBase58
+import net.avianlabs.solana.vendor.encodeToBase58String
 import okio.Buffer
-import org.komputing.kbase58.decodeBase58
-import org.komputing.kbase58.encodeToBase58String
 
 public data class DecodedTransaction(
   val instructions: List<DecodedInstruction>,

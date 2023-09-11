@@ -1,8 +1,7 @@
 package net.avianlabs.solana.crypto
 
 import net.avianlabs.solana.domain.core.PublicKey
-import org.komputing.kbase58.decodeBase58
-import org.komputing.kbase58.encodeToBase58String
+import net.avianlabs.solana.vendor.decodeBase58
 
 public data class Ed25519Keypair(
   public val publicKey: PublicKey,

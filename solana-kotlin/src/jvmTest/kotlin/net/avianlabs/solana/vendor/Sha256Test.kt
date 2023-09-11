@@ -4,7 +4,6 @@ import io.ktor.util.decodeBase64Bytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.komputing.khash.sha256.Sha256
 import kotlin.test.Test
 
 val string = "Hello, world!".encodeToByteArray()

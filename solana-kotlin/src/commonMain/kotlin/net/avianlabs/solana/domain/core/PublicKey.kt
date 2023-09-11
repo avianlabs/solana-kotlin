@@ -8,8 +8,8 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import org.komputing.kbase58.decodeBase58
-import org.komputing.kbase58.encodeToBase58String
+import net.avianlabs.solana.vendor.decodeBase58
+import net.avianlabs.solana.vendor.encodeToBase58String
 
 @Serializable(with = PublicKeySerializer::class)
 public data class PublicKey(public val bytes: ByteArray) {

@@ -1,4 +1,4 @@
-package org.komputing.khash.sha256
+package net.avianlabs.solana.vendor
 
 /**
  * Digest Class for SHA-256.
