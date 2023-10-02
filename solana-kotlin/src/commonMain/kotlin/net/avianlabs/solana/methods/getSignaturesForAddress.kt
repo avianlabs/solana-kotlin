@@ -5,27 +5,30 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.PublicKey
 
 public suspend fun SolanaClient.getSignaturesForAddress(
   account: PublicKey,
-  commitment: String?,
+  commitment: Commitment? = null,
 ): List<SignatureInformation> {
-  val rpcParams = SignaturesForAddress(
-    commitment = commitment,
+  val result = invoke<List<SignatureInformation>>(
+    "getSignaturesForAddress",
+    params(account, commitment)
   )
-  val result =
-    invoke<List<SignatureInformation>>("getSignaturesForAddress", params(account, rpcParams))
   return result!!
 }
 
 private fun SolanaClient.params(
   account: PublicKey,
-  rpcParams: SignaturesForAddress,
-) = JsonArray(listOf(json.encodeToJsonElement(account), json.encodeToJsonElement(rpcParams)))
+  commitment: Commitment?
+) = JsonArray(buildList {
+  add(json.encodeToJsonElement(account))
+  commitment?.let { add(json.encodeToJsonElement(SignaturesForAddressParams(commitment = it.value))) }
+})
 
 @Serializable
-internal data class SignaturesForAddress(
+internal data class SignaturesForAddressParams(
   val limit: Long? = null,
   val before: String? = null,
   val until: String? = null,

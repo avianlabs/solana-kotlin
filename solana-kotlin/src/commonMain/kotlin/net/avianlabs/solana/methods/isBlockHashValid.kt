@@ -5,10 +5,11 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse.RPC
+import net.avianlabs.solana.domain.core.Commitment
 
 public suspend fun SolanaClient.isBlockHashValid(
   blockHash: String,
-  commitment: String? = null,
+  commitment: Commitment? = null,
   minContextSlot: Long? = null,
 ): Boolean {
   val result =
@@ -18,14 +19,14 @@ public suspend fun SolanaClient.isBlockHashValid(
 
 private fun SolanaClient.params(
   blockHash: String,
-  commitment: String? = null,
-  minContextSlot: Long? = null,
-) = JsonArray(
-  listOf(
-    json.encodeToJsonElement(blockHash),
-    json.encodeToJsonElement(IsBlockHashValidParams(commitment, minContextSlot))
-  )
-)
+  commitment: Commitment?,
+  minContextSlot: Long?,
+) = JsonArray(buildList {
+  add(json.encodeToJsonElement(blockHash))
+  if (commitment != null || minContextSlot != null) {
+    add(json.encodeToJsonElement(IsBlockHashValidParams(commitment?.value, minContextSlot)))
+  }
+})
 
 @Serializable
 internal data class IsBlockHashValidParams(

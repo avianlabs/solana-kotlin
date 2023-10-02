@@ -5,21 +5,22 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.domain.core.Commitment
 
 public suspend fun SolanaClient.getTransaction(
   signature: String,
-  commitment: String? = null,
+  commitment: Commitment? = null,
 ): TransactionResponse? {
-  val rpcParams = GetTransactionParams(
-    commitment = commitment,
-  )
-  return invoke<TransactionResponse?>("getTransaction", params(signature, rpcParams))
+  return invoke<TransactionResponse?>("getTransaction", params(signature, commitment))
 }
 
 private fun SolanaClient.params(
   signature: String,
-  rpcParams: GetTransactionParams,
-) = JsonArray(listOf(json.encodeToJsonElement(signature), json.encodeToJsonElement(rpcParams)))
+  commitment: Commitment?
+) = JsonArray(buildList {
+  add(json.encodeToJsonElement(signature))
+  commitment?.let { add(json.encodeToJsonElement(GetTransactionParams(it.value))) }
+})
 
 @Serializable
 internal data class GetTransactionParams(
