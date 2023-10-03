@@ -5,17 +5,29 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse
+import net.avianlabs.solana.domain.core.Commitment
 
+/**
+ * Returns the latest blockhash
+ *
+ * @param commitment Optional [Commitment] level
+ */
 public suspend fun SolanaClient.getRecentBlockhash(
-  commitment: String? = null,
+  commitment: Commitment? = null,
 ): RecentBlockHash {
-  val rpc = invoke<RpcResponse.RPC<RecentBlockHash>>("getRecentBlockhash", params(commitment))
-  return rpc!!.value!!
+  val result = invoke<RpcResponse.RPC<RecentBlockHash>>(
+    method = "getRecentBlockhash",
+    params = JsonArray(buildList {
+      commitment?.let { add(json.encodeToJsonElement(RecentBlockHashParams(it.value))) }
+    })
+  )
+  return result!!.value!!
 }
 
-private fun SolanaClient.params(
-  commitment: String? = null,
-) = JsonArray(listOf(json.encodeToJsonElement(commitment)))
+@Serializable
+public data class RecentBlockHashParams(
+  val commitment: String? = null,
+)
 
 @Serializable
 public data class RecentBlockHash(

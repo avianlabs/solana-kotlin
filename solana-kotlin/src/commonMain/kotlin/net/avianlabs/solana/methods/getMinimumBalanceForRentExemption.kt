@@ -4,26 +4,31 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.domain.core.Commitment
 
+/**
+ * Returns minimum balance required to make account rent exempt.
+ *
+ * @param dataLength the Account's data length
+ * @param commitment Optional [Commitment] level
+ */
 public suspend fun SolanaClient.getMinimumBalanceForRentExemption(
   dataLength: Long,
-  commitment: String = "confirmed",
+  commitment: Commitment? = null,
 ): Long {
-  val result = invoke<Long>("getMinimumBalanceForRentExemption", params(dataLength, commitment))
+  val result = invoke<Long>(
+    method = "getMinimumBalanceForRentExemption",
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement(dataLength))
+      commitment?.let {
+        add(json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(it.value)))
+      }
+    })
+  )
   return result!!
 }
 
-private fun SolanaClient.params(
-  dataLength: Long,
-  commitment: String,
-) = JsonArray(
-  listOf(
-    json.encodeToJsonElement(dataLength),
-    json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(commitment))
-  )
-)
-
 @Serializable
 internal data class GetMinimumBalanceForRentExemptionParams(
-  val commitment: String,
+  val commitment: String? = null,
 )
