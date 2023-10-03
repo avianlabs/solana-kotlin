@@ -20,7 +20,9 @@ public suspend fun SolanaClient.getMinimumBalanceForRentExemption(
     method = "getMinimumBalanceForRentExemption",
     params = JsonArray(buildList {
       add(json.encodeToJsonElement(dataLength))
-      commitment?.let { add(json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(it.value))) }
+      commitment?.let {
+        add(json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(it.value)))
+      }
     })
   )
   return result!!

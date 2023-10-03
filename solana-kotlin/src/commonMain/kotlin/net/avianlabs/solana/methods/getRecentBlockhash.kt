@@ -18,11 +18,16 @@ public suspend fun SolanaClient.getRecentBlockhash(
   val result = invoke<RpcResponse.RPC<RecentBlockHash>>(
     method = "getRecentBlockhash",
     params = JsonArray(buildList {
-      commitment?.let { add(json.encodeToJsonElement(it.value)) }
+      commitment?.let { add(json.encodeToJsonElement(RecentBlockHashParams(it.value))) }
     })
   )
   return result!!.value!!
 }
+
+@Serializable
+public data class RecentBlockHashParams(
+  val commitment: String? = null,
+)
 
 @Serializable
 public data class RecentBlockHash(
