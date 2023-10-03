@@ -20,17 +20,12 @@ public suspend fun SolanaClient.getTransaction(
 ): TransactionResponse? {
   return invoke<TransactionResponse?>(
     method = "getTransaction",
-    params = params(signature, commitment)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement<String>(signature))
+      commitment?.let { add(json.encodeToJsonElement(GetTransactionParams(it.value))) }
+    })
   )
 }
-
-private fun SolanaClient.params(
-  signature: String,
-  commitment: Commitment?
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(signature))
-  commitment?.let { add(json.encodeToJsonElement(GetTransactionParams(it.value))) }
-})
 
 @Serializable
 internal data class GetTransactionParams(

@@ -21,18 +21,13 @@ public suspend fun SolanaClient.getFeeForMessage(
 ): Long {
   val result = invoke<RPC<Long>>(
     method = "getFeeForMessage",
-    params = params(message, commitment)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement<String>(message.encodeBase64()))
+      commitment?.let { add(json.encodeToJsonElement(FeeForMessageParams(it.value))) }
+    })
   )
   return result!!.value!!
 }
-
-private fun SolanaClient.params(
-  message: ByteArray,
-  commitment: Commitment?,
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(message.encodeBase64()))
-  commitment?.let { add(json.encodeToJsonElement(FeeForMessageParams(it.value))) }
-})
 
 @Serializable
 internal data class FeeForMessageParams(

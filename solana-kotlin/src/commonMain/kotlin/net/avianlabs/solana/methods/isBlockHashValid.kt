@@ -22,21 +22,15 @@ public suspend fun SolanaClient.isBlockHashValid(
 ): Boolean {
   val result = invoke<RPC<Boolean>>(
     method = "isBlockhashValid",
-    params = params(blockHash, commitment, minContextSlot)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement<String>(blockHash))
+      if (commitment != null || minContextSlot != null) {
+        add(json.encodeToJsonElement(IsBlockHashValidParams(commitment?.value, minContextSlot)))
+      }
+    })
   )
   return result!!.value!!
 }
-
-private fun SolanaClient.params(
-  blockHash: String,
-  commitment: Commitment?,
-  minContextSlot: Long?,
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(blockHash))
-  if (commitment != null || minContextSlot != null) {
-    add(json.encodeToJsonElement(IsBlockHashValidParams(commitment?.value, minContextSlot)))
-  }
-})
 
 @Serializable
 internal data class IsBlockHashValidParams(

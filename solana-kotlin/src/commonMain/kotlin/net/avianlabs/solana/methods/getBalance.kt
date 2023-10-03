@@ -20,18 +20,13 @@ public suspend fun SolanaClient.getBalance(
 ): Long {
   val result = invoke<RPC<Long>>(
     method = "getBalance",
-    params = params(account, commitment)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement<PublicKey>(account))
+      commitment?.let { add(json.encodeToJsonElement(BalanceParams(it.value))) }
+    })
   )
   return result!!.value!!
 }
-
-private fun SolanaClient.params(
-  account: PublicKey,
-  commitment: Commitment?
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(account))
-  commitment?.let { add(json.encodeToJsonElement(BalanceParams(it.value))) }
-})
 
 @Serializable
 internal data class BalanceParams(

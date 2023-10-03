@@ -23,18 +23,15 @@ public suspend fun SolanaClient.getSignaturesForAddress(
 ): List<SignatureInformation> {
   val result = invoke<List<SignatureInformation>>(
     method = "getSignaturesForAddress",
-    params = params(account, commitment)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement<PublicKey>(account))
+      commitment?.let {
+        add(json.encodeToJsonElement(SignaturesForAddressParams(commitment = it.value)))
+      }
+    })
   )
   return result!!
 }
-
-private fun SolanaClient.params(
-  account: PublicKey,
-  commitment: Commitment?
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(account))
-  commitment?.let { add(json.encodeToJsonElement(SignaturesForAddressParams(commitment = it.value))) }
-})
 
 @Serializable
 internal data class SignaturesForAddressParams(

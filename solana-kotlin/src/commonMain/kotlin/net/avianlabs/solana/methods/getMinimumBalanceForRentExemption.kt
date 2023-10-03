@@ -18,18 +18,13 @@ public suspend fun SolanaClient.getMinimumBalanceForRentExemption(
 ): Long {
   val result = invoke<Long>(
     method = "getMinimumBalanceForRentExemption",
-    params = params(dataLength, commitment)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement(dataLength))
+      commitment?.let { add(json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(it.value))) }
+    })
   )
   return result!!
 }
-
-private fun SolanaClient.params(
-  dataLength: Long,
-  commitment: Commitment?
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(dataLength))
-  commitment?.let { add(json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(it.value))) }
-})
 
 @Serializable
 internal data class GetMinimumBalanceForRentExemptionParams(

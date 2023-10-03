@@ -21,20 +21,14 @@ public suspend fun SolanaClient.requestAirdrop(
 ): String {
   val result = invoke<String>(
     method = "requestAirdrop",
-    params = params(publicKey, lamports, commitment)
+    params = JsonArray(buildList {
+      add(json.encodeToJsonElement<PublicKey>(publicKey))
+      add(json.encodeToJsonElement<Long>(lamports))
+      commitment?.let { json.encodeToJsonElement(RequestAirdropParams(it.value)) }
+    })
   )
   return result!!
 }
-
-private fun SolanaClient.params(
-  publicKey: PublicKey,
-  lamports: Long,
-  commitment: Commitment?
-) = JsonArray(buildList {
-  add(json.encodeToJsonElement(publicKey))
-  add(json.encodeToJsonElement(lamports))
-  commitment?.let { json.encodeToJsonElement(RequestAirdropParams(it.value)) }
-})
 
 @Serializable
 internal data class RequestAirdropParams(
