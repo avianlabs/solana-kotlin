@@ -24,7 +24,7 @@ public suspend fun SolanaClient.requestAirdrop(
     params = JsonArray(buildList {
       add(json.encodeToJsonElement<PublicKey>(publicKey))
       add(json.encodeToJsonElement<Long>(lamports))
-      commitment?.let { json.encodeToJsonElement(RequestAirdropParams(it.value)) }
+      commitment?.let { add(json.encodeToJsonElement(RequestAirdropParams(it.value))) }
     })
   )
   return result!!

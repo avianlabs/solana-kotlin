@@ -23,7 +23,7 @@ public suspend fun SolanaClient.getTokenAccountBalance(
     method = "getTokenAccountBalance",
     params = JsonArray(buildList {
       add(json.encodeToJsonElement<PublicKey>(tokenAccount))
-      commitment?.let { json.encodeToJsonElement(TokenAccountBalanceParams(it.value)) }
+      commitment?.let { add(json.encodeToJsonElement(TokenAccountBalanceParams(it.value))) }
     })
   )
   return result!!.value!!
