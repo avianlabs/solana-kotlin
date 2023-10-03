@@ -7,11 +7,21 @@ import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.domain.core.Commitment
 
+/**
+ * Returns transaction details for a confirmed transaction
+ *
+ * @param signature Transaction signature, as base-58 encoded string
+ * @param commitment Optional [Commitment] level
+ *
+ */
 public suspend fun SolanaClient.getTransaction(
   signature: String,
   commitment: Commitment? = null,
 ): TransactionResponse? {
-  return invoke<TransactionResponse?>("getTransaction", params(signature, commitment))
+  return invoke<TransactionResponse?>(
+    method = "getTransaction",
+    params = params(signature, commitment)
+  )
 }
 
 private fun SolanaClient.params(

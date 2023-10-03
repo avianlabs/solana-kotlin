@@ -7,12 +7,22 @@ import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.PublicKey
 
+/**
+ * Requests an airdrop of lamports to a Pubkey
+ *
+ * @param publicKey Pubkey of account to receive lamports
+ * @param lamports lamports to airdrop, as a "u64"
+ * @param commitment Optional [Commitment] level
+ */
 public suspend fun SolanaClient.requestAirdrop(
   publicKey: PublicKey,
   lamports: Long,
   commitment: Commitment? = null
 ): String {
-  val result = invoke<String>("requestAirdrop", params(publicKey, lamports, commitment))
+  val result = invoke<String>(
+    method = "requestAirdrop",
+    params = params(publicKey, lamports, commitment)
+  )
   return result!!
 }
 

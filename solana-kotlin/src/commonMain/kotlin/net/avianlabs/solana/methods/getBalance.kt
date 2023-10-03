@@ -8,11 +8,20 @@ import net.avianlabs.solana.client.RpcResponse.RPC
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.PublicKey
 
+/**
+ * @return The balance of the account of provided [PublicKey]
+ *
+ * @param account Pubkey of account to query
+ * @param commitment Optional [Commitment] level
+ */
 public suspend fun SolanaClient.getBalance(
   account: PublicKey,
   commitment: Commitment? = null,
 ): Long {
-  val result = invoke<RPC<Long>>("getBalance", params(account, commitment))
+  val result = invoke<RPC<Long>>(
+    method = "getBalance",
+    params = params(account, commitment)
+  )
   return result!!.value!!
 }
 

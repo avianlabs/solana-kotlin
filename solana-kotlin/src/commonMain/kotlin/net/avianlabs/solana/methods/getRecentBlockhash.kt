@@ -7,11 +7,19 @@ import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse
 import net.avianlabs.solana.domain.core.Commitment
 
+/**
+ * Returns the latest blockhash
+ *
+ * @param commitment Optional [Commitment] level
+ */
 public suspend fun SolanaClient.getRecentBlockhash(
   commitment: Commitment? = null,
 ): RecentBlockHash {
-  val rpc = invoke<RpcResponse.RPC<RecentBlockHash>>("getRecentBlockhash", params(commitment))
-  return rpc!!.value!!
+  val result = invoke<RpcResponse.RPC<RecentBlockHash>>(
+    method = "getRecentBlockhash",
+    params = params(commitment)
+  )
+  return result!!.value!!
 }
 
 private fun SolanaClient.params(

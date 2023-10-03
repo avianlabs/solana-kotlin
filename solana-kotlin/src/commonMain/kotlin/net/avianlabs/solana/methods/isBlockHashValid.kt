@@ -7,13 +7,23 @@ import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse.RPC
 import net.avianlabs.solana.domain.core.Commitment
 
+/**
+ * Returns whether a blockhash is still valid or not
+ *
+ * @param blockHash the blockhash of the block to evaluate, as base-58 encoded string
+ * @param commitment Optional [Commitment] level
+ * @param minContextSlot Optional minimum slot that the request can be evaluated at
+ *
+ */
 public suspend fun SolanaClient.isBlockHashValid(
   blockHash: String,
   commitment: Commitment? = null,
   minContextSlot: Long? = null,
 ): Boolean {
-  val result =
-    invoke<RPC<Boolean>>("isBlockhashValid", params(blockHash, commitment, minContextSlot))
+  val result = invoke<RPC<Boolean>>(
+    method = "isBlockhashValid",
+    params = params(blockHash, commitment, minContextSlot)
+  )
   return result!!.value!!
 }
 

@@ -8,11 +8,21 @@ import net.avianlabs.solana.client.RpcResponse.RPC
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.PublicKey
 
+/**
+ * Returns the token balance of an SPL Token account.
+ *
+ * @param tokenAccount Pubkey of Token account to query
+ * @param commitment Optional [Commitment] level
+ *
+ */
 public suspend fun SolanaClient.getTokenAccountBalance(
   tokenAccount: PublicKey,
   commitment: Commitment? = null,
 ): TokenAmountInfo {
-  val result = invoke<RPC<TokenAmountInfo>>("getTokenAccountBalance", params(tokenAccount, commitment))
+  val result = invoke<RPC<TokenAmountInfo>>(
+    method = "getTokenAccountBalance",
+    params = params(tokenAccount, commitment)
+  )
   return result!!.value!!
 }
 

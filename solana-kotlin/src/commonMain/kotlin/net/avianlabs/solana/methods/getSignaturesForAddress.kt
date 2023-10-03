@@ -8,13 +8,22 @@ import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.PublicKey
 
+/**
+ * Returns Signatures for confirmed transactions that include
+ * the given address in their accountKeys list.
+ * Returns signatures backwards in time from the provided signature or
+ * most recent confirmed block
+ *
+ * @param account Account address
+ * @param commitment Optional [Commitment] level
+ */
 public suspend fun SolanaClient.getSignaturesForAddress(
   account: PublicKey,
   commitment: Commitment? = null,
 ): List<SignatureInformation> {
   val result = invoke<List<SignatureInformation>>(
-    "getSignaturesForAddress",
-    params(account, commitment)
+    method = "getSignaturesForAddress",
+    params = params(account, commitment)
   )
   return result!!
 }
