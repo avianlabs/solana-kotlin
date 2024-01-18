@@ -5,10 +5,12 @@ public class AccountKeysList {
 
   public fun add(accountMeta: AccountMeta) {
     val key = accountMeta.publicKey.toString()
-    if (accounts.containsKey(key)) {
-      if (!accounts[key]!!.isWritable && accountMeta.isWritable) {
-        accounts[key] = accountMeta
-      }
+    val existing = accounts[key]
+    if (existing != null) {
+      accounts[key] = existing.copy(
+        isSigner = accountMeta.isSigner || existing.isSigner,
+        isWritable = accountMeta.isWritable || existing.isWritable,
+      )
     } else {
       accounts[key] = accountMeta
     }
