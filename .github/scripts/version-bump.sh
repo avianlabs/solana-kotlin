@@ -51,8 +51,8 @@ elif git log -1 | grep -q "#minor"; then
     BUMP_MODE="minor"
 elif git log -1 | grep -q "#patch"; then
     BUMP_MODE="patch"
-elif [[ "${AUTO}" == "true" ]]; then
-    BUMP_MODE="${AUTO_MODE}"
+else
+    BUMP_MODE="auto"
 fi
 
 if [ -f gradle.properties ] && grep -E -q "version=${CURRENT_VERSION}" gradle.properties; then
