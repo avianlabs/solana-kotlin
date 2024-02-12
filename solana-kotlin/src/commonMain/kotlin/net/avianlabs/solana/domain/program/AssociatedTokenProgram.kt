@@ -13,13 +13,47 @@ public object AssociatedTokenProgram : Program(
 
   public fun createAssociatedTokenAccountInstruction(
     associatedProgramId: PublicKey = ASSOCIATED_TOKEN_PROGRAM_PROGRAM_ID,
-    programId: PublicKey = TokenProgram.programId,
+    programId: PublicKey,
     mint: PublicKey,
     associatedAccount: PublicKey,
     owner: PublicKey,
     payer: PublicKey,
-  ): TransactionInstruction {
+  ): TransactionInstruction = buildCreateAssociatedTokenAccountInstruction(
+    payer = payer,
+    associatedAccount = associatedAccount,
+    owner = owner,
+    mint = mint,
+    programId = programId,
+    associatedProgramId = associatedProgramId,
+    bytes = byteArrayOf(),
+  )
 
+  public fun createAssociatedTokenAccountInstructionIdempotent(
+    associatedProgramId: PublicKey = ASSOCIATED_TOKEN_PROGRAM_PROGRAM_ID,
+    programId: PublicKey,
+    mint: PublicKey,
+    associatedAccount: PublicKey,
+    owner: PublicKey,
+    payer: PublicKey,
+  ): TransactionInstruction = buildCreateAssociatedTokenAccountInstruction(
+    payer = payer,
+    associatedAccount = associatedAccount,
+    owner = owner,
+    mint = mint,
+    programId = programId,
+    associatedProgramId = associatedProgramId,
+    bytes = byteArrayOf(1),
+  )
+
+  private fun buildCreateAssociatedTokenAccountInstruction(
+    payer: PublicKey,
+    associatedAccount: PublicKey,
+    owner: PublicKey,
+    mint: PublicKey,
+    programId: PublicKey,
+    associatedProgramId: PublicKey,
+    bytes: ByteArray,
+  ): TransactionInstruction {
     val keys = listOf(
       AccountMeta(payer, isSigner = true, isWritable = true),
       AccountMeta(associatedAccount, isSigner = false, isWritable = true),
@@ -33,7 +67,7 @@ public object AssociatedTokenProgram : Program(
     return TransactionInstruction(
       keys = keys,
       programId = associatedProgramId,
-      data = byteArrayOf(),
+      data = bytes,
     )
   }
 }
