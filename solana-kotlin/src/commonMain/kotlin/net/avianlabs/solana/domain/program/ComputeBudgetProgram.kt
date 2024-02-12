@@ -4,10 +4,11 @@ import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import okio.Buffer
 
-private val TOKEN_PROGRAM_ID = PublicKey.fromBase58("ComputeBudget111111111111111111111111111111")
+private val COMPUTE_BUDGET_PROGRAM_ID =
+  PublicKey.fromBase58("ComputeBudget111111111111111111111111111111")
 
 public object ComputeBudgetProgram : Program(
-  programId = TOKEN_PROGRAM_ID,
+  programId = COMPUTE_BUDGET_PROGRAM_ID,
 ) {
 
   public enum class Instruction(
