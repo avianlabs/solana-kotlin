@@ -26,11 +26,9 @@ jobs:
       - name: Bump Version
         env:
           TOKEN: ${{ secrets.github_token }}
-          NAME: ${{ inputs.git-username }}
+          NAME: ${{ github.actor }}
+          EMAIL: ${{ github.actor }}@users.noreply.github.com
           AUTO: true
-          AUTO_SPLITTER: '-'
-          AUTO_HIGHER: true
-          AUTO_RELEASE: false
         run: .github/scripts/version-bump.sh
         shell: bash
 

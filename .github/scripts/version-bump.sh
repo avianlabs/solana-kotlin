@@ -24,27 +24,22 @@ function bump {
         local bv=$((parts[1] + 1))
         NEW_VERSION="${parts[0]}.${bv}.0"
         ;;
-    patch)
+    patch|auto)
         local bv=$((parts[2] + 1))
         NEW_VERSION="${parts[0]}.${parts[1]}.${bv}"
         ;;
-    auto)
-        if [ "${AUTO_HIGHER}" == "true" ] && [[ "${parts[2]}" == *"${AUTO_SPLITTER}"* ]]; then
-            local higher=(${parts[2]//${AUTO_SPLITTER}/ })
-            local bv=$((higher[1] + 1))
-            NEW_VERSION="${parts[0]}.${parts[1]}.$((parts[2] + 0))${AUTO_SPLITTER}${bv}"
-        elif [ "${AUTO_HIGHER}" == "false" ] && [[ "${parts[2]}" == *"${AUTO_SPLITTER}"* ]]; then
-            local higher=(${parts[2]//${AUTO_SPLITTER}/ })
-            local bv=$((higher[1] + 0))
-            NEW_VERSION="${parts[0]}.${parts[1]}.$((parts[2] + 0))${AUTO_SPLITTER}${bv}"
-        elif [ "${AUTO_HIGHER}" == "true" ]; then
-            NEW_VERSION="${parts[0]}.${parts[1]}.$((parts[2] + 0))${AUTO_SPLITTER}0"
-        else
-            NEW_VERSION="${parts[0]}.${parts[1]}.$((parts[2] + 0))${AUTO_SPLITTER}"
-        fi
-        ;;
     esac
 }
+
+if [ "${COMMITTER}" = "BOT" ]; then
+    # Usage for defined name and mail
+    git config --global user.email $EMAIL
+    git config --global user.name $NAME
+else
+    # Usage for last commit
+    git config user.name "${GITHUB_ACTOR}"
+    git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+fi
 
 OLD_VERSION=$($DIR/get-version.sh)
 
@@ -78,13 +73,5 @@ else
     sed -i "s/\(version *= *['\"]*\)${OLD_VERSION}\(['\"]*\)/\1${NEW_VERSION}\2/" ${BUILD_FILE}
     git add $BUILD_FILE
     git commit -m "Bump version from $OLD_VERSION to $NEW_VERSION"
-    if [[ "${BUMP_MODE}" == "auto" ]] && [[ "${AUTO_RELEASE}" == "false" ]]; then
-        echo "Doing no new tag for this bump because its disabled for auto mode"
-        git push $REPO
-    else
-        git tag $NEW_VERSION
-        git push $REPO --follow-tags
-        git push $REPO --tags
-        echo "Created a new tag for this bump"
-    fi
+    git push $REPO
 fi
