@@ -4,11 +4,7 @@ on:
     types:
       - created
   workflow_dispatch:
-    inputs:
-      auto-version-bump:
-        description: 'Should we bump the version?'
-        required: true
-        default: 'false'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -16,13 +12,34 @@ jobs:
       - name: Checkout Latest Commit
         uses: actions/checkout@v3
 
+      - name: Output before version
+        id: get-before-version
+        shell: bash
+        run: echo "::set-output name=before-version::$(.github/scripts/get-version.sh)"
+
       - name: Bump Version
-        id: bump
-        uses: Plugily-Projects/version-bump-action@v6
-        with:
-          github-token: ${{ secrets.github_token }}
-          git-committer: 'BOT'
-          auto-version-bump: true
+        env:
+          TOKEN: ${{ secrets.github_token }}
+          NAME: ${{ inputs.git-username }}
+          AUTO: true
+          AUTO_SPLITTER: '-'
+          AUTO_HIGHER: true
+          AUTO_RELEASE: false
+        run: .github/scripts/version-bump.sh
+        shell: bash
+
+      - name: Set outputs
+        id: get-outputs
+        shell: bash
+        env:
+          BEFORE_VERSION: ${{ steps.get-outputs.outputs.version }}
+        run: |
+          echo "::set-output name=version::$(${{github.action_path}}/src/get-version.sh)"
+          echo "::set-output name=bumped::$(${{github.action_path}}/src/bumped.sh)"
+
+      - name: Result
+        shell: bash
+        run: "echo 'Version is now ${{ steps.get-outputs.outputs.version }} (Bumped: ${{ steps.get-outputs.outputs.bumped }})'"
 
       - name: Print Version
         run: "echo 'New Version: ${{steps.bump.outputs.version}}'"
