@@ -9,8 +9,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/setup-java@v3
+        with:
+          java-version: '18'
+          distribution: 'temurin'
+          cache: 'gradle'
+
       - name: Checkout Latest Commit
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Output before version
         id: get-before-version
