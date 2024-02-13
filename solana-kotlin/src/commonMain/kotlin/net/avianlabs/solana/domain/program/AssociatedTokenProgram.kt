@@ -74,10 +74,11 @@ public object AssociatedTokenProgram : Program(
 
 public fun PublicKey.associatedTokenAddress(
   tokenMintAddress: PublicKey,
+  programId: PublicKey = TokenProgram.programId,
 ): ProgramDerivedAddress = Program.findProgramAddress(
   listOf(
     bytes.copyOf(),
-    TokenProgram.programId.toByteArray(),
+    programId.toByteArray(),
     tokenMintAddress.toByteArray()
   ),
   AssociatedTokenProgram.programId,
