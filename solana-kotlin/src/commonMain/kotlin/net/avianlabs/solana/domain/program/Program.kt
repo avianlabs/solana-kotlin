@@ -7,19 +7,19 @@ import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.vendor.Sha256
 import okio.Buffer
 
-public abstract class Program(
-  public val programId: PublicKey,
-) {
+public interface Program {
+
+  public val programId: PublicKey
 
   public companion object {
 
-    public fun createTransactionInstruction(
+    internal fun createTransactionInstruction(
       programId: PublicKey,
       keys: List<AccountMeta>,
       data: ByteArray,
     ): TransactionInstruction = TransactionInstruction(programId, keys, data)
 
-    public fun findProgramAddress(
+    internal fun findProgramAddress(
       seeds: List<ByteArray>,
       programId: PublicKey,
     ): ProgramDerivedAddress {
@@ -37,7 +37,7 @@ public abstract class Program(
       throw Exception("Unable to find a viable program address nonce")
     }
 
-    public fun createProgramAddress(seeds: List<ByteArray>, programId: PublicKey): PublicKey {
+    internal fun createProgramAddress(seeds: List<ByteArray>, programId: PublicKey): PublicKey {
       if (seeds.size > 16) {
         throw RuntimeException("max seed length exceeded: ${seeds.size}")
       }
@@ -65,5 +65,4 @@ public abstract class Program(
       return PublicKey(hash)
     }
   }
-
 }
