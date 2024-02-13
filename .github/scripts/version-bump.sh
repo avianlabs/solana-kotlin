@@ -71,7 +71,4 @@ else
     bump $BUMP_MODE $OLD_VERSION
     echo "version will be bumped from" $OLD_VERSION "to" $NEW_VERSION
     sed -i "s/\(version *= *['\"]*\)${OLD_VERSION}\(['\"]*\)/\1${NEW_VERSION}\2/" ${BUILD_FILE}
-    git add $BUILD_FILE
-    git commit -m "Bump version from $OLD_VERSION to $NEW_VERSION"
-    git push $REPO
 fi

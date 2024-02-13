@@ -37,6 +37,23 @@ jobs:
         run: .github/scripts/version-bump.sh
         shell: bash
 
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v3
+        id: cpr
+        with:
+          token: ${{ secrets.github_token }}
+          commit-message: "Bump version from ${{ steps.get-before-version.outputs.before-version }} to ${{ steps.bump.outputs.version }}"
+          title: "Bump version from ${{ steps.get-before-version.outputs.before-version }} to ${{ steps.bump.outputs.version }}"
+          branch: "bump-version-${{ steps.bump.outputs.version }}"
+          base: "main"
+          labels: "version-bump"
+
+      - name: Enable Pull Request Automerge
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+
       - name: Set outputs
         id: get-outputs
         shell: bash
