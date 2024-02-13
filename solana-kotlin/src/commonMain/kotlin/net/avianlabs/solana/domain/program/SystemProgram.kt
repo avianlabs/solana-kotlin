@@ -3,13 +3,13 @@ package net.avianlabs.solana.domain.program
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
+import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import okio.Buffer
 
-private val SYSTEM_PROGRAM_ID = PublicKey.fromBase58("11111111111111111111111111111111")
+public object SystemProgram : Program {
 
-public object SystemProgram : Program(
-  programId = SYSTEM_PROGRAM_ID
-) {
+  public override val programId: PublicKey =
+    PublicKey.fromBase58("11111111111111111111111111111111")
 
   public val SYSVAR_RENT_ACCOUNT: PublicKey =
     PublicKey.fromBase58("SysvarRent111111111111111111111111111111111")

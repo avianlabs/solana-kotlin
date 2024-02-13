@@ -2,14 +2,14 @@ package net.avianlabs.solana.domain.program
 
 import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
+import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import okio.Buffer
 
-private val COMPUTE_BUDGET_PROGRAM_ID =
-  PublicKey.fromBase58("ComputeBudget111111111111111111111111111111")
 
-public object ComputeBudgetProgram : Program(
-  programId = COMPUTE_BUDGET_PROGRAM_ID,
-) {
+public object ComputeBudgetProgram : Program {
+
+  public override val programId: PublicKey =
+    PublicKey.fromBase58("ComputeBudget111111111111111111111111111111")
 
   public enum class Instruction(
     public val index: UByte,

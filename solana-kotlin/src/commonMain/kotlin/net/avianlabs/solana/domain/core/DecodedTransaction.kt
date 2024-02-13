@@ -3,7 +3,6 @@ package net.avianlabs.solana.domain.core
 import net.avianlabs.solana.domain.program.AssociatedTokenProgram
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.program.TokenProgram
-import net.avianlabs.solana.domain.program.TokenProgramBase
 import net.avianlabs.solana.methods.TransactionResponse
 import net.avianlabs.solana.vendor.decodeBase58
 import net.avianlabs.solana.vendor.encodeToBase58String
@@ -68,7 +67,7 @@ public sealed class DecodedInstruction(
       val owner: PublicKey,
       val amount: Long,
     ) :
-      TokenProgram(net.avianlabs.solana.domain.program.TokenProgramBase.Instruction.Transfer.index)
+      TokenProgram(net.avianlabs.solana.domain.program.TokenProgram.Instruction.Transfer.index)
 
     public data class TransferChecked(
       val source: PublicKey,
@@ -78,7 +77,7 @@ public sealed class DecodedInstruction(
       val amount: Long,
       val decimals: UByte,
     ) :
-      TokenProgram(net.avianlabs.solana.domain.program.TokenProgramBase.Instruction.TransferChecked.index)
+      TokenProgram(net.avianlabs.solana.domain.program.TokenProgram.Instruction.TransferChecked.index)
   }
 
   public sealed class AssociatedTokenProgram :
@@ -175,7 +174,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
       TokenProgram.programId -> {
         val programIndex = buffer.readByte().toUByte()
         when (programIndex) {
-          TokenProgramBase.Instruction.Transfer.index -> {
+          TokenProgram.Instruction.Transfer.index -> {
             val (source, destination, owner) = accountsMeta!!
             DecodedInstruction.TokenProgram.Transfer(
               source = source.publicKey,
@@ -185,7 +184,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
             )
           }
 
-          TokenProgramBase.Instruction.TransferChecked.index -> {
+          TokenProgram.Instruction.TransferChecked.index -> {
             val (source, mint, destination, owner) = accountsMeta!!
             DecodedInstruction.TokenProgram.TransferChecked(
               source = source.publicKey,
