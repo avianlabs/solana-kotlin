@@ -29,11 +29,6 @@ jobs:
         run: echo "::set-output name=before-version::$(.github/scripts/get-version.sh)"
 
       - name: Bump Version
-        env:
-          TOKEN: ${{ secrets.github_token }}
-          NAME: ${{ github.actor }}
-          EMAIL: ${{ github.actor }}@users.noreply.github.com
-          AUTO: true
         run: .github/scripts/version-bump.sh
         shell: bash
 
@@ -43,8 +38,8 @@ jobs:
         env:
           BEFORE_VERSION: ${{ steps.get-outputs.outputs.version }}
         run: |
-          echo "::set-output name=version::$(${{github.action_path}}/src/get-version.sh)"
-          echo "::set-output name=bumped::$(${{github.action_path}}/src/bumped.sh)"
+          echo "::set-output name=version::$(.github/scripts/get-version.sh)"
+          echo "::set-output name=bumped::$(.github/scripts/src/bumped.sh)"
 
       - name: Create pull request
         uses: peter-evans/create-pull-request@v3
