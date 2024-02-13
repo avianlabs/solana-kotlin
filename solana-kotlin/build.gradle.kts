@@ -25,8 +25,8 @@ kotlin {
     publishLibraryVariants("release")
   }
 
-//  ios()
-//  iosSimulatorArm64()
+  ios()
+  iosSimulatorArm64()
 
   js(IR) {
     browser()
@@ -77,13 +77,13 @@ kotlin {
     val jsMain by getting
     val jsTest by getting
 
-//    val iosMain by getting {
-//      dependencies {
-//        implementation(libs.ktorClientDarwin)
-//      }
-//    }
-//    val iosTest by getting {
-//    }
+    val iosMain by getting {
+      dependencies {
+        implementation(libs.ktorClientDarwin)
+      }
+    }
+    val iosTest by getting {
+    }
   }
 }
 
@@ -133,7 +133,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   }
 }
 
-mavenPublishing {
+publishing {
   repositories {
     mavenLocal()
   }
