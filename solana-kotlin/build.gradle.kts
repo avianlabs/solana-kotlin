@@ -1,7 +1,6 @@
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
-  alias(libs.plugins.androidLib)
   alias(libs.plugins.mavenPublish)
 }
 
@@ -19,10 +18,6 @@ kotlin {
         jvmTarget = "17"
       }
     }
-  }
-
-  android {
-    publishLibraryVariants("release")
   }
 
   ios()
@@ -61,19 +56,6 @@ kotlin {
       }
     }
 
-    val androidMain by getting {
-      dependencies {
-        implementation(libs.ktorClientOkHttp)
-        implementation(libs.tweetNaClJava)
-        implementation(libs.bouncyCastle)
-      }
-    }
-
-    val androidUnitTest by getting {
-      dependencies {
-      }
-    }
-
     val jsMain by getting
     val jsTest by getting
 
@@ -85,46 +67,6 @@ kotlin {
     val iosTest by getting {
     }
   }
-}
-
-android {
-  namespace = "net.avianlabs.solana"
-
-  defaultConfig {
-    minSdk = libs.versions.androidMinSdk.get().toInt()
-    compileSdk = libs.versions.androidCompileSdk.get().toInt()
-    consumerProguardFiles("src/androidMain/consumer-rules.pro")
-  }
-
-  sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-
-  testOptions {
-    unitTests {
-      isReturnDefaultValues = true
-    }
-  }
-
-  packagingOptions {
-    exclude("META-INF/AL2.0")
-    exclude("META-INF/LGPL2.1")
-  }
-//  packaging {
-//    resources.excludes.addAll(
-//      listOf(
-//        "META-INF/AL2.0",
-//        "META-INF/LGPL2.1",
-//      )
-//    )
-//  }
-  compileOptions {
-    isCoreLibraryDesugaringEnabled = true
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-  }
-}
-
-dependencies {
-  add("coreLibraryDesugaring", libs.coreLibraryDesugaring)
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
