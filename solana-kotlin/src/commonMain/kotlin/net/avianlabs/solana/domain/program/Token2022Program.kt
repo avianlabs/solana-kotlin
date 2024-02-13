@@ -27,16 +27,16 @@ public object Token2022Program : TokenProgramBase(TOKEN_2022_PROGRAM_ID) {
     MetadataPointerExtension(39u),
   }
 
-  public fun createAssociatedTokenAccountInstruction(
-    mint: PublicKey,
-    associatedAccount: PublicKey,
-    owner: PublicKey,
-    payer: PublicKey,
-  ): TransactionInstruction = AssociatedTokenProgram.createAssociatedTokenAccountInstruction(
-    programId = programId,
-    mint = mint,
-    associatedAccount = associatedAccount,
-    owner = owner,
-    payer = payer,
+  @Deprecated(
+    message = "Token2022Program does not support transfer, use transferChecked instead",
+    replaceWith = ReplaceWith("transferChecked(source, destination, owner, amount, decimals, mint)"),
+    level = DeprecationLevel.ERROR,
   )
+  public override fun transfer(
+    source: PublicKey,
+    destination: PublicKey,
+    owner: PublicKey,
+    amount: ULong,
+  ): TransactionInstruction =
+    error("Token2022Program does not support transfer, use transferChecked instead")
 }

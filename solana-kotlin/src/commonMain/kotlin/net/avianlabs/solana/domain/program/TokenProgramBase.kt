@@ -5,7 +5,7 @@ import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import okio.Buffer
 
-public abstract class TokenProgramBase internal constructor(
+public open class TokenProgramBase internal constructor(
   programId: PublicKey,
 ) : Program(
   programId = programId,
@@ -42,7 +42,7 @@ public abstract class TokenProgramBase internal constructor(
     ;
   }
 
-  public fun transfer(
+  public open fun transfer(
     source: PublicKey,
     destination: PublicKey,
     owner: PublicKey,
@@ -60,7 +60,7 @@ public abstract class TokenProgramBase internal constructor(
       .readByteArray(),
   )
 
-  public fun closeAccount(
+  public open fun closeAccount(
     account: PublicKey,
     destination: PublicKey,
     owner: PublicKey,
@@ -76,7 +76,7 @@ public abstract class TokenProgramBase internal constructor(
       .readByteArray(),
   )
 
-  public fun transferChecked(
+  public open fun transferChecked(
     source: PublicKey,
     mint: PublicKey,
     destination: PublicKey,
@@ -96,5 +96,18 @@ public abstract class TokenProgramBase internal constructor(
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .readByteArray(),
+  )
+
+  public open fun createAssociatedTokenAccountInstruction(
+    mint: PublicKey,
+    associatedAccount: PublicKey,
+    owner: PublicKey,
+    payer: PublicKey,
+  ): TransactionInstruction = AssociatedTokenProgram.createAssociatedTokenAccountInstruction(
+    programId = programId,
+    mint = mint,
+    associatedAccount = associatedAccount,
+    owner = owner,
+    payer = payer,
   )
 }
