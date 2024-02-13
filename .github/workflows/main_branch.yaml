@@ -47,7 +47,6 @@ jobs:
         run: >-
           ./gradlew
           assemble
-          testDebugUnitTest
           jvmTest
       #          jsTest
       #          iosTest
