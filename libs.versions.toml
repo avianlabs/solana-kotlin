@@ -10,7 +10,7 @@ androidJunit5 = "1.8.2.1"
 detekt = "1.22.0"
 jacoco = "0.8.7"
 kotlin = "1.8.22"
-mavenPublish = "+"
+mavenPublish = "0.27.0"
 
 # Libraries
 junit5 = "5.9.2"
