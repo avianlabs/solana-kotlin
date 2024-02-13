@@ -4,15 +4,13 @@ import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
 
-private val ASSOCIATED_TOKEN_PROGRAM_PROGRAM_ID =
-  PublicKey.fromBase58("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+public object AssociatedTokenProgram : Program {
 
-public object AssociatedTokenProgram : Program(
-  programId = ASSOCIATED_TOKEN_PROGRAM_PROGRAM_ID
-) {
+  public override val programId: PublicKey =
+    PublicKey.fromBase58("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
 
   public fun createAssociatedTokenAccountInstruction(
-    associatedProgramId: PublicKey = ASSOCIATED_TOKEN_PROGRAM_PROGRAM_ID,
+    associatedProgramId: PublicKey = this.programId,
     programId: PublicKey,
     mint: PublicKey,
     associatedAccount: PublicKey,
@@ -29,7 +27,7 @@ public object AssociatedTokenProgram : Program(
   )
 
   public fun createAssociatedTokenAccountInstructionIdempotent(
-    associatedProgramId: PublicKey = ASSOCIATED_TOKEN_PROGRAM_PROGRAM_ID,
+    associatedProgramId: PublicKey = this.programId,
     programId: PublicKey,
     mint: PublicKey,
     associatedAccount: PublicKey,
