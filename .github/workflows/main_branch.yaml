@@ -19,7 +19,7 @@ permissions:
 jobs:
   build:
     name: Build Project
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -48,8 +48,8 @@ jobs:
           ./gradlew
           assemble
           jvmTest
+          iosTest
       #          jsTest
-      #          iosTest
 
       - name: Bundle the failed build report
         if: failure()
