@@ -4,7 +4,7 @@ androidCompileSdk = "33"
 androidMinSdk = "24"
 
 # Plugins
-androidCacheFix = "2.7.1"
+androidCacheFix = "2.8.1"
 androidGradle = "8.2.2"
 androidJunit5 = "1.8.2.1"
 detekt = "1.23.5"
