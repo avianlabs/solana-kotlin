@@ -26,9 +26,11 @@ public data class Ed25519Keypair(
   public override fun toString(): String = "Ed25519Keypair(publicKey=$publicKey, secretKey=*****)"
 
   public companion object {
+    public const val SECRET_BYTES: Int = 64
+    public const val PUBLIC_BYTES: Int = 32
     public fun fromSecretKeyBytes(bytes: ByteArray): Ed25519Keypair {
-      require(bytes.size == 64) { "Invalid key length" }
-      val publicKey = PublicKey(bytes.sliceArray(32 until 64))
+      require(bytes.size == SECRET_BYTES) { "Invalid key length: ${bytes.size}" }
+      val publicKey = PublicKey(bytes.sliceArray(PUBLIC_BYTES until SECRET_BYTES))
       return Ed25519Keypair(publicKey, bytes.copyOf())
     }
 

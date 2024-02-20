@@ -34,3 +34,9 @@ dependencyResolutionManagement {
     }
   }
 }
+
+includeBuild("cklib") {
+  dependencySubstitution {
+    substitute(module("co.touchlab.cklib:co.touchlab.cklib.gradle.plugin")).using(project(":plugin"))
+  }
+}

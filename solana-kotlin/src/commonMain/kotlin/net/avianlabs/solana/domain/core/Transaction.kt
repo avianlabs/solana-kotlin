@@ -8,8 +8,12 @@ import okio.Buffer
 
 public class Transaction(
   public val message: Message = Message(),
-  private val signatures: MutableList<String> = ArrayList(),
+  private val _signatures: MutableList<String> = mutableListOf()
 ) {
+
+  public val signatures: List<String>
+    get() = _signatures
+
   private lateinit var serializedMessage: ByteArray
 
   public fun addInstruction(instruction: TransactionInstruction): Transaction {
@@ -37,7 +41,7 @@ public class Transaction(
     }
     serializedMessage = message.serialize()
     for (signer in signers) {
-      signatures.add(
+      _signatures.add(
         defaultCryptoEngine.sign(serializedMessage, signer.secretKey).encodeToBase58String()
       )
     }

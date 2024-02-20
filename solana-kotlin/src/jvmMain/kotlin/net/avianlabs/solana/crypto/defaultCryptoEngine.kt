@@ -13,8 +13,8 @@ internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
   override fun isOnCurve(publicKey: ByteArray): Boolean =
     Ed25519.validatePublicKeyPartial(publicKey, 0)
 
-  override fun generateKey(): Ed25519Keypair {
-    val keypair = TweetNaclFast.Signature.keyPair()
+  override fun generateKey(seed: ByteArray): Ed25519Keypair {
+    val keypair = TweetNaclFast.Signature.keyPair_fromSeed(seed)
     return Ed25519Keypair(
       publicKey = PublicKey(keypair.publicKey),
       secretKey = keypair.secretKey,

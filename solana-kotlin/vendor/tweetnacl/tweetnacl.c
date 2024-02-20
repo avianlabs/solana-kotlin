@@ -7,7 +7,6 @@ typedef unsigned long u32;
 typedef unsigned long long u64;
 typedef long long i64;
 typedef i64 gf[16];
-extern void randombytes(u8 *,u64);
 
 static const u8
     _0[16],
@@ -449,7 +448,6 @@ int crypto_scalarmult_base(u8 *q,const u8 *n)
 
 int crypto_box_keypair(u8 *y,u8 *x)
 {
-  randombytes(x,32);
   return crypto_scalarmult_base(y,x);
 }
 
@@ -659,7 +657,6 @@ int crypto_sign_keypair(u8 *pk, u8 *sk)
   gf p[4];
   int i;
 
-  randombytes(sk, 32);
   crypto_hash(d, sk, 32);
   d[0] &= 248;
   d[31] &= 127;
@@ -806,4 +803,9 @@ int crypto_sign_open(u8 *m,u64 *mlen,const u8 *sm,u64 n,const u8 *pk)
   FOR(i,n) m[i] = sm[i + 64];
   *mlen = n;
   return 0;
+}
+
+int is_on_curve(const u8 p[32]) {
+  gf q[4];
+  return unpackneg(q,p);
 }
