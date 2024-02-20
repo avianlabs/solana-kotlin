@@ -47,6 +47,7 @@ jobs:
       - name: Build run tests
         run: >-
           ./gradlew
+          jvmJar
           jvmTest
       #          jsTest
       #          iosTest
