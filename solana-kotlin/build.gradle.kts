@@ -47,7 +47,6 @@ kotlin {
         implementation(libs.ktorSerializationKotlinxJson)
         implementation(libs.kermit)
         implementation(libs.okio)
-        implementation(libs.khashSha256)
       }
     }
     val commonTest by getting {
