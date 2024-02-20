@@ -41,13 +41,11 @@ jobs:
           key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-konan-
 
-      - name: Build run tests
-        run: >-
-          ./gradlew
-          jvmJar
-          jvmTest
-          iosSimulatorArm64Test
-      #          jsTest
+      - name: Run tests
+        run: ./gradlew check
+
+      - name: Build packages
+        run: ./gradlew publishToMavenLocal
 
       - name: Bundle the failed build report
         if: failure()

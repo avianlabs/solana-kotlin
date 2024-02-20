@@ -43,6 +43,9 @@ jobs:
       - name: Run tests
         run: ./gradlew check
 
+      - name: Build packages
+        run: ./gradlew publishToMavenLocal
+
       - name: Bundle the failed build report
         if: failure()
         run: find ./build -type d -name 'reports' | zip -@ -r build-reports.zip

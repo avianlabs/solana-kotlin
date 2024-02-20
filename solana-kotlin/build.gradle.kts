@@ -1,5 +1,4 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
-import org.jetbrains.kotlin.gradle.plugin.mpp.Framework
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -30,10 +29,6 @@ kotlin {
 
   mingwX64()
 
-  js(IR) {
-    browser()
-  }
-
   sourceSets {
     val jvmMain by getting {
       dependencies {
@@ -62,9 +57,6 @@ kotlin {
         implementation(libs.coroutinesTest)
       }
     }
-
-    val jsMain by getting
-    val jsTest by getting
 
     val iosMain by getting {
       dependencies {
