@@ -1,7 +1,6 @@
 package net.avianlabs.solana.crypto
 
 import com.iwebpp.crypto.TweetNaclFast
-import net.avianlabs.solana.domain.core.PublicKey
 import org.bouncycastle.math.ec.rfc8032.Ed25519
 
 internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
@@ -14,10 +13,7 @@ internal actual val defaultCryptoEngine: CryptoEngine = object : CryptoEngine {
     Ed25519.validatePublicKeyPartial(publicKey, 0)
 
   override fun generateKey(seed: ByteArray): Ed25519Keypair {
-    val keypair = TweetNaclFast.Signature.keyPair_fromSeed(seed)
-    return Ed25519Keypair(
-      publicKey = PublicKey(keypair.publicKey),
-      secretKey = keypair.secretKey,
-    )
+    val bytes = TweetNaclFast.Signature.keyPair_fromSeed(seed)
+    return Ed25519Keypair.fromSecretKeyBytes(bytes.secretKey)
   }
 }
