@@ -39,6 +39,7 @@ kotlin {
 
     val commonMain by getting {
       dependencies {
+        implementation(libs.coroutinesCore)
         implementation(libs.ktorClientCore)
         implementation(libs.ktorClientLogging)
         implementation(libs.serializationJson)
