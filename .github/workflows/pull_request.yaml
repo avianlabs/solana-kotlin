@@ -49,7 +49,7 @@ jobs:
           ./gradlew
           jvmJar
           jvmTest
-          iosTest
+          iosSimulatorArm64Test
       #          jsTest
 
       - name: Bundle the failed build report
