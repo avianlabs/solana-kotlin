@@ -24,7 +24,7 @@ okio = "3.8.0"
 serialization = "1.6.3"
 
 [libraries]
-bouncyCastle = { module = "org.bouncycastle:bcpkix-jdk15to18", version = "1.75" }
+bouncyCastle = { module = "org.bouncycastle:bcpkix-jdk15to18", version = "1.77" }
 coreLibraryDesugaring = { module = "com.android.tools:desugar_jdk_libs", version = "2.0.4" }
 coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 coroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
