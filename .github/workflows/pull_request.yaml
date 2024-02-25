@@ -20,37 +20,35 @@ jobs:
   build:
     if: ${{ !github.event.pull_request.draft }}
     name: Build Project
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: 'true'
 
       - uses: actions/setup-java@v4
         with:
           java-version: '18'
           distribution: 'temurin'
-          cache: 'gradle'
 
-      - name: Cache gradle
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Cache konan
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-            ~/.konan
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-konan-
 
-      - name: Build run tests
-        run: >-
-          ./gradlew
-          jvmJar
-          jvmTest
-      #          jsTest
-      #          iosTest
+      - name: Run tests
+        run: ./gradlew check
+
+      - name: Build packages
+        run: ./gradlew publishToMavenLocal
 
       - name: Bundle the failed build report
         if: failure()
