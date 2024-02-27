@@ -1,9 +1,13 @@
-name: 'Release'
+name: 'Main Branch Build'
+
+concurrency:
+  group: main
+  cancel-in-progress: false
 
 on:
-  release:
-    types:
-      - created
+  push:
+    branches:
+      - main
 
 permissions:
   pull-requests: write
@@ -39,17 +43,14 @@ jobs:
           key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-konan-
 
-      - name: Run tests
-        run: ./gradlew check
-
-      - name: Publish to maven snapshots
+      - name: Publish to maven central
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.SONATYPE_USER }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyId: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_KEY_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToMavenCentralRepository
+        run: ./gradlew -Psnapshot=false publishAndReleaseToMavenCentral --no-configuration-cache
 
       - name: Bundle the failed build report
         if: failure()

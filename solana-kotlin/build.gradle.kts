@@ -1,4 +1,5 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
+import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -6,6 +7,8 @@ plugins {
   alias(libs.plugins.cklib)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.mavenPublish)
+  alias(libs.plugins.dokka)
+  signing
 }
 
 group = "net.avianlabs.solana"
@@ -106,8 +109,46 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
   }
 }
 
+signing {
+  useGpgCmd()
+}
+
 publishing {
   repositories {
     mavenLocal()
   }
+  publications {
+    withType<MavenPublication> {
+      pom {
+        name = "Solana Kotlin"
+        description = "Kotlin Multiplatform library to interface with the Solana network"
+        licenses {
+          license {
+            name = "MIT"
+            url = "https://opensource.org/licenses/MIT"
+          }
+        }
+        url = "https://github.com/avianlabs/solana-kotlin"
+        issueManagement {
+          system = "GitHub"
+          url = "https://github.com/avianlabs/solana-kotlin"
+        }
+        scm {
+          connection = "https://github.com/avianlabs/solana-kotlin.git"
+          url = "https://github.com/avianlabs/solana-kotlin"
+        }
+        developers {
+          developer {
+            name = "Avian Labs Engineers"
+            email = "engineering@avianlabs.net"
+          }
+        }
+      }
+    }
+  }
+}
+
+mavenPublishing {
+  publishToMavenCentral(SonatypeHost.DEFAULT)
+  signAllPublications()
 }
