@@ -4,12 +4,6 @@ plugins {
   alias(libs.plugins.nmcp)
 }
 
-if (rootProject.findProperty("snapshot") != "false") {
-  allprojects {
-    version = "$version-SNAPSHOT"
-  }
-}
-
 nmcp {
   publishAllProjectsProbablyBreakingProjectIsolation {
     username = findProperty("mavenCentralUsername") as? String
