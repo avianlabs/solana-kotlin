@@ -150,5 +150,7 @@ publishing {
 
 mavenPublishing {
   publishToMavenCentral(SonatypeHost.DEFAULT)
-  signAllPublications()
+  if (rootProject.findProperty("signPublications") != "false") {
+    signAllPublications()
+  }
 }

@@ -48,7 +48,7 @@ jobs:
         run: ./gradlew check
 
       - name: Build packages
-        run: ./gradlew publishToMavenLocal
+        run: ./gradlew -PsignPublications=false publishToMavenLocal
 
       - name: Bundle the failed build report
         if: failure()
