@@ -116,6 +116,16 @@ signing {
 publishing {
   repositories {
     mavenLocal()
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = uri("https://maven.pkg.github.com/avianlabs/solana-kotlin")
+        credentials {
+          username = System.getenv("GITHUB_ACTOR")
+          password = System.getenv("GITHUB_TOKEN")
+        }
+      }
+    }
   }
   publications {
     withType<MavenPublication> {
@@ -149,7 +159,6 @@ publishing {
 }
 
 mavenPublishing {
-  publishToMavenCentral(SonatypeHost.DEFAULT)
   if (rootProject.findProperty("signPublications") != "false") {
     signAllPublications()
   }
