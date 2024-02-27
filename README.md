@@ -1,21 +1,31 @@
 # solana-kotlin
 
-### Step 1. Add the JitPack repository to your build file
+### Usage
 
-Add it in your root build.gradle at the end of repositories:
+Add it in your root build.gradle.kts at the end of repositories:
+
 ```
-allprojects {
-  repositories {
-    ...
-    maven { url 'https://jitpack.io' }
-  }
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation("net.avianlabs.solana:solana-kotlin:<version>")
 }
 ```
 
-### Step 2. Add the dependency
+### Snapshot releases
+
+You can get snapshot releases from [GitHub Packages](https://github.com/orgs/avianlabs/packages?repo_name=solana-kotlin).
 
 ```
-dependencies {
-        implementation 'net.avianlabs.solana-kotlin:solana-kotlin:<version>'
+repositories {
+  maven {
+    url = uri("https://maven.pkg.github.com/avianlabs/solana-kotlin")
+    credentials {
+      username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+      password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+    }
+  }
 }
 ```
