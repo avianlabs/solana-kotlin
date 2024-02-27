@@ -1,9 +1,13 @@
-name: 'Release'
+name: 'Main Branch Build'
+
+concurrency:
+  group: main
+  cancel-in-progress: false
 
 on:
-  release:
-    types:
-      - created
+  push:
+    branches:
+      - main
 
 permissions:
   pull-requests: write
