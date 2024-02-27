@@ -58,7 +58,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
           ORG_GRADLE_PROJECT_signingGnupgKeyName: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingGnupgPassphrase: ${{ secrets.GPG_KEY_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToMavenCentralRepository
+        run: ./gradlew publishAllPublicationsToCentralPortal
 
       - name: Bundle the failed build report
         if: failure()

@@ -65,4 +65,5 @@ dokka = { id = "org.jetbrains.dokka", version = "1.9.10" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+nmcp = { id = "com.gradleup.nmcp", version = "0.0.4" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
