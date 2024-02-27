@@ -15,6 +15,7 @@ permissions:
   checks: write
   statuses: write
   contents: write
+  packages: write
 
 jobs:
   build:
