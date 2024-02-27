@@ -1,13 +1,9 @@
-name: 'Main Branch Build'
-
-concurrency:
-  group: main
-  cancel-in-progress: false
+name: 'Release'
 
 on:
-  push:
-    branches:
-      - main
+  release:
+    types:
+      - created
 
 permissions:
   pull-requests: write
@@ -43,9 +39,6 @@ jobs:
           key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-konan-
 
-      - name: Run tests
-        run: ./gradlew check
-        
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6
         with:
@@ -58,7 +51,7 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.SONATYPE_PASSWORD }}
           ORG_GRADLE_PROJECT_signingGnupgKeyName: ${{ secrets.GPG_KEY_ID }}
           ORG_GRADLE_PROJECT_signingGnupgPassphrase: ${{ secrets.GPG_KEY_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToMavenCentralRepository
+        run: ./gradlew -Psnapshot=false publishAndReleaseToMavenCentral --no-configuration-cache
 
       - name: Bundle the failed build report
         if: failure()
