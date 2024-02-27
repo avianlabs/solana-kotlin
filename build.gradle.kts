@@ -12,8 +12,8 @@ if (rootProject.findProperty("snapshot") != "false") {
 
 nmcp {
   publishAllProjectsProbablyBreakingProjectIsolation {
-    username = findProperty("mavenCentralUsername") as String
-    password = findProperty("mavenCentralPassword") as String
+    username = findProperty("mavenCentralUsername") as? String
+    password = findProperty("mavenCentralPassword") as? String
     publicationType = "USER_MANAGED"
   }
 }
