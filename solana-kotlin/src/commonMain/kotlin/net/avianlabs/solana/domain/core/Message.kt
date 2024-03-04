@@ -11,8 +11,8 @@ public class Message(
   instructions: List<TransactionInstruction> = emptyList(),
 ) {
 
-  private val _accountKeys: AccountKeysList
-  private val _instructions: MutableList<TransactionInstruction>
+  private val _accountKeys: AccountKeysList = accountKeys
+  private val _instructions: MutableList<TransactionInstruction> = instructions.toMutableList()
 
 
   public val accountKeys: List<AccountMeta>
@@ -20,11 +20,6 @@ public class Message(
 
   public val instructions: List<TransactionInstruction>
     get() = _instructions
-
-  init {
-    _accountKeys = accountKeys
-    _instructions = instructions.toMutableList()
-  }
 
   private class MessageHeader {
     var numRequiredSignatures: Byte = 0
