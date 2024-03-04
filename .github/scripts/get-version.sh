@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./gradlew properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'
+./gradlew -Psnapshot=false properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'
