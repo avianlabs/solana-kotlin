@@ -1,7 +1,7 @@
 package net.avianlabs.solana.domain.core
 
 public class AccountKeysList {
-  private val accounts: HashMap<String, AccountMeta> = HashMap()
+  private val accounts: LinkedHashMap<String, AccountMeta> = LinkedHashMap()
 
   public fun add(accountMeta: AccountMeta) {
     val key = accountMeta.publicKey.toString()
@@ -31,16 +31,18 @@ public class AccountKeysList {
 
   public companion object {
     private val metaComparator = Comparator<AccountMeta> { am1, am2 ->
-      val cmpSigner = if (am1.isSigner == am2.isSigner) 0 else if (am1.isSigner) -1 else 1
-      if (cmpSigner != 0) {
-        return@Comparator cmpSigner
+      // first sort by signer, then writable
+      if (am1.isSigner && !am2.isSigner) {
+        -1
+      } else if (!am1.isSigner && am2.isSigner) {
+        1
+      } else if (am1.isWritable && !am2.isWritable) {
+        -1
+      } else if (!am1.isWritable && am2.isWritable) {
+        1
+      } else {
+        0
       }
-      val cmpkWritable =
-        if (am1.isWritable == am2.isWritable) 0 else if (am1.isWritable) -1 else 1
-      if (cmpkWritable != 0) {
-        cmpkWritable
-      } else cmpSigner.compareTo(cmpkWritable)
     }
   }
-
 }
