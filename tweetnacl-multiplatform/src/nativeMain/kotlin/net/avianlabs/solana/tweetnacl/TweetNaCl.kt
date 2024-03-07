@@ -35,80 +35,90 @@ internal actual fun isOnCurveInternal(publicKey: ByteArray): Boolean =
   is_on_curve(publicKey.toUByteArray().toCValues()) != -1
 
 internal actual fun generateKeyInternal(seed: ByteArray): Ed25519Keypair = memScoped {
-  val pk = UByteArray(crypto_sign_ed25519_tweet_PUBLICKEYBYTES)
-  val sk = UByteArray(crypto_sign_ed25519_tweet_SECRETKEYBYTES) { i ->
-    if (i < crypto_sign_ed25519_tweet_PUBLICKEYBYTES) {
-      seed[i].toUByte()
-    } else {
-      0u
-    }
+  val pkPointer = allocArray<UByteVar>(crypto_sign_ed25519_tweet_PUBLICKEYBYTES)
+  val skPointer = allocArray<UByteVar>(crypto_sign_ed25519_tweet_SECRETKEYBYTES) { i ->
+    if (i < crypto_sign_ed25519_tweet_PUBLICKEYBYTES)
+      value = seed[i].toUByte()
   }
-  val res = crypto_sign_ed25519_tweet_keypair(pk.toCValues(), sk.toCValues())
+  val res = crypto_sign_ed25519_tweet_keypair(pkPointer, skPointer)
   check(res == 0) {
     "failed to crypto_sign_ed25519_tweet_keypair"
   }
   Ed25519Keypair(
-    publicKey = PublicKey(pk.asByteArray()),
-    secretKey = sk.asByteArray(),
+    publicKey = PublicKey(pkPointer.toByteArray(crypto_sign_ed25519_tweet_PUBLICKEYBYTES)),
+    secretKey = skPointer.toByteArray(crypto_sign_ed25519_tweet_SECRETKEYBYTES),
   )
 }
 
 internal actual fun secretBoxInternal(secretKey: ByteArray): TweetNaCl.SecretBox =
   object : TweetNaCl.SecretBox {
-    override fun box(message: ByteArray, nonce: ByteArray): ByteArray {
-      val boxLength = message.size + crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES
-      val box = UByteArray(boxLength) { i ->
-        if (i >= crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES) {
-          message[i + crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES].toUByte()
+    init {
+      check(secretKey.size == crypto_box_curve25519xsalsa20poly1305_tweet_SECRETKEYBYTES) {
+        "secretKey lenght ${secretKey.size} invalid (should be $crypto_box_curve25519xsalsa20poly1305_tweet_SECRETKEYBYTES)"
+      }
+    }
+
+    override fun box(message: ByteArray, nonce: ByteArray): ByteArray = memScoped {
+      check(nonce.size == crypto_box_curve25519xsalsa20poly1305_tweet_NONCEBYTES) {
+        "nonce lenght ${nonce.size} invalid (should be $crypto_box_curve25519xsalsa20poly1305_tweet_NONCEBYTES)"
+      }
+
+      val mLength = message.size + crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES
+      val m = allocArray<UByteVar>(mLength) { i ->
+        value = if (i >= crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES) {
+          message[i - crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES].toUByte()
         } else {
           0u
         }
       }
+
+      val c = allocArray<UByteVar>(mLength)
 
       val res = crypto_secretbox_xsalsa20poly1305_tweet(
-        message.asUByteArray().toCValues(),
-        box.toCValues(),
-        message.size.toULong(),
+        c,
+        m,
+        mLength.toULong(),
         nonce.asUByteArray().toCValues(),
         secretKey.asUByteArray().toCValues(),
       )
 
       check(res == 0) {
-        "failed to crypto_secretbox_xsalsa20poly1305_tweet"
+        "failed to crypto_secretbox_xsalsa20poly1305_tweet: $res"
       }
 
-      return box.asByteArray()
-        .sliceArray(crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES..<message.size)
-    }
+      c.toByteArray(mLength)
+    }.drop(crypto_secretbox_xsalsa20poly1305_tweet_BOXZEROBYTES).toByteArray()
 
-    override fun open(box: ByteArray, nonce: ByteArray): ByteArray {
+    override fun open(box: ByteArray, nonce: ByteArray): ByteArray = memScoped {
+      check(nonce.size == crypto_box_curve25519xsalsa20poly1305_tweet_NONCEBYTES) {
+        "nonce lenght ${nonce.size} invalid (should be $crypto_box_curve25519xsalsa20poly1305_tweet_NONCEBYTES)"
+      }
+
       val cSize = box.size + crypto_secretbox_xsalsa20poly1305_tweet_BOXZEROBYTES
-      val c = UByteArray(cSize) { i ->
-        if (i >= crypto_secretbox_xsalsa20poly1305_tweet_BOXZEROBYTES) {
-          box[i].toUByte()
+      val c = allocArray<UByteVar>(cSize) { i ->
+        value = if (i >= crypto_secretbox_xsalsa20poly1305_tweet_BOXZEROBYTES) {
+          box[i - crypto_secretbox_xsalsa20poly1305_tweet_BOXZEROBYTES].toUByte()
         } else {
           0u
         }
       }
 
-      val m = UByteArray(cSize)
+      val m = allocArray<UByteVar>(cSize)
 
       val res = crypto_secretbox_xsalsa20poly1305_tweet_open(
-        m.toCValues(),
-        c.toCValues(),
-        c.size.toULong(),
+        m,
+        c,
+        cSize.toULong(),
         nonce.asUByteArray().toCValues(),
         secretKey.asUByteArray().toCValues(),
       )
 
       check(res == 0) {
-        "failed to crypto_secretbox_xsalsa20poly1305_tweet_open"
+        "failed to crypto_secretbox_xsalsa20poly1305_tweet_open: $res"
       }
 
-      return c
-        .sliceArray(crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES..<cSize)
-        .asByteArray()
-    }
+      m.toByteArray(cSize)
+    }.drop(crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES).toByteArray()
   }
 
 private fun CPointer<UByteVar>.toByteArray(length: Int): ByteArray {
