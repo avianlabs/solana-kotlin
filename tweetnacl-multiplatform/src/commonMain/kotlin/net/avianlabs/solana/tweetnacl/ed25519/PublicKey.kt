@@ -8,6 +8,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.TweetNaCl.Signature.Companion.PUBLIC_KEY_BYTES
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
@@ -35,6 +36,8 @@ public data class PublicKey(public val bytes: ByteArray) {
   }
 
   override fun hashCode(): Int = bytes.contentHashCode()
+
+  public fun isOnCurve(): Boolean = TweetNaCl.Signature.isOnCurve(this.bytes)
 
   public companion object {
 

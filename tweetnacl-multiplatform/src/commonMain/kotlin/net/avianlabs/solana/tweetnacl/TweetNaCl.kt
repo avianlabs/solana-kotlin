@@ -4,8 +4,25 @@ import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 
 public interface TweetNaCl {
   public interface Signature {
+
+    /**
+     * Signs the message using the secret key and returns a signed message
+     *
+     * @param message:
+     * @param secretKey:
+     */
     public fun sign(message: ByteArray, secretKey: ByteArray): ByteArray
+
+    /**
+     * Returns a new signing key pair generated deterministically from a seed
+     *
+     * @param seed: 32 byte seed. Must contain enough entropy to be secure.
+     */
     public fun generateKey(seed: ByteArray): Ed25519Keypair
+
+    /**
+     * Returns whether the given publicKey falls in the Ed25519 elliptic curve
+     */
     public fun isOnCurve(publicKey: ByteArray): Boolean
 
     public companion object : Signature {
