@@ -1,7 +1,7 @@
 package net.avianlabs.solana.domain.program
 
 import net.avianlabs.solana.tweetnacl.TweetNaCl
-import net.avianlabs.solana.tweetnacl.crypto.PublicKey
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals

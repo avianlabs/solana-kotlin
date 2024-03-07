@@ -1,7 +1,7 @@
 package net.avianlabs.solana.tweetnacl
 
 import com.iwebpp.crypto.TweetNaclFast
-import net.avianlabs.solana.crypto.Ed25519Keypair
+import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import org.bouncycastle.math.ec.rfc8032.Ed25519
 
 

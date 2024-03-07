@@ -1,4 +1,4 @@
-package net.avianlabs.solana.tweetnacl.crypto
+package net.avianlabs.solana.tweetnacl.ed25519
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable

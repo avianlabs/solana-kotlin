@@ -1,6 +1,6 @@
 package net.avianlabs.solana.tweetnacl
 
-import net.avianlabs.solana.crypto.Ed25519Keypair
+import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 
 public interface TweetNaCl {
   public interface Signature {

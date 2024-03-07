@@ -1,6 +1,6 @@
 package net.avianlabs.solana.domain.core
 
-import net.avianlabs.solana.tweetnacl.crypto.PublicKey
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 public data class TransactionInstruction(
   val programId: PublicKey,

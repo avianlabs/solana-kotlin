@@ -3,8 +3,8 @@
 package net.avianlabs.solana.tweetnacl
 
 import kotlinx.cinterop.*
-import net.avianlabs.solana.crypto.Ed25519Keypair
-import net.avianlabs.solana.tweetnacl.crypto.PublicKey
+import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 internal actual fun signInternal(message: ByteArray, secretKey: ByteArray): ByteArray = memScoped {
   check(secretKey.size == crypto_sign_ed25519_tweet_SECRETKEYBYTES) {

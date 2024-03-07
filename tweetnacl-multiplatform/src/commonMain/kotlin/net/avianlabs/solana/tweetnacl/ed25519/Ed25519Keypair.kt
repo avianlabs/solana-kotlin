@@ -1,7 +1,6 @@
-package net.avianlabs.solana.crypto
+package net.avianlabs.solana.tweetnacl.ed25519
 
 import net.avianlabs.solana.tweetnacl.TweetNaCl
-import net.avianlabs.solana.tweetnacl.crypto.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 
 public data class Ed25519Keypair(

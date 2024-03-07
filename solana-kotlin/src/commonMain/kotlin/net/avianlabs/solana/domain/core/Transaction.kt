@@ -1,7 +1,7 @@
 package net.avianlabs.solana.domain.core
 
 import net.avianlabs.solana.tweetnacl.TweetNaCl
-import net.avianlabs.solana.tweetnacl.crypto.PublicKey
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.vendor.ShortvecEncoding
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
