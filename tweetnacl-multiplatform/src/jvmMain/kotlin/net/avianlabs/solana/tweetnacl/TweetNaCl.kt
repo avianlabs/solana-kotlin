@@ -17,3 +17,12 @@ internal actual fun generateKeyInternal(seed: ByteArray): Ed25519Keypair {
   val bytes = TweetNaclFast.Signature.keyPair_fromSeed(seed)
   return Ed25519Keypair.fromSecretKeyBytes(bytes.secretKey)
 }
+
+internal actual fun secretBoxInternal(secretKey: ByteArray): TweetNaCl.SecretBox =
+  object : TweetNaCl.SecretBox {
+    override fun box(message: ByteArray, nonce: ByteArray): ByteArray =
+      TweetNaclFast.SecretBox(secretKey).box(message, nonce)
+
+    override fun open(box: ByteArray, nonce: ByteArray): ByteArray =
+      TweetNaclFast.SecretBox(secretKey).open(box, nonce)
+  }
