@@ -1,5 +1,6 @@
 package net.avianlabs.solana.domain.core
 
+import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.vendor.ShortvecEncoding
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
@@ -97,7 +98,7 @@ public class Message(
       compiledInstructionsLength += compiledInstruction.length
     }
     val instructionsLength = ShortvecEncoding.encodeLength(compiledInstructions.size)
-    val accountsKeyBufferSize = accountKeysSize * PublicKey.PUBLIC_KEY_LENGTH
+    val accountsKeyBufferSize = accountKeysSize * TweetNaCl.Signature.PUBLIC_KEY_BYTES
     val bufferSize =
       (MessageHeader.HEADER_LENGTH + RECENT_BLOCK_HASH_LENGTH + accountAddressesLength.size
         + accountsKeyBufferSize + instructionsLength.size

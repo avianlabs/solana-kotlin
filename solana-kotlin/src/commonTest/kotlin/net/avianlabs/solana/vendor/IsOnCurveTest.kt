@@ -4,11 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import net.avianlabs.solana.crypto.isOnCurve
-import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.domain.program.ProgramDerivedAddress
 import net.avianlabs.solana.domain.program.associatedTokenAddress
-import net.avianlabs.solana.tweetnacl.TweetNaCl
-import kotlin.random.Random
+import net.avianlabs.solana.domain.randomKey
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -20,7 +19,7 @@ class IsOnCurveTest {
     val offCurve = PublicKey.fromBase58("12rqwuEgBYiGhBrDJStCiqEtzQpTTiZbh7teNVLuYcFA")
     assertFalse(offCurve.isOnCurve())
 
-    val onCurve = TweetNaCl.Signature.generateKey(Random.nextBytes(32)).publicKey
+    val onCurve = randomKey().publicKey
     assertTrue(onCurve.isOnCurve())
   }
 

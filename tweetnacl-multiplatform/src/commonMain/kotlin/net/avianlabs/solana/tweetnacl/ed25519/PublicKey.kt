@@ -8,6 +8,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import net.avianlabs.solana.tweetnacl.TweetNaCl.Signature.Companion.PUBLIC_KEY_BYTES
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 
@@ -15,7 +16,7 @@ import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 public data class PublicKey(public val bytes: ByteArray) {
 
   init {
-    require(bytes.size == PUBLIC_KEY_LENGTH) { "Invalid public key input size ${bytes.size} (must be $PUBLIC_KEY_LENGTH)" }
+    require(bytes.size == PUBLIC_KEY_BYTES) { "Invalid public key input size ${bytes.size} (must be $PUBLIC_KEY_BYTES)" }
   }
 
   public fun toBase58(): String = bytes.encodeToBase58String()
@@ -36,8 +37,6 @@ public data class PublicKey(public val bytes: ByteArray) {
   override fun hashCode(): Int = bytes.contentHashCode()
 
   public companion object {
-
-    public const val PUBLIC_KEY_LENGTH: Int = 32
 
     public fun fromBase58(base58: String): PublicKey = PublicKey(base58.decodeBase58())
   }
