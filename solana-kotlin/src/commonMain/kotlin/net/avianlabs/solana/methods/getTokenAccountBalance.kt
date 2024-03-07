@@ -6,7 +6,7 @@ import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse.RPC
 import net.avianlabs.solana.domain.core.Commitment
-import net.avianlabs.solana.domain.core.PublicKey
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 /**
  * Returns the token balance of an SPL Token account.

@@ -6,7 +6,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.domain.core.Commitment
-import net.avianlabs.solana.domain.core.PublicKey
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 /**
  * Returns Signatures for confirmed transactions that include

@@ -4,6 +4,7 @@ import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import net.avianlabs.solana.tweetnacl.vendor.Sha256
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 

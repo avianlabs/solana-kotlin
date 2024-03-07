@@ -1,5 +1,6 @@
 package net.avianlabs.solana.domain.core
 
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

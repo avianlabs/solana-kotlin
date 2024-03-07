@@ -1,10 +1,10 @@
 package net.avianlabs.solana.domain.program
 
-import io.ktor.util.encodeBase64
+import io.ktor.util.*
 import kotlinx.coroutines.test.runTest
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcKtorClient
-import net.avianlabs.solana.crypto.Ed25519Keypair
+import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import net.avianlabs.solana.domain.core.Transaction
 import net.avianlabs.solana.methods.getMinimumBalanceForRentExemption
 import net.avianlabs.solana.methods.getRecentBlockhash

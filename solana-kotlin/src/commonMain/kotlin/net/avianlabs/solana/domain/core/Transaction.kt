@@ -1,9 +1,10 @@
 package net.avianlabs.solana.domain.core
 
-import net.avianlabs.solana.crypto.defaultCryptoEngine
+import net.avianlabs.solana.tweetnacl.TweetNaCl
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.vendor.ShortvecEncoding
-import net.avianlabs.solana.vendor.decodeBase58
-import net.avianlabs.solana.vendor.encodeToBase58String
+import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
+import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import okio.Buffer
 
 public class Transaction(
@@ -42,7 +43,7 @@ public class Transaction(
     serializedMessage = message.serialize()
     for (signer in signers) {
       _signatures.add(
-        defaultCryptoEngine.sign(serializedMessage, signer.secretKey).encodeToBase58String()
+        TweetNaCl.Signature.sign(serializedMessage, signer.secretKey).encodeToBase58String()
       )
     }
     return this

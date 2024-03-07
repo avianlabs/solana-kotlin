@@ -4,8 +4,9 @@ import net.avianlabs.solana.domain.program.AssociatedTokenProgram
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.program.TokenProgram
 import net.avianlabs.solana.methods.TransactionResponse
-import net.avianlabs.solana.vendor.decodeBase58
-import net.avianlabs.solana.vendor.encodeToBase58String
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
+import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
+import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import okio.Buffer
 
 public data class DecodedTransaction(
