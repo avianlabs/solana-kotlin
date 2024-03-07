@@ -1,10 +1,8 @@
 package net.avianlabs.solana.domain.crypto
 
-import net.avianlabs.solana.crypto.isOnCurve
 import net.avianlabs.solana.domain.core.TransactionBuilder
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.randomKey
-import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import kotlin.random.Random

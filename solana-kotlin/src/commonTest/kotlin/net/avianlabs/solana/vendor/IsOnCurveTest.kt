@@ -3,7 +3,6 @@ package net.avianlabs.solana.vendor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
-import net.avianlabs.solana.crypto.isOnCurve
 import net.avianlabs.solana.domain.program.ProgramDerivedAddress
 import net.avianlabs.solana.domain.program.associatedTokenAddress
 import net.avianlabs.solana.domain.randomKey
