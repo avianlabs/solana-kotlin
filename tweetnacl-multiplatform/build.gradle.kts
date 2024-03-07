@@ -1,5 +1,9 @@
+import co.touchlab.cklib.gradle.CompileToBitcode.Language
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.cklib)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
@@ -30,7 +34,7 @@ kotlin {
   sourceSets {
     val jvmMain by getting {
       dependencies {
-        implementation(libs.ktorClientOkHttp)
+        implementation(libs.tweetNaClJava)
         implementation(libs.bouncyCastle)
       }
     }
@@ -38,15 +42,7 @@ kotlin {
 
     val commonMain by getting {
       dependencies {
-        api(project(":tweetnacl-multiplatform"))
-        implementation(libs.coroutinesCore)
-        implementation(libs.ktorClientCore)
-        implementation(libs.ktorClientLogging)
-        implementation(libs.serializationJson)
-        implementation(libs.ktorClientContentNegotiation)
-        implementation(libs.ktorSerializationKotlinxJson)
-        implementation(libs.kermit)
-        implementation(libs.okio)
+        implementation(libs.serializationCore)
       }
     }
     val commonTest by getting {
@@ -58,7 +54,6 @@ kotlin {
 
     val iosMain by getting {
       dependencies {
-        implementation(libs.ktorClientDarwin)
       }
     }
     val iosTest by getting {
@@ -66,6 +61,35 @@ kotlin {
 
     val nativeMain by getting {
     }
+
+    targets.withType<KotlinNativeTarget> {
+      val main by compilations.getting
+
+      main.cinterops {
+        create("tweetnacl") {
+          header(file("vendor/tweetnacl/tweetnacl.h"))
+          packageName("net.avianlabs.solana.tweetnacl")
+        }
+      }
+    }
+  }
+}
+
+cklib {
+  config.kotlinVersion = libs.versions.kotlin.get()
+  create("tweetnacl") {
+    language = Language.C
+    srcDirs = project.files(file("vendor/tweetnacl"))
+    compilerArgs.addAll(
+      listOf(
+        "-DKONAN_MI_MALLOC=1",
+        "-Wno-unknown-pragmas",
+        "-Wno-unused-function",
+        "-Wno-error=atomic-alignment",
+        "-Wno-sign-compare",
+        "-Wno-unused-parameter" /* for windows 32 */
+      )
+    )
   }
 }
 
@@ -96,8 +120,8 @@ publishing {
   publications {
     withType<MavenPublication> {
       pom {
-        name = "Solana Kotlin"
-        description = "Kotlin Multiplatform library to interface with the Solana network"
+        name = "TweetNaCl Multiplatform"
+        description = "Kotlin Multiplatform bindings for TweetNaCl"
         licenses {
           license {
             name = "MIT"

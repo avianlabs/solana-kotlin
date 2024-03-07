@@ -1,6 +1,6 @@
 package net.avianlabs.solana.domain.program
 
-import io.ktor.util.encodeBase64
+import io.ktor.util.*
 import kotlinx.coroutines.test.runTest
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcKtorClient

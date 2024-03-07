@@ -2,6 +2,7 @@ package net.avianlabs.solana.domain.core
 
 import net.avianlabs.solana.domain.program.ComputeBudgetProgram
 import net.avianlabs.solana.domain.program.TokenProgram
+import net.avianlabs.solana.tweetnacl.crypto.PublicKey
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

@@ -1,7 +1,8 @@
 package net.avianlabs.solana.domain.program
 
-import net.avianlabs.solana.crypto.defaultCryptoEngine
-import net.avianlabs.solana.domain.core.PublicKey
+import net.avianlabs.solana.tweetnacl.TweetNaCl
+import net.avianlabs.solana.tweetnacl.crypto.PublicKey
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -10,7 +11,7 @@ class AssociatedTokenProgramTest {
   @Test
   fun testFindProgramAddress() {
     for (i in 0..1000) {
-      val programId = defaultCryptoEngine.generateKey().publicKey
+      val programId = TweetNaCl.Signature.generateKey(Random.nextBytes(32)).publicKey
       println("programId: $programId")
 
       val seeds = listOf(

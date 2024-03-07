@@ -1,7 +1,7 @@
 package net.avianlabs.solana.domain.program
 
 import net.avianlabs.solana.domain.core.AccountMeta
-import net.avianlabs.solana.domain.core.PublicKey
+import net.avianlabs.solana.tweetnacl.crypto.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import okio.Buffer

@@ -26,6 +26,7 @@ dependencyResolutionManagement {
 }
 
 include(":solana-kotlin")
+include(":tweetnacl-multiplatform")
 
 dependencyResolutionManagement {
   versionCatalogs {
