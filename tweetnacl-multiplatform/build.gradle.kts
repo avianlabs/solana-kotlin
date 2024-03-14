@@ -8,6 +8,7 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
+  id("io.github.luca992.multiplatform-swiftpackage") version "2.2.2"
 }
 
 group = "net.avianlabs.solana"
@@ -26,8 +27,15 @@ kotlin {
     }
   }
 
-  iosArm64()
-  iosSimulatorArm64()
+  listOf(
+    iosArm64(),
+    iosSimulatorArm64(),
+  ).forEach { iosTarget ->
+    iosTarget.binaries.framework {
+      baseName = "TweetNaClMultiplatform"
+      isStatic = true
+    }
+  }
 
   mingwX64()
 
@@ -91,6 +99,15 @@ cklib {
       )
     )
   }
+}
+
+multiplatformSwiftPackage {
+  swiftToolsVersion("5.9")
+  targetPlatforms {
+    iOS { v("16") }
+  }
+  packageName("TweetNaClMultiplatform")
+  distributionMode { local() }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

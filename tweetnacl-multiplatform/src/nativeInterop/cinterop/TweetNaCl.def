@@ -1,0 +1,2 @@
+---
+extern int is_on_curve(const unsigned char *);

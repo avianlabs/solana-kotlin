@@ -4,6 +4,7 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
+  id("io.github.luca992.multiplatform-swiftpackage") version "2.2.2"
 }
 
 group = "net.avianlabs.solana"
@@ -22,8 +23,15 @@ kotlin {
     }
   }
 
-  iosArm64()
-  iosSimulatorArm64()
+  listOf(
+    iosArm64(),
+    iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+      iosTarget.binaries.framework {
+        baseName = "SolanaKotlin"
+        isStatic = true
+      }
+    }
 
   mingwX64()
 
@@ -67,6 +75,16 @@ kotlin {
     val nativeMain by getting {
     }
   }
+}
+
+multiplatformSwiftPackage {
+  swiftToolsVersion("5.9")
+  targetPlatforms {
+    iOS { v("16") }
+  }
+  packageName("SolanaKotlin")
+  zipFileName("SolanaKotlin")
+  distributionMode { remote("https://github.com/avianlabs/solana-kotlin/releases/download/0.1.5") }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
