@@ -5,6 +5,11 @@ on:
     tags:
       - '*'
   workflow_dispatch:
+    inputs:
+      tagname:
+        type: string
+        required: true
+        description: tag to run the release on
 
 permissions:
   pull-requests: write
@@ -43,9 +48,10 @@ jobs:
       - name: Create Swift package
         run: ./gradlew -Psnapshot=false :solana-kotlin:createSwiftPackage
 
-      - name: Create release
+      - name: Upload artifact to release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.inputs.tagname || github.ref }}
           files: |
             solana-kotlin/swiftpackage/SolanaKotlin.zip
 
@@ -54,10 +60,10 @@ jobs:
         with:
           path: _otherBranch
           ref: swiftpackage
-      
+
       - name: Copy Package.swift
         run: cp solana-kotlin/swiftpackage/Package.swift _otherBranch/Package.swift
-        
+
       - name: Commit and push changes
         uses: EndBug/add-and-commit@v9
         with:
