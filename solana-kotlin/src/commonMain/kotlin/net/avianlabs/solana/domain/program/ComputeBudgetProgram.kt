@@ -22,6 +22,21 @@ public object ComputeBudgetProgram : Program {
   }
 
   /**
+   * @param units Number of compute units to request.
+   */
+  public fun setComputeUnitLimit(
+    maxUnits: ULong,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+    ),
+    data = Buffer()
+      .writeByte(Instruction.SetComputeUnitLimit.index.toInt())
+      .writeLongLe(maxUnits.toLong())
+      .readByteArray(),
+  )
+
+  /**
    * @param microLamports Transaction compute unit price used for prioritization fees.
    */
   public fun setComputeUnitPrice(
