@@ -50,6 +50,9 @@ public class RpcKtorClient(
     val response = ktorClient.post(url) {
       contentType(ContentType.Application.Json)
       setBody(request.buildBody())
+      request.invocation.headerProviders.forEach { (header, valueProvider) ->
+        header(header, valueProvider())
+      }
     }
     response.body<JsonObject>()["error"]?.let {
       throw ExecuteException(Json.decodeFromJsonElement<RpcError>(it))
