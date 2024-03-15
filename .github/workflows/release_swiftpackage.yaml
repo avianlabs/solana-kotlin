@@ -51,7 +51,7 @@ jobs:
       - name: Upload artifact to release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.tagname || github.ref }}
+          tag_name: ${{ github.event.inputs.tagname || github.ref_name }}
           files: |
             solana-kotlin/swiftpackage/SolanaKotlin.zip
 
