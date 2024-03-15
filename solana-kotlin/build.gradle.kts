@@ -1,10 +1,14 @@
+import co.touchlab.skie.configuration.ClassInterop
+import co.touchlab.skie.configuration.DefaultArgumentInterop
+
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
-  id("io.github.luca992.multiplatform-swiftpackage") version "2.2.2"
+  alias(libs.plugins.multiplatform.swiftpackage)
+  alias(libs.plugins.skie)
 }
 
 group = "net.avianlabs.solana"
@@ -29,6 +33,7 @@ kotlin {
     ).forEach { iosTarget ->
       iosTarget.binaries.framework {
         baseName = "SolanaKotlin"
+        export(project(":tweetnacl-multiplatform"))
         isStatic = true
       }
     }
@@ -55,6 +60,7 @@ kotlin {
         implementation(libs.ktorSerializationKotlinxJson)
         implementation(libs.kermit)
         implementation(libs.okio)
+        implementation(libs.skie.configurationAnnotations)
       }
     }
     val commonTest by getting {
@@ -73,6 +79,15 @@ kotlin {
     }
 
     val nativeMain by getting {
+    }
+  }
+}
+
+skie {
+  features {
+    group("net.avianlabs.solana.tweetnacl") {
+      ClassInterop.CInteropFrameworkName("TweetNaClMultiplatform")
+      DefaultArgumentInterop.Enabled(true)
     }
   }
 }

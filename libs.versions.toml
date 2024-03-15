@@ -11,6 +11,7 @@ detekt = "1.23.5"
 jacoco = "0.8.7"
 kotlin = "1.9.23"
 mavenPublish = "0.27.0"
+skie = "0.6.2"
 
 # Libraries
 junit5 = "5.10.2"
@@ -43,6 +44,7 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttpLoggingInterceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 serializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+skie-configurationAnnotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }
 tweetNaClJava = { module = "net.avianlabs:tweetnacl-java", version = "1.1.2" }
 
 # Test Libs
@@ -68,3 +70,5 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 nmcp = { id = "com.gradleup.nmcp", version = "0.0.4" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+multiplatform-swiftpackage = { id = "io.github.luca992.multiplatform-swiftpackage", version = "2.2.2" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }

@@ -1,4 +1,5 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
+import co.touchlab.skie.configuration.ClassInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -8,7 +9,8 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
-  id("io.github.luca992.multiplatform-swiftpackage") version "2.2.2"
+  alias(libs.plugins.multiplatform.swiftpackage)
+  alias(libs.plugins.skie)
 }
 
 group = "net.avianlabs.solana"

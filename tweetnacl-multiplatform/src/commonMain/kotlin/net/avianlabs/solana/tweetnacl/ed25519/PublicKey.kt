@@ -40,7 +40,6 @@ public data class PublicKey(public val bytes: ByteArray) {
   public fun isOnCurve(): Boolean = TweetNaCl.Signature.isOnCurve(this.bytes)
 
   public companion object {
-
     public fun fromBase58(base58: String): PublicKey = PublicKey(base58.decodeBase58())
   }
 }
