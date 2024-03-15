@@ -1,0 +1,77 @@
+name: 'Release Swift package'
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  pull-requests: write
+  deployments: write
+  checks: write
+  statuses: write
+  contents: write
+
+jobs:
+  build:
+    name: Build Project
+    runs-on: macos-14
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: 'true'
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '18'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Cache konan
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-konan-
+
+      - name: Create Swift package
+        run: ./gradlew -Psnapshot=false :solana-kotlin:createSwiftPackage
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            solana-kotlin/swiftpackage/SolanaKotlin.zip
+
+      - name: Checkout package branch
+        uses: actions/checkout@v3
+        with:
+          path: _otherBranch
+          ref: swiftpackage
+      
+      - name: Copy Package.swift
+        run: cp solana-kotlin/swiftpackage/Package.swift _otherBranch/Package.swift
+        
+      - name: Commit and push changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          cwd: './_otherBranch'
+          fetch: false
+
+      - name: Bundle the failed build report
+        if: failure()
+        run: find ./build -type d -name 'reports' | zip -@ -r build-reports.zip
+
+      - name: Upload the failed build report
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: error-report
+          path: build-reports.zip
+          retention-days: 7

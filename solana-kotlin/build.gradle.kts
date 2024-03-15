@@ -99,7 +99,7 @@ multiplatformSwiftPackage {
   }
   packageName("SolanaKotlin")
   zipFileName("SolanaKotlin")
-  distributionMode { remote("https://github.com/avianlabs/solana-kotlin/releases/download/0.1.5") }
+  distributionMode { remote("https://github.com/avianlabs/solana-kotlin/releases/download/$version") }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
