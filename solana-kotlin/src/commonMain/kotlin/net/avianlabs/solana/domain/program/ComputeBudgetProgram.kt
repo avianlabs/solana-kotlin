@@ -25,14 +25,14 @@ public object ComputeBudgetProgram : Program {
    * @param units Number of compute units to request.
    */
   public fun setComputeUnitLimit(
-    maxUnits: ULong,
+    maxUnits: UInt,
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
     ),
     data = Buffer()
       .writeByte(Instruction.SetComputeUnitLimit.index.toInt())
-      .writeLongLe(maxUnits.toLong())
+      .writeIntLe(maxUnits.toInt())
       .readByteArray(),
   )
 
