@@ -76,7 +76,7 @@ kotlin {
       val main by compilations.getting
 
       main.cinterops {
-        create("tweetnacl") {
+        create("TweetNaCl") {
           header(file("vendor/tweetnacl/tweetnacl.h"))
           packageName("net.avianlabs.solana.tweetnacl")
         }

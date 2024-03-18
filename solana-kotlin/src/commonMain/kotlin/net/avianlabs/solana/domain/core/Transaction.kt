@@ -53,7 +53,7 @@ public class Transaction(
     val signaturesSize = signatures.size
     val signaturesLength = ShortvecEncoding.encodeLength(signaturesSize)
     val bufferSize =
-      signaturesLength.size + signaturesSize * SIGNATURE_LENGTH + serializedMessage.size
+      signaturesLength.size + signaturesSize * TweetNaCl.Signature.SIGNATURE_BYTES + serializedMessage.size
     val out = Buffer()
     out.write(signaturesLength)
     for (signature in signatures) {
@@ -72,5 +72,3 @@ public class Transaction(
   }
 
 }
-
-private const val SIGNATURE_LENGTH = 64
