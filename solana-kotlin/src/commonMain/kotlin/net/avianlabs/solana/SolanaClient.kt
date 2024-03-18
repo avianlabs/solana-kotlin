@@ -7,22 +7,32 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import net.avianlabs.solana.client.RpcInvocation
 import net.avianlabs.solana.client.RpcKtorClient
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 public class SolanaClient(
   private val client: RpcKtorClient,
   private val headerProviders: Map<String, suspend () -> String?> = mapOf(),
 ) {
+
+  // iOS friendly constructor
   public constructor(
     url: String,
-    authorizationHeaderProvider: suspend () -> String?,
+    authorizationHeaderProvider: (completion: (String?) -> Unit) -> Unit,
   ) : this(
     client = RpcKtorClient(
       url = url,
       httpClient = HttpClient(),
     ),
     headerProviders = mapOf(
-      HttpHeaders.Authorization to authorizationHeaderProvider,
-    )
+      HttpHeaders.Authorization to {
+        suspendCoroutine { continuation ->
+          authorizationHeaderProvider { header ->
+            continuation.resume(header)
+          }
+        }
+      },
+    ),
   )
 
   @OptIn(ExperimentalSerializationApi::class)

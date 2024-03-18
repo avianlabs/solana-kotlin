@@ -34,6 +34,7 @@ public interface TweetNaCl {
     public companion object : Signature {
       public const val SECRET_KEY_BYTES: Int = 64
       public const val PUBLIC_KEY_BYTES: Int = 32
+      public const val SIGNATURE_BYTES: Int = 64
 
       override fun sign(message: ByteArray, secretKey: ByteArray): ByteArray =
         signInternal(message, secretKey)
