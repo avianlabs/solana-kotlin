@@ -69,7 +69,7 @@ jobs:
         with:
           cwd: './_otherBranch'
           fetch: false
-          tag: 'swift/${{ github.event.inputs.tagname || github.ref_name }}'
+          tag: '${{ github.event.inputs.tagname || github.ref_name }}-swiftpackage'
 
       - name: Bundle the failed build report
         if: failure()
