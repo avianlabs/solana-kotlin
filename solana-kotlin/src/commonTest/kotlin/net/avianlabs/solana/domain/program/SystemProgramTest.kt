@@ -1,32 +1,41 @@
 package net.avianlabs.solana.domain.program
 
-import io.ktor.util.*
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcKtorClient
-import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
+import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.Transaction
-import net.avianlabs.solana.methods.getMinimumBalanceForRentExemption
-import net.avianlabs.solana.methods.getRecentBlockhash
+import net.avianlabs.solana.domain.core.TransactionBuilder
+import net.avianlabs.solana.methods.*
+import net.avianlabs.solana.tweetnacl.TweetNaCl
+import kotlin.random.Random
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 
 class SystemProgramTest {
 
   @Test
   @Ignore
-  fun testCreateDurableNonceAccount() = runTest {
-    val client = SolanaClient(client = RpcKtorClient("https://api.devnet.solana.com"))
+  fun testCreateDurableNonceAccount() = runBlocking {
+    val client = SolanaClient(client = RpcKtorClient("http://localhost:8899"))
 
-    val keypair = Ed25519Keypair.fromBase58("")
+    val keypair = TweetNaCl.Signature.generateKey(Random.nextBytes(32))
+    println("Keypair: ${keypair.publicKey}")
+    val nonceAccount = TweetNaCl.Signature.generateKey(Random.nextBytes(32))
+    println("Nonce account: ${nonceAccount.publicKey}")
 
-    val nonceAccount = Ed25519Keypair.fromBase58("")
+    client.requestAirdrop(keypair.publicKey, 2_000_000_000)
+    delay(15.seconds)
+    val balance = client.getBalance(keypair.publicKey)
+    println("Balance: $balance")
 
     val rentExempt = client.getMinimumBalanceForRentExemption(SystemProgram.NONCE_ACCOUNT_LENGTH)
 
     val blockhash = client.getRecentBlockhash()
 
-    val transaction = Transaction()
+    val initTransaction = Transaction()
       .addInstruction(
         SystemProgram.createAccount(
           fromPublicKey = keypair.publicKey,
@@ -44,8 +53,30 @@ class SystemProgramTest {
       .setRecentBlockHash(blockhash.blockhash)
       .sign(listOf(keypair, nonceAccount))
 
-    val serialized = transaction.serialize().encodeBase64()
 
-    println(serialized)
+    val initSignature = client.sendTransaction(initTransaction)
+
+    println("Initialized nonce account: $initSignature")
+    delay(15.seconds)
+
+    val lamportsPerSignature = client.getFeeForMessage(initTransaction.message.serialize())
+    println("Lamports per signature: $lamportsPerSignature")
+
+    val nonce = client.getNonce(nonceAccount.publicKey, Commitment.Processed)
+    println("Nonce account info: $nonce")
+
+    val testTransaction = TransactionBuilder()
+      .addInstruction(
+        SystemProgram.nonceAdvance(
+          nonceAccount = nonceAccount.publicKey,
+          authorized = keypair.publicKey,
+        )
+      )
+      .setRecentBlockHash(nonce!!.nonce)
+      .build()
+      .sign(keypair)
+
+    val testSignature = client.sendTransaction(testTransaction)
+    println("Advanced nonce account: $testSignature")
   }
 }

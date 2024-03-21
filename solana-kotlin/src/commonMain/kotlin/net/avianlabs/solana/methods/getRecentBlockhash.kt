@@ -1,11 +1,13 @@
 package net.avianlabs.solana.methods
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse
 import net.avianlabs.solana.domain.core.Commitment
+import net.avianlabs.solana.domain.core.FeeCalculator
 
 /**
  * Returns the latest blockhash
@@ -17,26 +19,19 @@ public suspend fun SolanaClient.getRecentBlockhash(
 ): RecentBlockHash {
   val result = invoke<RpcResponse.RPC<RecentBlockHash>>(
     method = "getRecentBlockhash",
-    params = JsonArray(buildList {
-      commitment?.let { add(json.encodeToJsonElement(RecentBlockHashParams(it.value))) }
-    })
+    params = buildJsonArray {
+      commitment?.let {
+        addJsonObject {
+          put("commitment", it.value)
+        }
+      }
+    }
   )
   return result!!.value!!
 }
 
 @Serializable
-public data class RecentBlockHashParams(
-  val commitment: String? = null,
-)
-
-@Serializable
 public data class RecentBlockHash(
   val blockhash: String,
   val feeCalculator: FeeCalculator,
-) {
-
-  @Serializable
-  public data class FeeCalculator(
-    val lamportsPerSignature: Long = 0,
-  )
-}
+)

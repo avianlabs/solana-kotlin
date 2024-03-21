@@ -1,8 +1,9 @@
 package net.avianlabs.solana.methods
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.domain.core.Commitment
 
@@ -18,17 +19,14 @@ public suspend fun SolanaClient.getMinimumBalanceForRentExemption(
 ): Long {
   val result = invoke<Long>(
     method = "getMinimumBalanceForRentExemption",
-    params = JsonArray(buildList {
-      add(json.encodeToJsonElement(dataLength))
+    params = buildJsonArray {
+      add(dataLength)
       commitment?.let {
-        add(json.encodeToJsonElement(GetMinimumBalanceForRentExemptionParams(it.value)))
+        addJsonObject {
+          put("commitment", it.value)
+        }
       }
-    })
+    }
   )
   return result!!
 }
-
-@Serializable
-internal data class GetMinimumBalanceForRentExemptionParams(
-  val commitment: String? = null,
-)

@@ -30,13 +30,13 @@ kotlin {
   listOf(
     iosArm64(),
     iosSimulatorArm64(),
-    ).forEach { iosTarget ->
-      iosTarget.binaries.framework {
-        baseName = "SolanaKotlin"
-        export(project(":tweetnacl-multiplatform"))
-        isStatic = true
-      }
+  ).forEach { iosTarget ->
+    iosTarget.binaries.framework {
+      baseName = "SolanaKotlin"
+      export(project(":tweetnacl-multiplatform"))
+      isStatic = true
     }
+  }
 
   mingwX64()
 

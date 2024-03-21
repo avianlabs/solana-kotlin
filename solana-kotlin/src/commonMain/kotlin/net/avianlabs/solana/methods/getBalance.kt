@@ -1,8 +1,9 @@
 package net.avianlabs.solana.methods
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse.RPC
 import net.avianlabs.solana.domain.core.Commitment
@@ -20,15 +21,14 @@ public suspend fun SolanaClient.getBalance(
 ): Long {
   val result = invoke<RPC<Long>>(
     method = "getBalance",
-    params = JsonArray(buildList {
-      add(json.encodeToJsonElement<PublicKey>(account))
-      commitment?.let { add(json.encodeToJsonElement(BalanceParams(it.value))) }
-    })
+    params = buildJsonArray {
+      add(account.toBase58())
+      commitment?.let {
+        addJsonObject {
+          put("commitment", it.value)
+        }
+      }
+    }
   )
   return result!!.value!!
 }
-
-@Serializable
-internal data class BalanceParams(
-  val commitment: String? = null,
-)
