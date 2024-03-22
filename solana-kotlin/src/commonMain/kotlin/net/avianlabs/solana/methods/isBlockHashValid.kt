@@ -1,8 +1,9 @@
 package net.avianlabs.solana.methods
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse.RPC
 import net.avianlabs.solana.domain.core.Commitment
@@ -22,18 +23,15 @@ public suspend fun SolanaClient.isBlockHashValid(
 ): Boolean {
   val result = invoke<RPC<Boolean>>(
     method = "isBlockhashValid",
-    params = JsonArray(buildList {
-      add(json.encodeToJsonElement<String>(blockHash))
-      if (commitment != null || minContextSlot != null) {
-        add(json.encodeToJsonElement(IsBlockHashValidParams(commitment?.value, minContextSlot)))
+    params = buildJsonArray {
+      add(blockHash)
+      if (listOfNotNull(commitment, minContextSlot).isNotEmpty()) {
+        addJsonObject {
+          commitment?.let { put("commitment", it.value) }
+          minContextSlot?.let { put("minContextSlot", it) }
+        }
       }
-    })
+    }
   )
   return result!!.value!!
 }
-
-@Serializable
-internal data class IsBlockHashValidParams(
-  val commitment: String? = null,
-  val minContextSlot: Long? = null,
-)

@@ -35,8 +35,8 @@ public class RpcKtorClient(
     install(ContentNegotiation) { json(json = json) }
     expectSuccess = true
     install(Logging) {
-      logger = Logger.DEFAULT
-      level = LogLevel.ALL
+      logger = Logger.SIMPLE
+      level = LogLevel.NONE
     }
   }
 

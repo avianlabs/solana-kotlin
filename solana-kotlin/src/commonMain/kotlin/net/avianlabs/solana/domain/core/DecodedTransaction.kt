@@ -56,6 +56,47 @@ public sealed class DecodedInstruction(
       val to: PublicKey,
       val lamports: Long,
     ) : SystemProgram(net.avianlabs.solana.domain.program.SystemProgram.Instruction.Transfer.index)
+
+    public data class CreateAccount(
+      val from: PublicKey,
+      val newAccount: PublicKey,
+      val lamports: Long,
+      val space: Long,
+      val owner: PublicKey,
+    ) : SystemProgram(
+      net.avianlabs.solana.domain.program.SystemProgram.Instruction.CreateAccount.index
+    )
+
+    public data class InitializeNonceAccount(
+      val nonceAccount: PublicKey,
+      val authorizedPubkey: PublicKey,
+    ) : SystemProgram(
+      net.avianlabs.solana.domain.program.SystemProgram.Instruction.InitializeNonceAccount.index
+    )
+
+    public data class AdvanceNonceAccount(
+      val nonceAccount: PublicKey,
+      val authorizedPubkey: PublicKey,
+    ) : SystemProgram(
+      net.avianlabs.solana.domain.program.SystemProgram.Instruction.AdvanceNonceAccount.index
+    )
+
+    public data class WithdrawNonceAccount(
+      val nonceAccount: PublicKey,
+      val authorizedPubkey: PublicKey,
+      val destination: PublicKey,
+      val lamports: Long,
+    ) : SystemProgram(
+      net.avianlabs.solana.domain.program.SystemProgram.Instruction.WithdrawNonceAccount.index
+    )
+
+    public data class AuthorizeNonceAccount(
+      val nonceAccount: PublicKey,
+      val authorizedPubkey: PublicKey,
+      val newAuthorizedPubkey: PublicKey,
+    ) : SystemProgram(
+      net.avianlabs.solana.domain.program.SystemProgram.Instruction.AuthorizeNonceAccount.index
+    )
   }
 
   public sealed class TokenProgram(
@@ -67,8 +108,9 @@ public sealed class DecodedInstruction(
       val destination: PublicKey,
       val owner: PublicKey,
       val amount: Long,
-    ) :
-      TokenProgram(net.avianlabs.solana.domain.program.TokenProgram.Instruction.Transfer.index)
+    ) : TokenProgram(
+      net.avianlabs.solana.domain.program.TokenProgram.Instruction.Transfer.index
+    )
 
     public data class TransferChecked(
       val source: PublicKey,
@@ -77,12 +119,14 @@ public sealed class DecodedInstruction(
       val owner: PublicKey,
       val amount: Long,
       val decimals: UByte,
-    ) :
-      TokenProgram(net.avianlabs.solana.domain.program.TokenProgram.Instruction.TransferChecked.index)
+    ) : TokenProgram(
+      net.avianlabs.solana.domain.program.TokenProgram.Instruction.TransferChecked.index
+    )
   }
 
-  public sealed class AssociatedTokenProgram :
-    DecodedInstruction(net.avianlabs.solana.domain.program.AssociatedTokenProgram.programId) {
+  public sealed class AssociatedTokenProgram : DecodedInstruction(
+    net.avianlabs.solana.domain.program.AssociatedTokenProgram.programId
+  ) {
     public data class CreatedAssociatedAccount(
       val payer: PublicKey,
       val associatedAccount: PublicKey,
@@ -162,11 +206,60 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
       SystemProgram.programId -> {
         val programIndex = buffer.readInt().toUInt()
         when (programIndex) {
-          SystemProgram.Instruction.Transfer.index -> DecodedInstruction.SystemProgram.Transfer(
-            from = accountsMeta!![0].publicKey,
-            to = accountsMeta[1].publicKey,
-            lamports = buffer.readLongLe(),
-          )
+          SystemProgram.Instruction.Transfer.index -> {
+            val (from, to) = accountsMeta!!
+            DecodedInstruction.SystemProgram.Transfer(
+              from = from.publicKey,
+              to = to.publicKey,
+              lamports = buffer.readLongLe(),
+            )
+          }
+
+          SystemProgram.Instruction.AdvanceNonceAccount.index -> {
+            val (nonceAccount, authorizedPubkey) = accountsMeta!!
+            DecodedInstruction.SystemProgram.AdvanceNonceAccount(
+              nonceAccount = nonceAccount.publicKey,
+              authorizedPubkey = authorizedPubkey.publicKey,
+            )
+          }
+
+          SystemProgram.Instruction.AuthorizeNonceAccount.index -> {
+            val (nonceAccount, authorizedPubkey, newAuthorizedPubkey) = accountsMeta!!
+            DecodedInstruction.SystemProgram.AuthorizeNonceAccount(
+              nonceAccount = nonceAccount.publicKey,
+              authorizedPubkey = authorizedPubkey.publicKey,
+              newAuthorizedPubkey = newAuthorizedPubkey.publicKey,
+            )
+          }
+
+          SystemProgram.Instruction.CreateAccount.index -> {
+            val (from, newAccount, owner) = accountsMeta!!
+            DecodedInstruction.SystemProgram.CreateAccount(
+              from = from.publicKey,
+              newAccount = newAccount.publicKey,
+              lamports = buffer.readLongLe(),
+              space = buffer.readLongLe(),
+              owner = owner.publicKey,
+            )
+          }
+
+          SystemProgram.Instruction.InitializeNonceAccount.index -> {
+            val (nonceAccount, authorizedPubkey) = accountsMeta!!
+            DecodedInstruction.SystemProgram.InitializeNonceAccount(
+              nonceAccount = nonceAccount.publicKey,
+              authorizedPubkey = authorizedPubkey.publicKey,
+            )
+          }
+
+          SystemProgram.Instruction.WithdrawNonceAccount.index -> {
+            val (nonceAccount, authorizedPubkey, destination) = accountsMeta!!
+            DecodedInstruction.SystemProgram.WithdrawNonceAccount(
+              nonceAccount = nonceAccount.publicKey,
+              authorizedPubkey = authorizedPubkey.publicKey,
+              destination = destination.publicKey,
+              lamports = buffer.readLongLe(),
+            )
+          }
 
           else -> raw
         }
@@ -209,8 +302,8 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
           associatedAccount,
           owner,
           mint,
+          programId,
         ) = accountsMeta!!
-        val programId = accountsMeta[5]
         DecodedInstruction.AssociatedTokenProgram.CreatedAssociatedAccount(
           payer = payer.publicKey,
           associatedAccount = associatedAccount.publicKey,

@@ -1,8 +1,9 @@
 package net.avianlabs.solana.methods
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.addJsonObject
+import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
@@ -21,16 +22,15 @@ public suspend fun SolanaClient.requestAirdrop(
 ): String {
   val result = invoke<String>(
     method = "requestAirdrop",
-    params = JsonArray(buildList {
-      add(json.encodeToJsonElement<PublicKey>(publicKey))
-      add(json.encodeToJsonElement<Long>(lamports))
-      commitment?.let { add(json.encodeToJsonElement(RequestAirdropParams(it.value))) }
-    })
+    params = buildJsonArray {
+      add(publicKey.toBase58())
+      add(lamports)
+      commitment?.let {
+        addJsonObject {
+          put("commitment", it.value)
+        }
+      }
+    }
   )
   return result!!
 }
-
-@Serializable
-internal data class RequestAirdropParams(
-  val commitment: String? = null,
-)
