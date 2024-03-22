@@ -7,6 +7,7 @@ import net.avianlabs.solana.client.RpcKtorClient
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.Transaction
 import net.avianlabs.solana.domain.core.TransactionBuilder
+import net.avianlabs.solana.domain.core.decode
 import net.avianlabs.solana.methods.*
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import kotlin.random.Random
@@ -72,11 +73,26 @@ class SystemProgramTest {
           authorized = keypair.publicKey,
         )
       )
+      .addInstruction(
+        SystemProgram.transfer(
+          fromPublicKey = keypair.publicKey,
+          toPublicKey = nonceAccount.publicKey,
+          lamports = 1_000_000_000,
+        )
+      )
       .setRecentBlockHash(nonce!!.nonce)
       .build()
       .sign(keypair)
 
     val testSignature = client.sendTransaction(testTransaction)
     println("Advanced nonce account: $testSignature")
+
+    delay(15.seconds)
+
+    val testTxInfo = client.getTransaction(testSignature, Commitment.Confirmed)
+    println("Transaction info: ${testTxInfo?.decode()}")
+
+    val newNonce = client.getNonce(nonceAccount.publicKey, Commitment.Processed)
+    println("New nonce account info: $newNonce")
   }
 }
