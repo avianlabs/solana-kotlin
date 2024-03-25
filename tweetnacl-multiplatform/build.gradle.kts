@@ -1,11 +1,9 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
-import co.touchlab.skie.configuration.ClassInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.cklib)
-  alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
@@ -53,7 +51,6 @@ kotlin {
 
     val commonMain by getting {
       dependencies {
-        implementation(libs.serializationCore)
       }
     }
     val commonTest by getting {
