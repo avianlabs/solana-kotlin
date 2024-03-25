@@ -39,6 +39,7 @@ kotlin {
   }
 
   mingwX64()
+  linuxX64()
 
   sourceSets {
     val jvmMain by getting {
@@ -79,6 +80,18 @@ kotlin {
     }
 
     val nativeMain by getting {
+    }
+
+    val linuxMain by getting {
+      dependencies {
+        implementation(libs.ktorClientCio)
+      }
+    }
+
+    val mingwMain by getting {
+      dependencies {
+        implementation(libs.ktorClientWinHttp)
+      }
     }
   }
 }
