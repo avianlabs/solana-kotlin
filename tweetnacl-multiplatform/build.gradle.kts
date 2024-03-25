@@ -40,6 +40,7 @@ kotlin {
   }
 
   mingwX64()
+  linuxX64()
 
   sourceSets {
     val jvmMain by getting {
