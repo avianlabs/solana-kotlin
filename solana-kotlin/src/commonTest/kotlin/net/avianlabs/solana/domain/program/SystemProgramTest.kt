@@ -1,7 +1,7 @@
 package net.avianlabs.solana.domain.program
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcKtorClient
 import net.avianlabs.solana.domain.core.Commitment
@@ -11,7 +11,6 @@ import net.avianlabs.solana.domain.core.decode
 import net.avianlabs.solana.methods.*
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import kotlin.random.Random
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 

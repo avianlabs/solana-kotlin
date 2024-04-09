@@ -1,4 +1,4 @@
-package net.avianlabs.solana.vendor
+package net.avianlabs.solana.tweetnacl.net.avianlabs.solana.vendor
 
 import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers

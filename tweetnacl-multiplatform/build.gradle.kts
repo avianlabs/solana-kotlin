@@ -1,4 +1,5 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
+import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
@@ -40,6 +41,30 @@ kotlin {
   mingwX64()
   linuxX64()
 
+  js(KotlinJsCompilerType.IR) {
+    browser {
+      compilations.all {
+        kotlinOptions {
+          sourceMap = true
+          sourceMapEmbedSources = "always"
+        }
+      }
+      testTask {
+        useMocha()
+      }
+    }
+    nodejs {
+      compilations.all {
+        kotlinOptions {
+          sourceMap = true
+          sourceMapEmbedSources = "always"
+        }
+      }
+    }
+    generateTypeScriptDefinitions()
+    useEsModules()
+  }
+
   sourceSets {
     val jvmMain by getting {
       dependencies {
@@ -57,6 +82,7 @@ kotlin {
       dependencies {
         implementation(libs.kotlinTest)
         implementation(libs.coroutinesTest)
+        implementation(libs.ktorUtils)
       }
     }
 
@@ -68,6 +94,13 @@ kotlin {
     }
 
     val nativeMain by getting {
+    }
+
+    val jsMain by getting {
+      dependencies {
+        implementation(npm("tweetnacl", "1.0.3"))
+        implementation(npm("@noble/curves", "1.4.0"))
+      }
     }
 
     targets.withType<KotlinNativeTarget> {
