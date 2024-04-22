@@ -11,7 +11,7 @@ detekt = "1.23.6"
 jacoco = "0.8.7"
 kotlin = "1.9.23"
 mavenPublish = "0.28.0"
-skie = "0.6.2"
+skie = "0.6.4"
 
 # Libraries
 junit5 = "5.10.2"
