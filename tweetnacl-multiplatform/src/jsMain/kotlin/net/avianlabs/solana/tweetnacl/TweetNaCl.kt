@@ -12,7 +12,6 @@ internal actual fun isOnCurveInternal(publicKey: ByteArray): Boolean =
     Curves.ed25519.extendedPoint.fromHex(publicKey.asUint8Array())
     true
   } catch (e: Throwable) {
-    println(e.stackTraceToString())
     false
   }
 

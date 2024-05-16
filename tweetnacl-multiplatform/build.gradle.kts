@@ -70,12 +70,18 @@ kotlin {
       dependencies {
         implementation(libs.tweetNaClJava)
         implementation(libs.bouncyCastle)
+        implementation(libs.slf4j.api)
       }
     }
-    val jvmTest by getting
+    val jvmTest by getting {
+      dependencies {
+        implementation(libs.slf4j.simple)
+      }
+    }
 
     val commonMain by getting {
       dependencies {
+        implementation(libs.kotlinLogging)
       }
     }
     val commonTest by getting {

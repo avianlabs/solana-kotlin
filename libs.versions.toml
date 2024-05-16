@@ -32,6 +32,7 @@ coroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", ver
 coroutinesJdk8 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8", version.ref = "kotlinxCoroutines" }
 kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlinLogging = { module = "io.github.oshai:kotlin-logging", version = "6.0.9" }
 ktorClientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktorClientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktorClientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -45,6 +46,8 @@ ktorUtils = { module = "io.ktor:ktor-utils", version.ref = "ktor" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttpLoggingInterceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version = "2.0.13" }
+slf4j-simple = { module = "org.slf4j:slf4j-simple", version = "2.0.13" }
 serializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 skie-configurationAnnotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }
