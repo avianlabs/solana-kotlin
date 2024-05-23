@@ -9,7 +9,7 @@ androidGradle = "8.4.1"
 androidJunit5 = "1.10.0.0"
 detekt = "1.23.6"
 jacoco = "0.8.7"
-kotlin = "1.9.24"
+kotlin = "2.0.0"
 mavenPublish = "0.28.0"
 skie = "0.8.0"
 
