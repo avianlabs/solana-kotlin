@@ -11,7 +11,6 @@ class AssociatedTokenProgramTest {
   fun testFindProgramAddress() {
     for (i in 0..1000) {
       val programId = randomKey().publicKey
-      println("programId: $programId")
 
       val seeds = listOf(
         "Lil'".encodeToByteArray(),
@@ -21,14 +20,11 @@ class AssociatedTokenProgramTest {
         seeds = seeds,
         programId = programId,
       )
-      println("address: $address")
 
       val created = Program.createProgramAddress(
         seeds = seeds + byteArrayOf(address.nonce.toByte()),
         programId = programId,
       )
-
-      println("created: $created")
 
       assertEquals(address.address, created)
     }
@@ -46,7 +42,6 @@ class AssociatedTokenProgramTest {
       val wallet = PublicKey.fromBase58(wallet)
 
       val associated = wallet.associatedTokenAddress(mint)
-      println(associated)
 
       val expectedAssociated = PublicKey.fromBase58(expectedAssociated)
 

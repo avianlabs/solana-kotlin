@@ -1,5 +1,6 @@
 import co.touchlab.skie.configuration.ClassInterop
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import org.jetbrains.kotlin.gradle.plugin.KotlinJsCompilerType
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -41,14 +42,44 @@ kotlin {
   mingwX64()
   linuxX64()
 
+  js(KotlinJsCompilerType.IR) {
+    browser {
+      compilations.all {
+        kotlinOptions {
+          sourceMap = true
+          sourceMapEmbedSources = "always"
+        }
+      }
+      testTask {
+        useMocha {
+          timeout = "60s"
+        }
+      }
+    }
+    nodejs {
+      compilations.all {
+        kotlinOptions {
+          sourceMap = true
+          sourceMapEmbedSources = "always"
+        }
+      }
+    }
+    generateTypeScriptDefinitions()
+  }
+
   sourceSets {
     val jvmMain by getting {
       dependencies {
         implementation(libs.ktorClientOkHttp)
         implementation(libs.bouncyCastle)
+        implementation(libs.slf4j.api)
       }
     }
-    val jvmTest by getting
+    val jvmTest by getting {
+      dependencies {
+        implementation(libs.slf4j.simple)
+      }
+    }
 
     val commonMain by getting {
       dependencies {
@@ -62,6 +93,7 @@ kotlin {
         implementation(libs.kermit)
         implementation(libs.okio)
         implementation(libs.skie.configurationAnnotations)
+        implementation(libs.kotlinLogging)
       }
     }
     val commonTest by getting {
@@ -91,6 +123,12 @@ kotlin {
     val mingwMain by getting {
       dependencies {
         implementation(libs.ktorClientWinHttp)
+      }
+    }
+
+    val jsMain by getting {
+      dependencies {
+        implementation(libs.ktorClientJs)
       }
     }
   }
