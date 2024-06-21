@@ -16,6 +16,7 @@
   "lockFileMaintenance": {
     "enabled": true
   },
+  "rebaseWhen": "never",
   "packageRules": [
     {
       "matchUpdateTypes": [
