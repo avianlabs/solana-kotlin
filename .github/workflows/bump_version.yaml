@@ -56,7 +56,7 @@ jobs:
         if: ${{ steps.cpr.outputs.pull-request-number }}
         run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
         env:
-          GH_TOKEN: ${{ secrets.github_token }}
+          GH_TOKEN: ${{ secrets.ORG_BOT_TOKEN }}
 
       - name: Result
         shell: bash
