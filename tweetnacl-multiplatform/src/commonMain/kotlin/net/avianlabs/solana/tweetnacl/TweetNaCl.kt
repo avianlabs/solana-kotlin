@@ -16,6 +16,7 @@ public interface TweetNaCl {
      *
      * @param message: The message to sign
      * @param secretKey: The secret key to sign the message with
+     *
      * @return The signature of the message
      */
     public fun sign(message: ByteArray, secretKey: ByteArray): ByteArray
@@ -24,6 +25,7 @@ public interface TweetNaCl {
      * Returns a new signing key pair generated deterministically from a seed
      *
      * @param seed: 32 byte seed. Must contain enough entropy to be secure.
+     *
      * @return A new key pair generated from the seed
      */
     public fun generateKey(seed: ByteArray): Ed25519Keypair
@@ -32,6 +34,7 @@ public interface TweetNaCl {
      * Returns whether the given publicKey falls in the Ed25519 elliptic curve
      *
      * @param publicKey: The public key to check
+     *
      * @return Whether the public key is on the curve
      */
     public fun isOnCurve(publicKey: ByteArray): Boolean
@@ -65,18 +68,20 @@ public interface TweetNaCl {
      *
      * @param message: The message to encrypt
      * @param nonce: The nonce to use for encryption
-     * @return The encrypted message
+     *
+     * @return The encrypted message, or null if there was an error
      */
-    public fun box(message: ByteArray, nonce: ByteArray): ByteArray
+    public fun box(message: ByteArray, nonce: ByteArray): ByteArray?
 
     /**
      * Authenticates and decrypts the given secret box using the key and the nonce.
      *
      * @param box: The encrypted message
      * @param nonce: The nonce used for encryption
-     * @return The decrypted message
+     *
+     * @return The decrypted message, or null if there was an error
      */
-    public fun open(box: ByteArray, nonce: ByteArray): ByteArray
+    public fun open(box: ByteArray, nonce: ByteArray): ByteArray?
 
     public companion object {
       public const val NONCE_BYTES: Int = 24
