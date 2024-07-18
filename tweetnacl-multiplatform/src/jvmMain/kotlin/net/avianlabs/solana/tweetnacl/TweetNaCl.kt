@@ -20,9 +20,9 @@ internal actual fun generateKeyInternal(seed: ByteArray): Ed25519Keypair {
 
 internal actual fun secretBoxInternal(secretKey: ByteArray): TweetNaCl.SecretBox =
   object : TweetNaCl.SecretBox {
-    override fun box(message: ByteArray, nonce: ByteArray): ByteArray =
+    override fun box(message: ByteArray, nonce: ByteArray): ByteArray? =
       TweetNaclFast.SecretBox(secretKey).box(message, nonce)
 
-    override fun open(box: ByteArray, nonce: ByteArray): ByteArray =
+    override fun open(box: ByteArray, nonce: ByteArray): ByteArray? =
       TweetNaclFast.SecretBox(secretKey).open(box, nonce)
   }
