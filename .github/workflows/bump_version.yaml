@@ -45,7 +45,7 @@ jobs:
         uses: peter-evans/create-pull-request@v6
         id: cpr
         with:
-          token: ${{ secrets.github_token }}
+          token: ${{ secrets.ORG_BOT_TOKEN }}
           commit-message: "Bump version from ${{ steps.get-before-version.outputs.before-version }} to ${{ steps.get-outputs.outputs.version }}"
           title: "Bump version from ${{ steps.get-before-version.outputs.before-version }} to ${{ steps.get-outputs.outputs.version }}"
           branch: "bump-version-${{ steps.get-outputs.outputs.version }}"
