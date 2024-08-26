@@ -36,7 +36,7 @@ jobs:
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
         with:
-          dependency-graph-include-configurations: '(release(Compile|Runtime)|(compile|runtime))Classpath'
+          dependency-graph-include-configurations: '*(Compile|Runtime)Classpath'
 
   build:
     name: Build Project
