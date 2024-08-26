@@ -18,6 +18,33 @@ permissions:
   contents: write
 
 jobs:
+  dependency-review:
+    name: Review dependency graph
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '18'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v4
+        with:
+          dependency-graph-include-configurations: '(release(Compile|Runtime)|(compile|runtime))Classpath'
+          add-job-summary-as-pr-comment: 'always'
+
+      - name: Perform dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          comment-summary-in-pr: 'always'
+
   build:
     if: ${{ !github.event.pull_request.draft }}
     name: Build Project
