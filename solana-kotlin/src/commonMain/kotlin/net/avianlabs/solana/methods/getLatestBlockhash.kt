@@ -7,25 +7,17 @@ import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.RpcResponse
 import net.avianlabs.solana.domain.core.Commitment
-import net.avianlabs.solana.domain.core.FeeCalculator
 
 /**
  * Returns the latest blockhash
  *
  * @param commitment Optional [Commitment] level
- *
- * @deprecated Use [getLatestBlockhash] instead
  */
-@Deprecated(
-  "No longer a part of solana-core after 2.0. Use getLatestBlockhash instead",
-  ReplaceWith("getLatestBlockhash"),
-  DeprecationLevel.ERROR,
-)
-public suspend fun SolanaClient.getRecentBlockhash(
+public suspend fun SolanaClient.getLatestBlockhash(
   commitment: Commitment? = null,
-): RecentBlockHash {
-  val result = invoke<RpcResponse.RPC<RecentBlockHash>>(
-    method = "getRecentBlockhash",
+): LatestBlockHash {
+  val result = invoke<RpcResponse.RPC<LatestBlockHash>>(
+    method = "getLatestBlockhash",
     params = buildJsonArray {
       commitment?.let {
         addJsonObject {
@@ -38,7 +30,7 @@ public suspend fun SolanaClient.getRecentBlockhash(
 }
 
 @Serializable
-public data class RecentBlockHash(
+public data class LatestBlockHash(
   val blockhash: String,
-  val feeCalculator: FeeCalculator,
+  val lastValidBlockHeight: Long,
 )

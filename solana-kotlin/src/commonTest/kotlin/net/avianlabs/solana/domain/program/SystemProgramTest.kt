@@ -34,7 +34,7 @@ class SystemProgramTest {
 
     val rentExempt = client.getMinimumBalanceForRentExemption(SystemProgram.NONCE_ACCOUNT_LENGTH)
 
-    val blockhash = client.getRecentBlockhash()
+    val blockhash = client.getLatestBlockhash()
 
     val initTransaction = Transaction()
       .addInstruction(
