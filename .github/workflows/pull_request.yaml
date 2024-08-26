@@ -20,7 +20,7 @@ permissions:
 jobs:
   dependency-review:
     name: Review dependency graph
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
