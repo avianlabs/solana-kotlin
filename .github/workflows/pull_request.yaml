@@ -37,7 +37,7 @@ jobs:
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v4
         with:
-          dependency-graph-include-configurations: '*(Compile|Runtime)Classpath'
+          dependency-graph-include-configurations: '.+(Compile|Runtime)Classpath'
           add-job-summary-as-pr-comment: 'always'
 
       - name: Perform dependency review
