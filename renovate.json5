@@ -34,6 +34,7 @@
         "app.cash.molecule",
         "com.google.devtools.ksp",
         "org.jetbrains.kotlin",
+        "co.touchlab.skie",
       ],
       "groupName": "Kotlin/Compose"
     },
