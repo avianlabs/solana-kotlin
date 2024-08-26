@@ -52,11 +52,19 @@ jobs:
           base: "main"
           labels: "version-bump"
 
-      - name: Enable Pull Request Automerge
+      - name: Force merge PR
         if: ${{ steps.cpr.outputs.pull-request-number }}
-        run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+        # Ignore if failed
+        continue-on-error: true
+        # Match head commit to avoid security holes
         env:
           GH_TOKEN: ${{ secrets.ORG_BOT_TOKEN }}
+        run: |
+          gh pr merge \
+          --match-head-commit "${{ steps.cpr.outputs.pull-request-head-sha }}" \
+          --rebase \
+          --admin \
+          "${{ steps.cpr.outputs.pull-request-number }}"
 
       - name: Result
         shell: bash
