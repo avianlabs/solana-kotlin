@@ -26,7 +26,7 @@ serialization = "1.7.1"
 
 [libraries]
 bouncyCastle = { module = "org.bouncycastle:bcpkix-jdk15to18", version = "1.78.1" }
-coreLibraryDesugaring = { module = "com.android.tools:desugar_jdk_libs", version = "2.0.4" }
+coreLibraryDesugaring = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.0" }
 coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }
 coroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 coroutinesJdk8 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8", version.ref = "kotlinxCoroutines" }
