@@ -2,7 +2,7 @@ name: 'Pull Request Build'
 
 concurrency:
   group: ${{ github.event.branch }}-${{ github.event.number }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 on:
   merge_group:
