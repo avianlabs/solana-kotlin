@@ -32,9 +32,10 @@ class SystemProgramTest {
     val balance = client.getBalance(keypair.publicKey)
     println("Balance: $balance")
 
-    val rentExempt = client.getMinimumBalanceForRentExemption(SystemProgram.NONCE_ACCOUNT_LENGTH)
+    val rentExempt =
+      client.getMinimumBalanceForRentExemption(SystemProgram.NONCE_ACCOUNT_LENGTH).result!!
 
-    val blockhash = client.getLatestBlockhash()
+    val blockhash = client.getLatestBlockhash().result!!.value
 
     val initTransaction = Transaction()
       .addInstruction(
@@ -84,12 +85,12 @@ class SystemProgramTest {
       .build()
       .sign(keypair)
 
-    val testSignature = client.sendTransaction(testTransaction)
+    val testSignature = client.sendTransaction(testTransaction).result!!
     println("Advanced nonce account: $testSignature")
 
     delay(15.seconds)
 
-    val testTxInfo = client.getTransaction(testSignature, Commitment.Confirmed)
+    val testTxInfo = client.getTransaction(testSignature, Commitment.Confirmed).result
     println("Transaction info: ${testTxInfo?.decode()}")
 
     val newNonce = client.getNonce(nonceAccount.publicKey, Commitment.Processed)

@@ -5,7 +5,8 @@ import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
-import net.avianlabs.solana.client.RpcResponse.RPC
+import net.avianlabs.solana.client.Response
+import net.avianlabs.solana.client.Response.RPC
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
@@ -18,17 +19,14 @@ import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 public suspend fun SolanaClient.getBalance(
   account: PublicKey,
   commitment: Commitment? = null,
-): Long {
-  val result = invoke<RPC<Long>>(
-    method = "getBalance",
-    params = buildJsonArray {
-      add(account.toBase58())
-      commitment?.let {
-        addJsonObject {
-          put("commitment", it.value)
-        }
+): Response<RPC<Long>> = invoke(
+  method = "getBalance",
+  params = buildJsonArray {
+    add(account.toBase58())
+    commitment?.let {
+      addJsonObject {
+        put("commitment", it.value)
       }
     }
-  )
-  return result!!.value!!
-}
+  }
+)

@@ -3,7 +3,7 @@ package net.avianlabs.solana.client
 import kotlinx.serialization.Serializable
 
 @Serializable
-public data class RpcResponse<T>(
+public data class Response<T>(
   val id: Int,
   val jsonrpc: String,
   val result: T? = null,
@@ -11,13 +11,13 @@ public data class RpcResponse<T>(
 ) {
   @Serializable
   public data class RPC<T>(
-    val context: Context?,
-    val value: T? = null,
+    val context: Context,
+    val value: T,
   ) {
 
     @Serializable
     public data class Context(
-      val slot: Long,
+      val slot: ULong,
       val apiVersion: String?,
     )
   }

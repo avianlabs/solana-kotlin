@@ -40,25 +40,20 @@ public class RpcKtorClient(
     }
   }
 
-  internal suspend inline fun <reified T, reified R> invoke(invocation: RpcInvocation<T>): RpcResponse<R> =
+  internal suspend inline fun <reified T, reified R> invoke(invocation: RpcInvocation<T>): Response<R> =
     execute(makeRequest(invocation))
 
   internal inline fun <reified T> makeRequest(invocation: RpcInvocation<T>): RpcRequest<T> =
     RpcRequest(requestIdGenerator.next(), invocation)
 
-  internal suspend inline fun <reified T, reified R> execute(request: RpcRequest<T>): RpcResponse<R> {
-    val response = ktorClient.post(url) {
+  internal suspend inline fun <reified T, reified R> execute(request: RpcRequest<T>): Response<R> =
+    ktorClient.post(url) {
       contentType(ContentType.Application.Json)
-      setBody(request.buildBody())
+      setBody(request.buildBody<T>())
       request.invocation.headerProviders.forEach { (header, valueProvider) ->
         header(header, valueProvider())
       }
-    }
-    response.body<JsonObject>()["error"]?.let {
-      throw ExecuteException(Json.decodeFromJsonElement<RpcError>(it))
-    }
-    return response.body()
-  }
+    }.body()
 
   internal inline fun <reified T> RpcRequest<T>.buildBody(): JsonObject {
     val body: MutableMap<String, JsonElement> = mutableMapOf(
