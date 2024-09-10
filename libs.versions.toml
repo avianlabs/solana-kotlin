@@ -9,9 +9,9 @@ androidGradle = "8.5.2"
 androidJunit5 = "1.10.0.0"
 detekt = "1.23.7"
 jacoco = "0.8.7"
-kotlin = "2.0.0"
+kotlin = "2.0.20"
 mavenPublish = "0.29.0"
-skie = "0.8.2"
+skie = "0.8.4"
 
 # Libraries
 arrow = "1.2.4"
@@ -23,7 +23,7 @@ kotlinxCoroutines = "1.8.1"
 ktor = "2.3.12"
 okhttp = "4.12.0"
 okio = "3.9.0"
-serialization = "1.7.1"
+serialization = "1.7.2"
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
