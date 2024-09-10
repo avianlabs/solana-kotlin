@@ -6,7 +6,7 @@ androidMinSdk = "24"
 # Plugins
 androidCacheFix = "3.0.1"
 androidGradle = "8.5.2"
-androidJunit5 = "1.10.0.0"
+androidJunit5 = "1.11.0.0"
 detekt = "1.23.7"
 jacoco = "0.8.7"
 kotlin = "2.0.0"
