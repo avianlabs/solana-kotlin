@@ -3,6 +3,7 @@ package net.avianlabs.solana.methods
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
@@ -18,20 +19,17 @@ import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 public suspend fun SolanaClient.getSignaturesForAddress(
   account: PublicKey,
   commitment: Commitment? = null,
-): List<SignatureInformation> {
-  val result = invoke<List<SignatureInformation>>(
-    method = "getSignaturesForAddress",
-    params = buildJsonArray {
-      add(account.toBase58())
-      commitment?.let {
-        addJsonObject {
-          put("commitment", it.value)
-        }
+): Response<List<SignatureInformation>> = invoke(
+  method = "getSignaturesForAddress",
+  params = buildJsonArray {
+    add(account.toBase58())
+    commitment?.let {
+      addJsonObject {
+        put("commitment", it.value)
       }
     }
-  )
-  return result!!
-}
+  }
+)
 
 @Serializable
 public data class SignatureInformation(

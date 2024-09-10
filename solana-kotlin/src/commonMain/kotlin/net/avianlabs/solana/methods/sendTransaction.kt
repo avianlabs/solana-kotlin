@@ -6,11 +6,13 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.Transaction
 
 /**
  * Send a signed transaction to the cluster
+ *
  * @param transaction The signed transaction to send
  * @param skipPreflight If true, skip the preflight check
  * @param preflightCommitment The commitment level to use for the preflight check
@@ -24,19 +26,16 @@ public suspend fun SolanaClient.sendTransaction(
   preflightCommitment: Commitment = Commitment.Finalized,
   maxRetries: Int? = null,
   minContextSlot: Long? = null,
-): String {
-  val result = invoke<String>(
-    method = "sendTransaction",
-    params = buildJsonArray {
-      add(transaction.serialize().encodeBase64())
-      add(buildJsonObject {
-        put("encoding", "base64")
-        put("skipPreflight", skipPreflight)
-        put("preflightCommitment", preflightCommitment.value)
-        maxRetries?.let { put("maxRetries", it) }
-        minContextSlot?.let { put("minContextSlot", it) }
-      })
-    }
-  )
-  return result!!
-}
+): Response<String> = invoke(
+  method = "sendTransaction",
+  params = buildJsonArray {
+    add(transaction.serialize().encodeBase64())
+    add(buildJsonObject {
+      put("encoding", "base64")
+      put("skipPreflight", skipPreflight)
+      put("preflightCommitment", preflightCommitment.value)
+      maxRetries?.let { put("maxRetries", it) }
+      minContextSlot?.let { put("minContextSlot", it) }
+    })
+  }
+)

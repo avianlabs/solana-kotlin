@@ -3,6 +3,7 @@ package net.avianlabs.solana.methods
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.domain.core.Commitment
 
 /**
@@ -15,19 +16,17 @@ import net.avianlabs.solana.domain.core.Commitment
 public suspend fun SolanaClient.getTransaction(
   signature: String,
   commitment: Commitment? = null,
-): TransactionResponse? {
-  return invoke<TransactionResponse?>(
-    method = "getTransaction",
-    params = buildJsonArray {
-      add(signature)
-      commitment?.let {
-        addJsonObject {
-          put("commitment", it.value)
-        }
+): Response<TransactionResponse?> = invoke(
+  method = "getTransaction",
+  params = buildJsonArray {
+    add(signature)
+    commitment?.let {
+      addJsonObject {
+        put("commitment", it.value)
       }
     }
-  )
-}
+  }
+)
 
 @Serializable
 public data class TransactionResponse(

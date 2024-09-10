@@ -11,6 +11,8 @@ public suspend fun SolanaClient.getNonce(
   publicKey: PublicKey,
   commitment: Commitment? = null
 ): NonceAccount? = getAccountInfo(publicKey, commitment)
+  .result
+  ?.value
   ?.dataBytes
   ?.let { data ->
     val decoded = NonceAccountData.read(Buffer().write(data))

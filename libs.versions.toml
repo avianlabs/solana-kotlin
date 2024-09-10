@@ -14,6 +14,7 @@ mavenPublish = "0.29.0"
 skie = "0.8.2"
 
 # Libraries
+arrow = "1.2.4"
 junit5 = "5.11.0"
 junitPioneer = "2.2.0"
 kermit = "2.0.4"
@@ -25,6 +26,7 @@ okio = "3.9.0"
 serialization = "1.7.1"
 
 [libraries]
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 bouncyCastle = { module = "org.bouncycastle:bcpkix-jdk15to18", version = "1.78.1" }
 coreLibraryDesugaring = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.0" }
 coroutinesAndroid = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutines" }

@@ -5,6 +5,7 @@ import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
+import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.domain.core.Commitment
 
 /**
@@ -16,17 +17,14 @@ import net.avianlabs.solana.domain.core.Commitment
 public suspend fun SolanaClient.getMinimumBalanceForRentExemption(
   dataLength: Long,
   commitment: Commitment? = null,
-): Long {
-  val result = invoke<Long>(
-    method = "getMinimumBalanceForRentExemption",
-    params = buildJsonArray {
-      add(dataLength)
-      commitment?.let {
-        addJsonObject {
-          put("commitment", it.value)
-        }
+): Response<Long> = invoke(
+  method = "getMinimumBalanceForRentExemption",
+  params = buildJsonArray {
+    add(dataLength)
+    commitment?.let {
+      addJsonObject {
+        put("commitment", it.value)
       }
     }
-  )
-  return result!!
-}
+  }
+)

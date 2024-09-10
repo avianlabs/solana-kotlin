@@ -5,7 +5,8 @@ import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
-import net.avianlabs.solana.client.RpcResponse
+import net.avianlabs.solana.client.Response
+import net.avianlabs.solana.client.Response.RPC
 import net.avianlabs.solana.domain.core.Commitment
 
 /**
@@ -15,19 +16,16 @@ import net.avianlabs.solana.domain.core.Commitment
  */
 public suspend fun SolanaClient.getLatestBlockhash(
   commitment: Commitment? = null,
-): LatestBlockHash {
-  val result = invoke<RpcResponse.RPC<LatestBlockHash>>(
-    method = "getLatestBlockhash",
-    params = buildJsonArray {
-      commitment?.let {
-        addJsonObject {
-          put("commitment", it.value)
-        }
+): Response<RPC<LatestBlockHash>> = invoke(
+  method = "getLatestBlockhash",
+  params = buildJsonArray {
+    commitment?.let {
+      addJsonObject {
+        put("commitment", it.value)
       }
     }
-  )
-  return result!!.value!!
-}
+  }
+)
 
 @Serializable
 public data class LatestBlockHash(

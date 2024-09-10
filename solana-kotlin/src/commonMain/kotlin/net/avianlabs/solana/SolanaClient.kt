@@ -2,9 +2,9 @@ package net.avianlabs.solana
 
 import io.ktor.client.*
 import io.ktor.http.*
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.client.RpcInvocation
 import net.avianlabs.solana.client.RpcKtorClient
 import kotlin.coroutines.resume
@@ -35,7 +35,6 @@ public class SolanaClient(
     ),
   )
 
-  @OptIn(ExperimentalSerializationApi::class)
   internal val json: Json = Json {
     ignoreUnknownKeys = true
     isLenient = true
@@ -46,8 +45,8 @@ public class SolanaClient(
   internal suspend inline fun <reified T> invoke(
     method: String,
     params: JsonArray? = null,
-  ): T? {
+  ): Response<T> {
     val invocation = RpcInvocation(method, params, headerProviders)
-    return client.invoke<JsonArray, T>(invocation).result
+    return client.invoke<JsonArray, T>(invocation)
   }
 }
