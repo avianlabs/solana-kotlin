@@ -42,7 +42,7 @@ jobs:
           echo "::set-output name=bumped::$(.github/scripts/src/bumped.sh)"
 
       - name: Create pull request
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         id: cpr
         with:
           token: ${{ secrets.ORG_BOT_TOKEN }}
