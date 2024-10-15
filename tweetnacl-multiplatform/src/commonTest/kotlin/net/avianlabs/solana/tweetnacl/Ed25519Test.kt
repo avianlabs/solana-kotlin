@@ -2,7 +2,6 @@ package net.avianlabs.solana.tweetnacl
 
 import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
-import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -16,9 +15,10 @@ class Ed25519Test {
 
     val restored = Ed25519Keypair.fromSecretKeyBytes(chopped).secretKey
 
+    @OptIn(ExperimentalStdlibApi::class)
     assertEquals(
-      secretKey.encodeToBase58String(),
-      restored.encodeToBase58String(),
+      secretKey.toHexString(),
+      restored.toHexString(),
     )
   }
 }
