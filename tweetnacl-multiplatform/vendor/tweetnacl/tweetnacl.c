@@ -807,9 +807,11 @@ int crypto_sign_open(u8 *m,u64 *mlen,const u8 *sm,u64 n,const u8 *pk)
 
 // curve additions
 
-int is_on_curve(const u8 p[32]) {
+int is_on_curve(const u8 p[32])
+{
   gf q[4];
-  return unpackneg(q,p);
+
+  return unpackneg(q, p);
 }
 
 // END curve additions
