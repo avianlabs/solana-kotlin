@@ -814,14 +814,4 @@ int is_on_curve(const u8 p[32])
   return unpackneg(q, p);
 }
 
-int public_key_from_secret(u8 *sk, u8 *pk)
-{
-  gf a[4];
-
-  scalarbase(a, sk);
-  pack(pk, a);
-
-  return 0;
-}
-
 // END curve additions

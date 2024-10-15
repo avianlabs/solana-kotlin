@@ -31,10 +31,7 @@ public data class Ed25519Keypair(
   public companion object {
     public fun fromSecretKeyBytes(bytes: ByteArray): Ed25519Keypair = when (bytes.size) {
       // [secretKey(32)]
-      32 -> {
-        val publicKeyBytes = generatePublicKeyBytes(bytes)
-        Ed25519Keypair(PublicKey(publicKeyBytes), bytes + publicKeyBytes)
-      }
+      32 -> TweetNaCl.Signature.generateKey(bytes + ByteArray(32))
       // [secretKey(32)|publicKey(32)]
       64 -> {
         val publicKey = PublicKey(bytes.sliceArray(32 until 64))
@@ -48,5 +45,3 @@ public data class Ed25519Keypair(
       fromSecretKeyBytes(base58.decodeBase58())
   }
 }
-
-internal expect fun generatePublicKeyBytes(secretKey: ByteArray): ByteArray
