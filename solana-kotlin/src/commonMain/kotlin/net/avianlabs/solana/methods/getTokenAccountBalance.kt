@@ -21,7 +21,7 @@ import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 public suspend fun SolanaClient.getTokenAccountBalance(
   tokenAccount: PublicKey,
   commitment: Commitment? = null,
-): Response<RPC<TokenAmountInfo>> = invoke(
+): Response<RPC<TokenAmountInfo?>> = invoke(
   method = "getTokenAccountBalance",
   params = buildJsonArray {
     add(tokenAccount.toBase58())
