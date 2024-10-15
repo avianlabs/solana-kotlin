@@ -20,7 +20,7 @@ import net.avianlabs.solana.domain.core.Commitment
 public suspend fun SolanaClient.getFeeForMessage(
   message: ByteArray,
   commitment: Commitment? = null
-): Response<RPC<Long>> = invoke(
+): Response<RPC<Long?>> = invoke(
   method = "getFeeForMessage",
   params = buildJsonArray {
     add(message.encodeBase64())

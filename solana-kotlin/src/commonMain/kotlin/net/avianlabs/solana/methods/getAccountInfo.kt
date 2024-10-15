@@ -8,13 +8,14 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.Response
+import net.avianlabs.solana.client.Response.RPC
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 public suspend fun SolanaClient.getAccountInfo(
   publicKey: PublicKey,
   commitment: Commitment? = null,
-): Response<Response.RPC<AccountInfo>> = invoke(
+): Response<RPC<AccountInfo?>> = invoke(
   method = "getAccountInfo",
   params = buildJsonArray {
     add(publicKey.toBase58())
