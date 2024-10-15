@@ -121,13 +121,3 @@ internal actual fun secretBoxInternal(secretKey: ByteArray): TweetNaCl.SecretBox
     }.drop(crypto_secretbox_xsalsa20poly1305_tweet_ZEROBYTES).toByteArray()
   }
 
-private fun CPointer<UByteVar>.toByteArray(length: Int): ByteArray {
-  val nativeBytes = this
-  val bytes = ByteArray(length)
-  var index = 0
-  while (index < length) {
-    bytes[index] = nativeBytes[index].toByte()
-    ++index
-  }
-  return bytes
-}

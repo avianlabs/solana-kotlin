@@ -807,9 +807,21 @@ int crypto_sign_open(u8 *m,u64 *mlen,const u8 *sm,u64 n,const u8 *pk)
 
 // curve additions
 
-int is_on_curve(const u8 p[32]) {
+int is_on_curve(const u8 p[32])
+{
   gf q[4];
-  return unpackneg(q,p);
+
+  return unpackneg(q, p);
+}
+
+int public_key_from_secret(u8 *sk, u8 *pk)
+{
+  gf a[4];
+
+  scalarbase(a, sk);
+  pack(pk, a);
+
+  return 0;
 }
 
 // END curve additions

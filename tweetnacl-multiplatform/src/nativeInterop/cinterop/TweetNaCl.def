@@ -1,2 +1,3 @@
 ---
 extern int is_on_curve(const unsigned char *);
+extern int public_key_from_secret(unsigned char *, unsigned char *);

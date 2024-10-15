@@ -1,8 +1,6 @@
 package net.avianlabs.solana.tweetnacl.ed25519
 
 import net.avianlabs.solana.tweetnacl.TweetNaCl
-import net.avianlabs.solana.tweetnacl.TweetNaCl.Signature.Companion.PUBLIC_KEY_BYTES
-import net.avianlabs.solana.tweetnacl.TweetNaCl.Signature.Companion.SECRET_KEY_BYTES
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 
 public data class Ed25519Keypair(
@@ -31,13 +29,24 @@ public data class Ed25519Keypair(
     TweetNaCl.Signature.sign(message = message, secretKey = secretKey)
 
   public companion object {
-    public fun fromSecretKeyBytes(bytes: ByteArray): Ed25519Keypair {
-      require(bytes.size == SECRET_KEY_BYTES) { "Invalid key length: ${bytes.size}" }
-      val publicKey = PublicKey(bytes.sliceArray(PUBLIC_KEY_BYTES until SECRET_KEY_BYTES))
-      return Ed25519Keypair(publicKey, bytes.copyOf())
+    public fun fromSecretKeyBytes(bytes: ByteArray): Ed25519Keypair = when (bytes.size) {
+      // [secretKey(32)]
+      32 -> {
+        val publicKeyBytes = generatePublicKeyBytes(bytes)
+        Ed25519Keypair(PublicKey(publicKeyBytes), bytes + publicKeyBytes)
+      }
+      // [secretKey(32)|publicKey(32)]
+      64 -> {
+        val publicKey = PublicKey(bytes.sliceArray(32 until 64))
+        Ed25519Keypair(publicKey, bytes.copyOf())
+      }
+
+      else -> error("Invalid key length: ${bytes.size}")
     }
 
     public fun fromBase58(base58: String): Ed25519Keypair =
       fromSecretKeyBytes(base58.decodeBase58())
   }
 }
+
+internal expect fun generatePublicKeyBytes(secretKey: ByteArray): ByteArray
