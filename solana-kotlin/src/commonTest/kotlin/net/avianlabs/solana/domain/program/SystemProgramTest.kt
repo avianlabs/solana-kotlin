@@ -1,5 +1,7 @@
 package net.avianlabs.solana.domain.program
 
+import io.ktor.client.*
+import io.ktor.client.plugins.logging.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.avianlabs.solana.SolanaClient
@@ -20,7 +22,13 @@ class SystemProgramTest {
   @Test
   @Ignore
   fun testCreateDurableNonceAccount() = runBlocking {
-    val client = SolanaClient(client = RpcKtorClient("http://localhost:8899"))
+    val client =
+      SolanaClient(client = RpcKtorClient("http://localhost:8899", httpClient = HttpClient {
+        install(Logging) {
+          level = LogLevel.ALL
+          logger = Logger.SIMPLE
+        }
+      }))
 
     val keypair = TweetNaCl.Signature.generateKey(Random.nextBytes(32))
     println("Keypair: ${keypair.publicKey}")
@@ -55,6 +63,10 @@ class SystemProgramTest {
       .setRecentBlockHash(blockhash.blockhash)
       .sign(listOf(keypair, nonceAccount))
 
+
+    val simulated = client.simulateTransaction(initTransaction)
+
+    println("simulated: $simulated")
 
     val initSignature = client.sendTransaction(initTransaction)
 
