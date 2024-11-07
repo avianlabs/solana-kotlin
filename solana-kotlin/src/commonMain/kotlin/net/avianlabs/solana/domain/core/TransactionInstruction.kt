@@ -1,5 +1,6 @@
 package net.avianlabs.solana.domain.core
 
+import io.ktor.util.*
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 public data class TransactionInstruction(
@@ -7,6 +8,9 @@ public data class TransactionInstruction(
   val keys: List<AccountMeta>,
   val data: ByteArray,
 ) {
+
+  override fun toString(): String =
+    "TransactionInstruction(programId=$programId, keys=$keys, data=${data.encodeBase64()})"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

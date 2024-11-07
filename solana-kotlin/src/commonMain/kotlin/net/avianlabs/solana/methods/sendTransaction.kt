@@ -8,7 +8,7 @@ import kotlinx.serialization.json.put
 import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.domain.core.Commitment
-import net.avianlabs.solana.domain.core.Transaction
+import net.avianlabs.solana.domain.core.SignedTransaction
 
 /**
  * Send a signed transaction to the cluster
@@ -21,7 +21,7 @@ import net.avianlabs.solana.domain.core.Transaction
  * @return The transaction signature
  */
 public suspend fun SolanaClient.sendTransaction(
-  transaction: Transaction,
+  transaction: SignedTransaction,
   skipPreflight: Boolean = false,
   preflightCommitment: Commitment = Commitment.Finalized,
   maxRetries: Int? = null,

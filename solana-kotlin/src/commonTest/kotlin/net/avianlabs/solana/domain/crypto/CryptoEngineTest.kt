@@ -1,6 +1,6 @@
 package net.avianlabs.solana.domain.crypto
 
-import net.avianlabs.solana.domain.core.TransactionBuilder
+import net.avianlabs.solana.domain.core.Transaction
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.randomKey
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
@@ -20,7 +20,7 @@ class CryptoEngineTest {
   @Test
   fun test_sign() {
     val keypair = randomKey()
-    val transaction = TransactionBuilder()
+    val transaction = Transaction.Builder()
       .addInstruction(
         SystemProgram.createAccount(
           fromPublicKey = keypair.publicKey,

@@ -62,6 +62,7 @@ kotlin {
         implementation(libs.kermit)
         implementation(libs.okio)
         implementation(libs.skie.configurationAnnotations)
+        implementation(libs.kotlinLogging)
       }
     }
     val commonTest by getting {

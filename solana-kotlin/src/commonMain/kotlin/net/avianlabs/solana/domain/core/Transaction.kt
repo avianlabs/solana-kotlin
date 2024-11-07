@@ -1,74 +1,69 @@
 package net.avianlabs.solana.domain.core
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import net.avianlabs.solana.vendor.ShortvecEncoding
-import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
-import okio.Buffer
 
-public class Transaction(
-  public val message: Message = Message(),
-  private val _signatures: MutableList<String> = mutableListOf()
+private val logger = KotlinLogging.logger {}
+
+public open class Transaction internal constructor(
+  public val message: Message,
 ) {
 
-  public val signatures: List<String>
-    get() = _signatures
+  public fun sign(signer: Signer): SignedTransaction = sign(listOf(signer))
 
-  private lateinit var serializedMessage: ByteArray
+  public open fun sign(signers: List<Signer>): SignedTransaction {
+    val message = when (message.feePayer) {
+      // fee payer is the first signer by default
+      null -> message.newBuilder()
+        .setFeePayer(signers.first().publicKey)
+        .build()
 
-  public fun addInstruction(instruction: TransactionInstruction): Transaction {
-    message.addInstruction(instruction)
-    return this
-  }
-
-  public fun setRecentBlockHash(recentBlockhash: String): Transaction {
-    message.recentBlockHash = recentBlockhash
-    return this
-  }
-
-  public fun setFeePayer(feePayer: PublicKey?): Transaction {
-    message.feePayer = feePayer
-    return this
-  }
-
-  public fun sign(signer: Signer): Transaction = sign(listOf(signer))
-
-  public fun sign(signers: List<Signer>): Transaction {
-    require(signers.isNotEmpty()) { "No signers" }
-    // Fee payer defaults to first signer if not set
-    message.feePayer ?: let {
-      message.feePayer = signers[0].publicKey
+      else -> message
     }
-    serializedMessage = message.serialize()
-    for (signer in signers) {
-      _signatures.add(
-        TweetNaCl.Signature.sign(serializedMessage, signer.secretKey).encodeToBase58String()
-      )
+
+    val serializedMessage = message
+      .serialize()
+
+    val signatures = signers.map { signer ->
+      TweetNaCl.Signature.sign(serializedMessage, signer.secretKey).encodeToBase58String()
     }
-    return this
-  }
 
-  public fun serialize(): ByteArray {
-    val signaturesSize = signatures.size
-    val signaturesLength = ShortvecEncoding.encodeLength(signaturesSize)
-    val bufferSize =
-      signaturesLength.size + signaturesSize * TweetNaCl.Signature.SIGNATURE_BYTES + serializedMessage.size
-    val out = Buffer()
-    out.write(signaturesLength)
-    for (signature in signatures) {
-      val rawSignature = signature.decodeBase58()
-      out.write(rawSignature)
+    val signatureSet = signatures.toSet()
+    if (signatureSet.size != signatures.size) {
+      logger.warn { "Duplicate signatures detected" }
     }
-    out.write(serializedMessage)
-    return out.readByteArray(bufferSize.toLong())
+
+    return SignedTransaction(
+      originalMessage = message,
+      signedMessage = serializedMessage,
+      signatures = signatures,
+    )
   }
 
-  override fun toString(): String {
-    return """Transaction(
-            |  signatures: [${signatures.joinToString()}],
-            |  message: $message
-        |)""".trimMargin()
-  }
+  override fun toString(): String = "Transaction(message=$message)"
 
+  public class Builder internal constructor(
+    private var messageBuilder: Message.Builder,
+  ) {
+    public constructor() : this(Message.Builder())
+
+    public fun addInstruction(instruction: TransactionInstruction): Builder {
+      messageBuilder.addInstruction(instruction)
+      return this
+    }
+
+    public fun setRecentBlockHash(recentBlockHash: String): Builder {
+      messageBuilder.setRecentBlockHash(recentBlockHash)
+      return this
+    }
+
+    public fun setFeePayer(feePayer: PublicKey): Builder {
+      messageBuilder.setFeePayer(feePayer)
+      return this
+    }
+
+    public fun build(): Transaction = Transaction(messageBuilder.build())
+  }
 }
