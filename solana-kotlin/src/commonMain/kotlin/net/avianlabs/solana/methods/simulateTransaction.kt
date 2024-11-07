@@ -1,7 +1,6 @@
 package net.avianlabs.solana.methods
 
 import io.ktor.util.*
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import net.avianlabs.solana.SolanaClient
@@ -62,7 +61,7 @@ public data class SimulateTransactionResponse(
   /**
    * Error if transaction failed, null if transaction succeeded.
    */
-  @Contextual val err: Any?,
+  val err: JsonElement?,
   /**
    * Array of log messages the transaction instructions output during execution, null if simulation
    * failed before the transaction was able to execute (for example due to an invalid blockhash or
@@ -84,7 +83,7 @@ public data class SimulateTransactionResponse(
   /**
    * Defined only if innerInstructions was set to true
    */
-  @Contextual val innerInstructions: Any?,
+  val innerInstructions: JsonElement?,
 ) {
   @Serializable
   public data class AccountInfo(
@@ -99,7 +98,7 @@ public data class SimulateTransactionResponse(
     /**
      * Data associated with the account, either as encoded binary data or JSON format
      */
-    @Contextual val data: Any,
+    val data: JsonElement,
     /**
      * Boolean indicating if the account contains a program (and is strictly read-only)
      */
@@ -119,6 +118,6 @@ public data class SimulateTransactionResponse(
     /**
      * The return data itself, as base-64 encoded binary data
      */
-    @Contextual val data: Any,
+    val data: String,
   )
 }
