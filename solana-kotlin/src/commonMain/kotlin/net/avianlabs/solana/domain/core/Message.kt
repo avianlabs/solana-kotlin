@@ -2,15 +2,13 @@ package net.avianlabs.solana.domain.core
 
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
-public class Message internal constructor(
+@ConsistentCopyVisibility
+public data class Message private constructor(
   public val feePayer: PublicKey?,
   public val recentBlockHash: String?,
   public val accountKeys: List<AccountMeta>,
   public val instructions: List<TransactionInstruction>,
 ) {
-
-  override fun toString(): String =
-    "Message(feePayer=$feePayer, recentBlockHash=$recentBlockHash, accountKeys=$accountKeys, instructions=$instructions)"
 
   public fun newBuilder(): Builder = Builder(
     feePayer = feePayer,

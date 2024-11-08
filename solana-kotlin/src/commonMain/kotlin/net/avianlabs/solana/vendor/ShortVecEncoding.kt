@@ -5,7 +5,7 @@ import kotlin.experimental.and
 
 internal typealias ShortVecLength = ByteArray
 
-internal object ShortvecEncoding {
+internal object ShortVecEncoding {
   internal fun encodeLength(len: Int): ShortVecLength {
     val buffer = Buffer()
     var length = len

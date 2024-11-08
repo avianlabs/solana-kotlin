@@ -3,8 +3,8 @@ package net.avianlabs.solana.domain.core
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
+import net.avianlabs.solana.vendor.ShortVecEncoding
 import net.avianlabs.solana.vendor.ShortVecLength
-import net.avianlabs.solana.vendor.ShortvecEncoding
 import okio.Buffer
 
 private const val RECENT_BLOCK_HASH_LENGTH = 32
@@ -72,7 +72,7 @@ public fun Message.serialize(): ByteArray {
   require(instructions.isNotEmpty()) { "No instructions provided" }
   val keysList = compileAccountKeys(feePayer)
   val accountKeysSize = keysList.size
-  val accountAddressesLength = ShortvecEncoding.encodeLength(accountKeysSize)
+  val accountAddressesLength = ShortVecEncoding.encodeLength(accountKeysSize)
   val compiledInstructions = instructions.map { instruction ->
     val keysSize = instruction.keys.size
     val keyIndices = ByteArray(keysSize)
@@ -81,14 +81,14 @@ public fun Message.serialize(): ByteArray {
     }
     CompiledInstruction(
       programIdIndex = keysList.findAccountIndex(instruction.programId).toByte(),
-      keyIndicesLength = ShortvecEncoding.encodeLength(keysSize),
+      keyIndicesLength = ShortVecEncoding.encodeLength(keysSize),
       keyIndices = keyIndices,
-      dataLength = ShortvecEncoding.encodeLength(instruction.data.count()),
+      dataLength = ShortVecEncoding.encodeLength(instruction.data.count()),
       data = instruction.data,
     )
   }
   val accountsKeyBufferSize = accountKeysSize * TweetNaCl.Signature.PUBLIC_KEY_BYTES
-  val instructionsLength = ShortvecEncoding.encodeLength(compiledInstructions.size)
+  val instructionsLength = ShortVecEncoding.encodeLength(compiledInstructions.size)
   val compiledInstructionsBytes = compiledInstructions.sumOf { it.bytes }
   val bufferSize =
     (Header.HEADER_LENGTH + RECENT_BLOCK_HASH_LENGTH + accountAddressesLength.size

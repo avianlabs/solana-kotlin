@@ -42,6 +42,19 @@ public open class Transaction internal constructor(
     )
   }
 
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || this::class != other::class) return false
+
+    other as Transaction
+
+    return message == other.message
+  }
+
+  override fun hashCode(): Int {
+    return message.hashCode()
+  }
+
   override fun toString(): String = "Transaction(message=$message)"
 
   public class Builder internal constructor(
