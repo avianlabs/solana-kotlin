@@ -36,7 +36,7 @@ public suspend fun SolanaClient.simulateTransaction(
 ): Response<RPC<SimulateTransactionResponse>> = invoke(
   method = "simulateTransaction",
   params = buildJsonArray {
-    add(transaction.serialize().encodeBase64())
+    add(transaction.sign(emptyList()).serialize().encodeBase64())
     addJsonObject {
       put("encoding", "base64")
       commitment?.let { put("commitment", it.value) }
@@ -60,6 +60,8 @@ public suspend fun SolanaClient.simulateTransaction(
 public data class SimulateTransactionResponse(
   /**
    * Error if transaction failed, null if transaction succeeded.
+   *
+   * can be null, string or object
    */
   val err: JsonElement?,
   /**

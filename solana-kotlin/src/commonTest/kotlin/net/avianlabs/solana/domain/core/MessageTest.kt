@@ -10,7 +10,7 @@ class MessageTest {
 
   @Test
   fun account_keys_order() {
-    val transaction = Transaction()
+    val transaction = Transaction.Builder()
       .addInstruction(
         TokenProgram.transferChecked(
           source = PublicKey.fromBase58("9JGhZqi4MbnVz424uJ6vqk9a1u359xg3nJekdjzzL4d5"),
@@ -26,6 +26,7 @@ class MessageTest {
           microLamports = 1u,
         )
       )
+      .build()
 
     transaction.message.accountKeys.map { println(it) }
 

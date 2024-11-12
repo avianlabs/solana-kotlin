@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 class AccountKeysListTest {
   @Test
   fun add_different_writable_flags_preserves_isSigner() {
-    val accountKeysList = AccountKeysList()
+    val accountKeysList = mutableListOf<AccountMeta>()
     val accountMeta1 = AccountMeta(
       publicKey = PublicKey.fromBase58("4rZoSK72jVaAW1ayZLrefdMPAAStRVhCfH1PSundaoNt"),
       isSigner = false,
@@ -25,14 +25,16 @@ class AccountKeysListTest {
 
     accountKeysList.add(accountMeta2)
 
-    assertTrue(accountKeysList.list.size == 1)
-    assertTrue(accountKeysList.list[0].isSigner)
-    assertTrue(accountKeysList.list[0].isWritable)
+    val normalized = accountKeysList.normalize()
+
+    assertTrue(normalized.size == 1)
+    assertTrue(normalized[0].isSigner)
+    assertTrue(normalized[0].isWritable)
   }
 
   @Test
   fun account_order() {
-    val accountKeysList = AccountKeysList()
+    val accountKeysList = mutableListOf<AccountMeta>()
 
     val meta = listOf(
       AccountMeta(
@@ -60,7 +62,7 @@ class AccountKeysListTest {
         PublicKey.fromBase58("9JGhZqi4MbnVz424uJ6vqk9a1u359xg3nJekdjzzL4d5"),
         PublicKey.fromBase58("G8iheDY9bGix5qCXEitCExLcgZzZrEemngk9cbTR3CQs"),
       ),
-      accountKeysList.list.map { it.publicKey }
+      accountKeysList.normalize().map { it.publicKey }
     )
   }
 }
