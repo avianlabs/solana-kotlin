@@ -57,6 +57,8 @@ public open class Transaction internal constructor(
 
   override fun toString(): String = "Transaction(message=$message)"
 
+  public fun newBuilder(): Builder = Builder(message.newBuilder())
+
   public class Builder internal constructor(
     private var messageBuilder: Message.Builder,
   ) {
