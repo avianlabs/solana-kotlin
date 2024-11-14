@@ -54,7 +54,7 @@ public data class SignedTransaction internal constructor(
   override fun toString(): String =
     "SignedTransaction(message=${originalMessage}, signatures=$signatures)"
 
-  public fun serialize(): ByteArray {
+  public fun serialize(): SerializedTransaction {
     val signaturesSize = signatures.size
     val signaturesLength = ShortVecEncoding.encodeLength(signaturesSize)
     val bufferSize =
@@ -70,18 +70,6 @@ public data class SignedTransaction internal constructor(
     out.write(signedMessage)
     return out.readByteArray(bufferSize.toLong())
   }
-
-  public fun validate(): Boolean {
-    val message = signedMessage
-    val messageLength = message.size
-    val signaturesSize = signatures.size
-    val signaturesLength = ShortVecEncoding.encodeLength(signaturesSize)
-    val signaturesSizeBytes = signaturesLength.size
-    val signatureSize = TweetNaCl.Signature.SIGNATURE_BYTES
-    val signatureSizeBytes = ShortVecEncoding.encodeLength(signatureSize)
-    val signatureSizeBytesLength = signatureSizeBytes.size
-    val expectedSize =
-      messageLength + signaturesSizeBytes + signaturesSize * (signatureSize + signatureSizeBytesLength)
-    return expectedSize == serialize().size
-  }
 }
+
+public typealias SerializedTransaction = ByteArray
