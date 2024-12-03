@@ -27,6 +27,7 @@ public data class Message private constructor(
 
     public fun setFeePayer(feePayer: PublicKey): Builder {
       this.feePayer = feePayer
+      accountKeys.add(AccountMeta(feePayer, isSigner = true, isWritable = true))
       return this
     }
 
@@ -45,6 +46,6 @@ public data class Message private constructor(
     }
 
     public fun build(): Message =
-      Message(feePayer, recentBlockHash, accountKeys.normalize(), instructions)
+      Message(feePayer, recentBlockHash, accountKeys.normalize(feePayer), instructions)
   }
 }

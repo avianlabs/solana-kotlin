@@ -3,7 +3,6 @@ package net.avianlabs.solana.domain.crypto
 import net.avianlabs.solana.domain.core.Transaction
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.randomKey
-import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import kotlin.random.Random
 import kotlin.test.Test
@@ -33,10 +32,8 @@ class CryptoEngineTest {
       .build()
       .sign(keypair)
 
-    val signature = transaction.signatures.first()
+    val signature = transaction.signatures[keypair.publicKey]!!
 
-    val signatureArray = signature.decodeBase58()
-
-    assertTrue(signatureArray.size == 64, "wrong signature size ${signatureArray.size}")
+    assertTrue(signature.size == 64, "wrong signature size ${signature.size}")
   }
 }

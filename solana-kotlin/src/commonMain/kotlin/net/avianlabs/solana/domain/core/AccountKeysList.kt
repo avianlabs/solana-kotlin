@@ -1,6 +1,10 @@
 package net.avianlabs.solana.domain.core
 
-internal fun List<AccountMeta>.normalize(): List<AccountMeta> = groupBy { it.publicKey }
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
+
+internal fun List<AccountMeta>.normalize(
+  feePayer: PublicKey? = null,
+): List<AccountMeta> = groupBy { it.publicKey }
   .mapValues { (_, metas) ->
     metas.reduce { acc, meta ->
       AccountMeta(
@@ -11,12 +15,17 @@ internal fun List<AccountMeta>.normalize(): List<AccountMeta> = groupBy { it.pub
     }
   }
   .values
-  .sortedWith(metaComparator)
+  .sortedWith(metaComparator(feePayer))
   .toList()
 
-private val metaComparator = Comparator<AccountMeta> { am1, am2 ->
+private fun metaComparator(feePayer: PublicKey?) = Comparator<AccountMeta> { am1, am2 ->
   // first sort by signer, then writable
-  if (am1.isSigner && !am2.isSigner) {
+  // and ensure feePayer is always first
+  if (am1.publicKey == feePayer) {
+    -1
+  } else if (am2.publicKey == feePayer) {
+    1
+  } else if (am1.isSigner && !am2.isSigner) {
     -1
   } else if (!am1.isSigner && am2.isSigner) {
     1
