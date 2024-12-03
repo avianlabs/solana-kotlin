@@ -1,33 +1,26 @@
 package net.avianlabs.solana.domain.core
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import net.avianlabs.solana.tweetnacl.TweetNaCl
-import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import net.avianlabs.solana.vendor.ShortVecEncoding
 import okio.Buffer
-
-private val logger = KotlinLogging.logger {}
 
 @ConsistentCopyVisibility
 public data class SignedTransaction internal constructor(
   public val originalMessage: Message,
   public val signedMessage: ByteArray,
-  public val signatures: List<String>,
+  public val signatures: Map<PublicKey, ByteArray>,
 ) : Transaction(originalMessage) {
 
   public override fun sign(signers: List<Signer>): SignedTransaction = SignedTransaction(
     originalMessage = originalMessage,
     signedMessage = signedMessage,
-    signatures = signatures + signers.map { signer ->
-      TweetNaCl.Signature.sign(signedMessage, signer.secretKey).encodeToBase58String()
+    signatures = signatures + signers.associate { signer ->
+      signer.publicKey to
+        TweetNaCl.Signature.sign(signedMessage, signer.secretKey)
     }
-  ).also {
-    val signatureSet = signatures.toSet()
-    if (signatureSet.size != signatures.size) {
-      logger.warn { "Duplicate signatures detected" }
-    }
-  }
+  )
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -52,21 +45,23 @@ public data class SignedTransaction internal constructor(
   }
 
   override fun toString(): String =
-    "SignedTransaction(message=${originalMessage}, signatures=$signatures)"
+    "SignedTransaction(message=${originalMessage}, " +
+      "signatures=${signatures.values.map { it.encodeToBase58String() }})"
 
-  public fun serialize(): SerializedTransaction {
-    val signaturesSize = signatures.size
-    val signaturesLength = ShortVecEncoding.encodeLength(signaturesSize)
+  public fun serialize(includeNullSignatures: Boolean = false): SerializedTransaction {
+    val signerKeys = message.accountKeys.filter { it.isSigner }
+      .mapNotNull {
+        signatures[it.publicKey]
+          ?: ByteArray(TweetNaCl.Signature.SIGNATURE_BYTES).takeIf { includeNullSignatures }
+      }
+    val signaturesLength = ShortVecEncoding.encodeLength(signerKeys.size)
     val bufferSize =
       signaturesLength.size +
-        signaturesSize * TweetNaCl.Signature.SIGNATURE_BYTES +
+        signerKeys.size * TweetNaCl.Signature.SIGNATURE_BYTES +
         signedMessage.size
     val out = Buffer()
     out.write(signaturesLength)
-    for (signature in signatures) {
-      val rawSignature = signature.decodeBase58()
-      out.write(rawSignature)
-    }
+    signerKeys.forEach(out::write)
     out.write(signedMessage)
     return out.readByteArray(bufferSize.toLong())
   }

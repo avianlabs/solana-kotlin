@@ -1,11 +1,7 @@
 package net.avianlabs.solana.domain.core
 
-import io.github.oshai.kotlinlogging.KotlinLogging
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
-
-private val logger = KotlinLogging.logger {}
 
 public open class Transaction internal constructor(
   public val message: Message,
@@ -26,13 +22,9 @@ public open class Transaction internal constructor(
     val serializedMessage = message
       .serialize()
 
-    val signatures = signers.map { signer ->
-      TweetNaCl.Signature.sign(serializedMessage, signer.secretKey).encodeToBase58String()
-    }
-
-    val signatureSet = signatures.toSet()
-    if (signatureSet.size != signatures.size) {
-      logger.warn { "Duplicate signatures detected" }
+    val signatures = signers.associate { signer ->
+      signer.publicKey to
+        TweetNaCl.Signature.sign(serializedMessage, signer.secretKey)
     }
 
     return SignedTransaction(

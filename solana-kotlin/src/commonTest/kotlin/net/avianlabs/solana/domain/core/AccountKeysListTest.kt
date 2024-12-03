@@ -52,17 +52,25 @@ class AccountKeysListTest {
         isSigner = false,
         isWritable = false,
       ),
+      AccountMeta(
+        publicKey = PublicKey.fromBase58("8Ta2TgXmiG36c4219H5GC1yzpzuzSqA2rYBiRuGuCmzG"),
+        isSigner = false,
+        isWritable = false,
+      ),
     )
 
     accountKeysList.addAll(meta.shuffled())
 
     assertEquals(
       listOf(
+        PublicKey.fromBase58("8Ta2TgXmiG36c4219H5GC1yzpzuzSqA2rYBiRuGuCmzG"),
         PublicKey.fromBase58("EtDXsqZ9Cgod7Z6j8cqu8fNMF7fu9txu2puHnxVY1wBk"),
         PublicKey.fromBase58("9JGhZqi4MbnVz424uJ6vqk9a1u359xg3nJekdjzzL4d5"),
         PublicKey.fromBase58("G8iheDY9bGix5qCXEitCExLcgZzZrEemngk9cbTR3CQs"),
       ),
-      accountKeysList.normalize().map { it.publicKey }
+      accountKeysList.normalize(
+        feePayer = PublicKey.fromBase58("8Ta2TgXmiG36c4219H5GC1yzpzuzSqA2rYBiRuGuCmzG")
+      ).map { it.publicKey }
     )
   }
 }
