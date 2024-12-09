@@ -1,8 +1,5 @@
 name: 'Pull Request Build'
 
-concurrency:
-  group: ${{ github.event_name }}/${{ github.event.branch }}/${{ github.event.number }}/${{ github.head_ref }}
-
 on:
   merge_group:
   pull_request:
