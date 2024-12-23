@@ -11,7 +11,7 @@ detekt = "1.23.7"
 jacoco = "0.8.7"
 kotlin = "2.1.0"
 mavenPublish = "0.30.0"
-skie = "0.9.5"
+skie = "0.10.0"
 
 # Libraries
 arrow = "2.0.0"
