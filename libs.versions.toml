@@ -70,7 +70,7 @@ androidLib = { id = "com.android.library", version.ref = "androidGradle" }
 cklib = { id = "co.touchlab.cklib", version = "0.3.3" }
 detekt = { id = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 detektFormatting = { id = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
-dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
+dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
