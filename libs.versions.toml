@@ -24,7 +24,7 @@ kotlinLogging = "7.0.3"
 ktor = "3.0.3"
 okhttp = "4.12.0"
 okio = "3.9.1"
-serialization = "1.7.3"
+serialization = "1.8.0"
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
