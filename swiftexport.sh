@@ -100,4 +100,4 @@ echo "EFFECTIVE_PLATFORM_NAME=$EFFECTIVE_PLATFORM_NAME"
 
 # Run the gradle task
 echo "Running gradle task..."
-./gradlew :solana-kotlin:embedSwiftExportForXcode --stacktrace
+./gradlew :tweetnacl-multiplatform:embedSwiftExportForXcode

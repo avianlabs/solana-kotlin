@@ -1,5 +1,6 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -29,6 +30,15 @@ kotlin {
   iosArm64()
   iosSimulatorArm64()
 
+  @OptIn(ExperimentalSwiftExportDsl::class)
+  swiftExport {
+    // Root module name
+    moduleName = "TweetNaCl"
+
+    // Collapse rule
+    flattenPackage = "net.avianlabs.solana.tweetnacl"
+  }
+  
   mingwX64()
   linuxX64()
 
