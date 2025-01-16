@@ -8,14 +8,13 @@ plugins {
   alias(libs.plugins.dokka)
   signing
   alias(libs.plugins.multiplatform.swiftpackage)
-  alias(libs.plugins.skie)
 }
 
 group = "net.avianlabs.solana"
 version = properties["version"] as String
 
 kotlin {
-  targetHierarchy.default()
+  applyDefaultHierarchyTemplate()
   explicitApi()
 
   jvm {
@@ -27,15 +26,8 @@ kotlin {
     }
   }
 
-  listOf(
-    iosArm64(),
-    iosSimulatorArm64(),
-  ).forEach { iosTarget ->
-    iosTarget.binaries.framework {
-      baseName = "TweetNaClMultiplatform"
-      isStatic = true
-    }
-  }
+  iosArm64()
+  iosSimulatorArm64()
 
   mingwX64()
   linuxX64()
