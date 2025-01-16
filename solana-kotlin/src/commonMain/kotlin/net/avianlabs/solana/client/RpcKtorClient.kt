@@ -10,17 +10,16 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.*
 import kotlin.collections.set
 
-public class RpcKtorClient(
+public class RpcKtorClient internal constructor(
   internal val url: Url,
   httpClient: HttpClient = HttpClient(),
 ) {
 
   public constructor(
     url: String,
-    httpClient: HttpClient = HttpClient(),
   ) : this(
     url = Url(url),
-    httpClient = httpClient,
+    httpClient = HttpClient(),
   )
 
   internal val requestIdGenerator: RequestIdGenerator = RequestIdGenerator()

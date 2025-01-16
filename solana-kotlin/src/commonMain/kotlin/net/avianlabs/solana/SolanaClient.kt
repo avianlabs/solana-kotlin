@@ -22,7 +22,6 @@ public class SolanaClient(
   ) : this(
     client = RpcKtorClient(
       url = url,
-      httpClient = HttpClient(),
     ),
     headerProviders = mapOf(
       HttpHeaders.Authorization to {

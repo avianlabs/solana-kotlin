@@ -29,7 +29,6 @@ class RPCIntegrationTest {
   private val client = SolanaClient(
     client = RpcKtorClient(
       "http://localhost:8899",
-      httpClient = HttpClient {}
     ),
   )
 

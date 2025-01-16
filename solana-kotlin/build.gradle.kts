@@ -46,12 +46,6 @@ kotlin {
 //      // Collapse exported dependency rule
 //      flattenPackage = "net.avianlabs.solana.tweetnacl"
 //    }
-    export(libs.ktorClientCore)
-//    export(libs.ktorClientDarwin)
-    export(libs.ktorHttp)
-    export(libs.ktorEvents)
-    export(libs.ktorIo)
-    export(libs.coroutinesCore)
   }
 
   sourceSets {
