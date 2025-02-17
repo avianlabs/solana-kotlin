@@ -14,7 +14,7 @@ mavenPublish = "0.30.0"
 skie = "0.10.0"
 
 # Libraries
-arrow = "2.0.0"
+arrow = "2.0.1"
 junit5 = "5.11.4"
 junitPioneer = "2.3.0"
 kermit = "2.0.5"
