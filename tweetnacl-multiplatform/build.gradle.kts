@@ -1,5 +1,6 @@
 import co.touchlab.cklib.gradle.CompileToBitcode.Language
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -8,14 +9,13 @@ plugins {
   alias(libs.plugins.dokka)
   signing
   alias(libs.plugins.multiplatform.swiftpackage)
-  alias(libs.plugins.skie)
 }
 
 group = "net.avianlabs.solana"
 version = properties["version"] as String
 
 kotlin {
-  targetHierarchy.default()
+  applyDefaultHierarchyTemplate()
   explicitApi()
 
   jvm {
@@ -27,16 +27,18 @@ kotlin {
     }
   }
 
-  listOf(
-    iosArm64(),
-    iosSimulatorArm64(),
-  ).forEach { iosTarget ->
-    iosTarget.binaries.framework {
-      baseName = "TweetNaClMultiplatform"
-      isStatic = true
-    }
-  }
+  iosArm64()
+  iosSimulatorArm64()
 
+  @OptIn(ExperimentalSwiftExportDsl::class)
+  swiftExport {
+    // Root module name
+    moduleName = "TweetNaCl"
+
+    // Collapse rule
+    flattenPackage = "net.avianlabs.solana.tweetnacl"
+  }
+  
   mingwX64()
   linuxX64()
 

@@ -1,5 +1,4 @@
-import co.touchlab.skie.configuration.ClassInterop
-import co.touchlab.skie.configuration.DefaultArgumentInterop
+import org.jetbrains.kotlin.gradle.swiftexport.ExperimentalSwiftExportDsl
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -8,14 +7,13 @@ plugins {
   alias(libs.plugins.dokka)
   signing
   alias(libs.plugins.multiplatform.swiftpackage)
-  alias(libs.plugins.skie)
 }
 
 group = "net.avianlabs.solana"
 version = properties["version"] as String
 
 kotlin {
-  targetHierarchy.default()
+  applyDefaultHierarchyTemplate()
   explicitApi()
 
   jvm {
@@ -27,19 +25,28 @@ kotlin {
     }
   }
 
-  listOf(
-    iosArm64(),
-    iosSimulatorArm64(),
-  ).forEach { iosTarget ->
-    iosTarget.binaries.framework {
-      baseName = "SolanaKotlin"
-      export(project(":tweetnacl-multiplatform"))
-      isStatic = true
-    }
-  }
+  iosArm64()
+  iosSimulatorArm64()
 
   mingwX64()
   linuxX64()
+
+  @OptIn(ExperimentalSwiftExportDsl::class)
+  swiftExport {
+    // Root module name
+    moduleName = "SolanaKotlin"
+
+    // Collapse rule
+    flattenPackage = "net.avianlabs.solana"
+
+//    // Export external modules
+//    export(project(":tweetnacl-multiplatform")) {
+//      // Exported module name
+//      moduleName = "TweetNaCl"
+//      // Collapse exported dependency rule
+//      flattenPackage = "net.avianlabs.solana.tweetnacl"
+//    }
+  }
 
   sourceSets {
     val jvmMain by getting {
@@ -97,15 +104,6 @@ kotlin {
   }
 }
 
-skie {
-  features {
-    group("net.avianlabs.solana.tweetnacl") {
-      ClassInterop.CInteropFrameworkName("TweetNaClMultiplatform")
-      DefaultArgumentInterop.Enabled(true)
-    }
-  }
-}
-
 multiplatformSwiftPackage {
   swiftToolsVersion("5.9")
   targetPlatforms {
@@ -140,6 +138,7 @@ publishing {
       }
     }
   }
+
   publications {
     withType<MavenPublication> {
       pom {
