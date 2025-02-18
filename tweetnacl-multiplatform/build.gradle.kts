@@ -33,6 +33,8 @@ kotlin {
   ).forEach { iosTarget ->
     iosTarget.binaries.framework {
       baseName = "TweetNaClMultiplatform"
+      binaryOption("bundleId", "net.avianlabs.solana.tweetnacl")
+      binaryOption("bundleVersion", version.toString())
       isStatic = true
     }
   }
