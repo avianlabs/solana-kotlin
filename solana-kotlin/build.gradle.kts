@@ -32,6 +32,8 @@ kotlin {
     iosSimulatorArm64(),
   ).forEach { iosTarget ->
     iosTarget.binaries.framework {
+      binaryOption("bundleId", "net.avianlabs.solana")
+      binaryOption("bundleVersion", version.toString())
       baseName = "SolanaKotlin"
       export(project(":tweetnacl-multiplatform"))
       isStatic = true
@@ -103,6 +105,9 @@ skie {
       ClassInterop.CInteropFrameworkName("TweetNaClMultiplatform")
       DefaultArgumentInterop.Enabled(true)
     }
+  }
+  build {
+    produceDistributableFramework()
   }
 }
 
