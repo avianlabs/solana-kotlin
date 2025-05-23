@@ -1,52 +1,52 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base",
-    ":label(dependencies)",
-    ":automergePatch",
-    ":combinePatchMinorReleases",
-    ":prConcurrentLimit10",
-    ":timezone(Europe/London)",
-    "group:recommended",
-    "group:testNonMajor",
-    "workarounds:all"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:recommended',
+    ':label(dependencies)',
+    ':automergePatch',
+    ':combinePatchMinorReleases',
+    ':prConcurrentLimit10',
+    ':timezone(Europe/London)',
+    'group:recommended',
+    'group:testNonMajor',
+    'workarounds:all',
   ],
-  "schedule": "before 5am on Monday",
-  "prHourlyLimit": 0,
-  "lockFileMaintenance": {
-    "enabled": true
+  schedule: 'before 5am on Monday',
+  prHourlyLimit: 0,
+  lockFileMaintenance: {
+    enabled: true,
   },
-  "rebaseWhen": "never",
-  "packageRules": [
+  rebaseWhen: 'never',
+  packageRules: [
     {
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'pin',
+        'digest',
       ],
-      "automerge": true
+      automerge: true,
     },
     {
-      // Compose compiler, molecule and ksp are tightly coupled to Kotlin version.
-      "matchPackagePrefixes": [
-        "androidx.compose.compiler",
-        "app.cash.molecule",
-        "com.google.devtools.ksp",
-        "org.jetbrains.kotlin",
-        "co.touchlab.skie",
+      groupName: 'Kotlin/Compose',
+      matchPackageNames: [
+        'androidx.compose.compiler{/,}**',
+        'app.cash.molecule{/,}**',
+        'com.google.devtools.ksp{/,}**',
+        'org.jetbrains.kotlin{/,}**',
+        'co.touchlab.skie{/,}**',
       ],
-      "groupName": "Kotlin/Compose"
     },
     {
-      // First release used Kotlin version + project version which sorts higher than new versions.
-      "matchPackageNames": ["co.touchlab:cklib-gradle-plugin"],
-      "allowedVersions": "!/1\\.5\\.31\\.*/",
+      matchPackageNames: [
+        'co.touchlab:cklib-gradle-plugin',
+      ],
+      allowedVersions: '!/1\\.5\\.31\\.*/',
     },
   ],
-  "force": {
-    "constraints": {
-      "java": "= 18"
-    }
+  force: {
+    constraints: {
+      java: '= 18',
+    },
   },
 }
