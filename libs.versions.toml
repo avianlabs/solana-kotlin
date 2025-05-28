@@ -76,5 +76,5 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 nmcp = { id = "com.gradleup.nmcp", version = "0.0.9" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
-multiplatform-swiftpackage = { id = "io.github.luca992.multiplatform-swiftpackage", version = "2.2.3" }
+multiplatform-swiftpackage = { id = "io.github.luca992.multiplatform-swiftpackage", version = "2.2.4" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
