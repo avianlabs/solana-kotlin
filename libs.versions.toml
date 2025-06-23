@@ -67,7 +67,7 @@ kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotli
 androidCacheFix = { id = "org.gradle.android.cache-fix", version.ref = "androidCacheFix" }
 androidJunit5 = { id = "de.mannodermaus.android-junit5", version.ref = "androidJunit5" }
 androidLib = { id = "com.android.library", version.ref = "androidGradle" }
-cklib = { id = "co.touchlab.cklib", version = "0.3.3" }
+cklib = { id = "co.touchlab.cklib", version = "0.3.4" }
 detekt = { id = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 detektFormatting = { id = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
