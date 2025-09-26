@@ -47,6 +47,18 @@ public interface TokenProgram : Program {
     amount: ULong,
   ): TransactionInstruction
 
+  public fun approve(
+    source: PublicKey,
+    delegate: PublicKey,
+    owner: PublicKey,
+    amount: ULong,
+  ) : TransactionInstruction
+
+  public fun revoke(
+    source: PublicKey,
+    owner: PublicKey,
+  ) : TransactionInstruction
+
   public fun closeAccount(
     account: PublicKey,
     destination: PublicKey,
@@ -95,6 +107,62 @@ public interface TokenProgram : Program {
       data = Buffer()
         .writeByte(Instruction.Transfer.index.toInt())
         .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    public override fun approve(
+      source: PublicKey,
+      delegate: PublicKey,
+      owner: PublicKey,
+      amount: ULong
+    ): TransactionInstruction = createApproveInstruction(
+      source = source,
+      delegate = delegate,
+      owner = owner,
+      amount = amount,
+      programId = programId,
+    )
+
+    internal fun createApproveInstruction(
+      source: PublicKey,
+      delegate: PublicKey,
+      owner: PublicKey,
+      amount: ULong,
+      programId: PublicKey
+    ) = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(delegate, isSigner = false, isWritable = false),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Approve.index.toInt())
+        .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    public override fun revoke(
+      source: PublicKey,
+      owner: PublicKey,
+    ): TransactionInstruction = createRevokeInstruction(
+      source = source,
+      owner = owner,
+      programId = programId,
+    )
+
+    internal fun createRevokeInstruction(
+      source: PublicKey,
+      owner: PublicKey,
+      programId: PublicKey
+    ) = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Revoke.index.toInt())
         .readByteArray(),
     )
 

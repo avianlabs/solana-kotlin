@@ -2,7 +2,9 @@ package net.avianlabs.solana.domain.program
 
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
+import net.avianlabs.solana.domain.program.TokenProgram.Companion.createApproveInstruction
 import net.avianlabs.solana.domain.program.TokenProgram.Companion.createCloseAccountInstruction
+import net.avianlabs.solana.domain.program.TokenProgram.Companion.createRevokeInstruction
 import net.avianlabs.solana.domain.program.TokenProgram.Companion.createTransferCheckedInstruction
 
 
@@ -44,6 +46,28 @@ public interface Token2022Program : TokenProgram {
       amount: ULong,
     ): TransactionInstruction =
       error("Token2022Program does not support transfer, use transferChecked instead")
+
+    public override fun approve(
+      source: PublicKey,
+      delegate: PublicKey,
+      owner: PublicKey,
+      amount: ULong
+    ): TransactionInstruction = createApproveInstruction(
+      source = source,
+      delegate = delegate,
+      owner = owner,
+      amount = amount,
+      programId = programId,
+    )
+
+    public override fun revoke(
+      source: PublicKey,
+      owner: PublicKey,
+    ): TransactionInstruction = createRevokeInstruction(
+      source = source,
+      owner = owner,
+      programId = programId,
+    )
 
     public override fun closeAccount(
       account: PublicKey,
