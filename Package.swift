@@ -15,8 +15,8 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "SolanaKotlin",
-            url: "https://github.com/avianlabs/solana-kotlin/releases/download/0.3.4/SolanaKotlin.zip",
-            checksum: "5e2675c96dabd20456a0d83937484b51b65232e2459c3e8883c6ef909cd592c2"
+            url: "https://github.com/avianlabs/solana-kotlin/releases/download/0.3.5/SolanaKotlin.zip",
+            checksum: "a2adf0671a1b15920a3550c538f7b01ae0cb5e1d950cc0c60cb5054eb051ae21"
         ),
     ]
 )
