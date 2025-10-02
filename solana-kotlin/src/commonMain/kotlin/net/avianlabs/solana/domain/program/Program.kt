@@ -18,7 +18,7 @@ public interface Program {
       data: ByteArray,
     ): TransactionInstruction = TransactionInstruction(programId, keys, data)
 
-    internal fun findProgramAddress(
+    public fun findProgramAddress(
       seeds: List<ByteArray>,
       programId: PublicKey,
     ): ProgramDerivedAddress {
