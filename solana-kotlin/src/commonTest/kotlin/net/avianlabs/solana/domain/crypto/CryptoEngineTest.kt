@@ -22,10 +22,10 @@ class CryptoEngineTest {
     val transaction = Transaction.Builder()
       .addInstruction(
         SystemProgram.createAccount(
-          fromPublicKey = keypair.publicKey,
-          newAccountPublicKey = randomKey().publicKey,
-          lamports = 5000,
-          space = 0,
+          newAccount = randomKey().publicKey,
+          lamports = 5000UL,
+          space = 0UL,
+          programAddress = SystemProgram.programId,
         )
       )
       .setRecentBlockHash(Random.nextBytes(32).encodeToBase58String())

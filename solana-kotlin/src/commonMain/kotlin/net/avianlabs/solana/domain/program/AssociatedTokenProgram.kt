@@ -1,83 +1,76 @@
 package net.avianlabs.solana.domain.program
 
+import kotlin.UByte
 import net.avianlabs.solana.domain.core.AccountMeta
-import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
+import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
+import okio.Buffer
 
 public object AssociatedTokenProgram : Program {
-
   public override val programId: PublicKey =
-    PublicKey.fromBase58("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
+      PublicKey.fromBase58("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL")
 
-  public fun createAssociatedTokenAccountInstruction(
-    associatedProgramId: PublicKey = this.programId,
-    programId: PublicKey,
-    mint: PublicKey,
-    associatedAccount: PublicKey,
+  public fun createAssociatedToken(
+    ata: PublicKey,
     owner: PublicKey,
-    payer: PublicKey,
-  ): TransactionInstruction = buildCreateAssociatedTokenAccountInstruction(
-    payer = payer,
-    associatedAccount = associatedAccount,
-    owner = owner,
-    mint = mint,
+    mint: PublicKey,
+  ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
-    associatedProgramId = associatedProgramId,
-    bytes = byteArrayOf(),
-  )
-
-  public fun createAssociatedTokenAccountInstructionIdempotent(
-    associatedProgramId: PublicKey = this.programId,
-    programId: PublicKey,
-    mint: PublicKey,
-    associatedAccount: PublicKey,
-    owner: PublicKey,
-    payer: PublicKey,
-  ): TransactionInstruction = buildCreateAssociatedTokenAccountInstruction(
-    payer = payer,
-    associatedAccount = associatedAccount,
-    owner = owner,
-    mint = mint,
-    programId = programId,
-    associatedProgramId = associatedProgramId,
-    bytes = byteArrayOf(1),
-  )
-
-  private fun buildCreateAssociatedTokenAccountInstruction(
-    payer: PublicKey,
-    associatedAccount: PublicKey,
-    owner: PublicKey,
-    mint: PublicKey,
-    programId: PublicKey,
-    associatedProgramId: PublicKey,
-    bytes: ByteArray,
-  ): TransactionInstruction {
-    val keys = listOf(
-      AccountMeta(payer, isSigner = true, isWritable = true),
-      AccountMeta(associatedAccount, isSigner = false, isWritable = true),
+    keys = listOf(
       AccountMeta(owner, isSigner = false, isWritable = false),
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(SystemProgram.programId, isSigner = false, isWritable = false),
-      AccountMeta(programId, isSigner = false, isWritable = false),
-      AccountMeta(SystemProgram.SYSVAR_RENT_ACCOUNT, isSigner = false, isWritable = false)
-    )
+      AccountMeta(TokenProgram.programId, isSigner = false, isWritable = false),
+    ),
+    data = Buffer()
+      .writeByte(Instruction.CreateAssociatedToken.index.toInt())
+    .readByteArray(),
+  )
 
-    return TransactionInstruction(
-      keys = keys,
-      programId = associatedProgramId,
-      data = bytes,
-    )
+  public fun createAssociatedTokenIdempotent(
+    ata: PublicKey,
+    owner: PublicKey,
+    mint: PublicKey,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+      AccountMeta(owner, isSigner = false, isWritable = false),
+      AccountMeta(mint, isSigner = false, isWritable = false),
+      AccountMeta(SystemProgram.programId, isSigner = false, isWritable = false),
+      AccountMeta(TokenProgram.programId, isSigner = false, isWritable = false),
+    ),
+    data = Buffer()
+      .writeByte(Instruction.CreateAssociatedTokenIdempotent.index.toInt())
+    .readByteArray(),
+  )
+
+  public fun recoverNestedAssociatedToken(
+    nestedAssociatedAccountAddress: PublicKey,
+    nestedTokenMintAddress: PublicKey,
+    destinationAssociatedAccountAddress: PublicKey,
+    ownerAssociatedAccountAddress: PublicKey,
+    ownerTokenMintAddress: PublicKey,
+    walletAddress: PublicKey,
+  ): TransactionInstruction = createTransactionInstruction(
+    programId = programId,
+    keys = listOf(
+      AccountMeta(nestedTokenMintAddress, isSigner = false, isWritable = false),
+      AccountMeta(ownerTokenMintAddress, isSigner = false, isWritable = false),
+      AccountMeta(walletAddress, isSigner = true, isWritable = true),
+      AccountMeta(TokenProgram.programId, isSigner = false, isWritable = false),
+    ),
+    data = Buffer()
+      .writeByte(Instruction.RecoverNestedAssociatedToken.index.toInt())
+    .readByteArray(),
+  )
+
+  public enum class Instruction(
+    public val index: UByte,
+  ) {
+    CreateAssociatedToken(0u),
+    CreateAssociatedTokenIdempotent(1u),
+    RecoverNestedAssociatedToken(2u),
+    ;
   }
 }
-
-public fun PublicKey.associatedTokenAddress(
-  tokenMintAddress: PublicKey,
-  programId: PublicKey = TokenProgram.programId,
-): ProgramDerivedAddress = Program.findProgramAddress(
-  listOf(
-    bytes.copyOf(),
-    programId.toByteArray(),
-    tokenMintAddress.toByteArray()
-  ),
-  AssociatedTokenProgram.programId,
-)

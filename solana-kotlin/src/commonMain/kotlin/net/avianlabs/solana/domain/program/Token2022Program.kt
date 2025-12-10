@@ -1,100 +1,72 @@
 package net.avianlabs.solana.domain.program
 
-import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.domain.core.TransactionInstruction
-import net.avianlabs.solana.domain.program.TokenProgram.Companion.createApproveInstruction
-import net.avianlabs.solana.domain.program.TokenProgram.Companion.createCloseAccountInstruction
-import net.avianlabs.solana.domain.program.TokenProgram.Companion.createRevokeInstruction
-import net.avianlabs.solana.domain.program.TokenProgram.Companion.createTransferCheckedInstruction
+import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
-
-public interface Token2022Program : TokenProgram {
-
-  public enum class Extensions(
-    public val index: UByte,
-  ) {
-    TransferFeeExtension(26u),
-    ConfidentialTransferExtension(27u),
-    DefaultAccountStateExtension(28u),
-    Reallocate(29u),
-    MemoTransferExtension(30u),
-    CreateNativeMint(31u),
-    InitializeNonTransferableMint(32u),
-    InterestBearingMintExtension(33u),
-    CpiGuardExtension(34u),
-    InitializePermanentDelegate(35u),
-    TransferHookExtension(36u),
-    ConfidentialTransferFeeExtension(37u),
-    WithdrawalExcessLamports(38u),
-    MetadataPointerExtension(39u),
-  }
-
-  public companion object : Token2022Program, TokenProgram by TokenProgram.Companion {
-
+public object Token2022Program : Program {
     public override val programId: PublicKey =
-      PublicKey.fromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")
-
-    @Deprecated(
-      message = "Token2022Program does not support transfer, use transferChecked instead",
-      replaceWith = ReplaceWith("transferChecked(source, destination, owner, amount, decimals, mint)"),
-      level = DeprecationLevel.ERROR,
+        PublicKey.fromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")
+    
+    public fun transfer(
+        source: PublicKey,
+        destination: PublicKey,
+        authority: PublicKey,
+        amount: ULong,
+    ): TransactionInstruction = TokenProgram.createTransferInstruction(
+        source = source,
+        destination = destination,
+        authority = authority,
+        amount = amount,
+        programId = programId
     )
-    public override fun transfer(
-      source: PublicKey,
-      destination: PublicKey,
-      owner: PublicKey,
-      amount: ULong,
-    ): TransactionInstruction =
-      error("Token2022Program does not support transfer, use transferChecked instead")
-
-    public override fun approve(
-      source: PublicKey,
-      delegate: PublicKey,
-      owner: PublicKey,
-      amount: ULong
-    ): TransactionInstruction = createApproveInstruction(
-      source = source,
-      delegate = delegate,
-      owner = owner,
-      amount = amount,
-      programId = programId,
+    
+    public fun approve(
+        source: PublicKey,
+        delegate: PublicKey,
+        owner: PublicKey,
+        amount: ULong,
+    ): TransactionInstruction = TokenProgram.createApproveInstruction(
+        source = source,
+        delegate = delegate,
+        owner = owner,
+        amount = amount,
+        programId = programId
     )
-
-    public override fun revoke(
-      source: PublicKey,
-      owner: PublicKey,
-    ): TransactionInstruction = createRevokeInstruction(
-      source = source,
-      owner = owner,
-      programId = programId,
+    
+    public fun revoke(
+        source: PublicKey,
+        owner: PublicKey,
+    ): TransactionInstruction = TokenProgram.createRevokeInstruction(
+        source = source,
+        owner = owner,
+        programId = programId
     )
-
-    public override fun closeAccount(
-      account: PublicKey,
-      destination: PublicKey,
-      owner: PublicKey,
-    ): TransactionInstruction = createCloseAccountInstruction(
-      account = account,
-      destination = destination,
-      owner = owner,
-      programId = programId,
+    
+    public fun closeAccount(
+        account: PublicKey,
+        destination: PublicKey,
+        owner: PublicKey,
+    ): TransactionInstruction = TokenProgram.createCloseAccountInstruction(
+        account = account,
+        destination = destination,
+        owner = owner,
+        programId = programId
     )
-
-    public override fun transferChecked(
-      source: PublicKey,
-      mint: PublicKey,
-      destination: PublicKey,
-      owner: PublicKey,
-      amount: ULong,
-      decimals: UByte,
-    ): TransactionInstruction = createTransferCheckedInstruction(
-      source = source,
-      mint = mint,
-      destination = destination,
-      owner = owner,
-      amount = amount,
-      decimals = decimals,
-      programId = programId,
+    
+    public fun transferChecked(
+        source: PublicKey,
+        mint: PublicKey,
+        destination: PublicKey,
+        authority: PublicKey,
+        amount: ULong,
+        decimals: UByte,
+    ): TransactionInstruction = TokenProgram.createTransferCheckedInstruction(
+        source = source,
+        mint = mint,
+        destination = destination,
+        authority = authority,
+        amount = amount,
+        decimals = decimals,
+        programId = programId
     )
-  }
 }

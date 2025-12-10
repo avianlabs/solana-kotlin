@@ -55,7 +55,7 @@ public sealed class DecodedInstruction(
       val from: PublicKey,
       val to: PublicKey,
       val lamports: Long,
-    ) : SystemProgram(net.avianlabs.solana.domain.program.SystemProgram.Instruction.Transfer.index)
+    ) : SystemProgram(net.avianlabs.solana.domain.program.SystemProgram.Instruction.TransferSol.index)
 
     public data class CreateAccount(
       val from: PublicKey,
@@ -206,7 +206,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
       SystemProgram.programId -> {
         val programIndex = buffer.readInt().toUInt()
         when (programIndex) {
-          SystemProgram.Instruction.Transfer.index -> {
+          SystemProgram.Instruction.TransferSol.index -> {
             val (from, to) = accountsMeta!!
             DecodedInstruction.SystemProgram.Transfer(
               from = from.publicKey,

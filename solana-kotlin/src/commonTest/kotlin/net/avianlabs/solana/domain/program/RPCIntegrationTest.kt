@@ -47,23 +47,23 @@ class RPCIntegrationTest {
     println("Balance: $balance")
 
     val rentExempt =
-      client.getMinimumBalanceForRentExemption(SystemProgram.NONCE_ACCOUNT_LENGTH).result!!
+      client.getMinimumBalanceForRentExemption(SystemProgram.NONCE_LENGTH).result!!
 
     val blockhash = client.getLatestBlockhash().result!!.value
 
     val initTransaction = Transaction.Builder()
       .addInstruction(
         SystemProgram.createAccount(
-          fromPublicKey = keypair.publicKey,
-          newAccountPublicKey = nonceAccount.publicKey,
-          lamports = rentExempt,
-          space = SystemProgram.NONCE_ACCOUNT_LENGTH,
+          newAccount = nonceAccount.publicKey,
+          lamports = rentExempt.toULong(),
+          space = SystemProgram.NONCE_LENGTH.toULong(),
+          programAddress = SystemProgram.programId,
         )
       )
       .addInstruction(
-        SystemProgram.nonceInitialize(
+        SystemProgram.initializeNonceAccount(
           nonceAccount = nonceAccount.publicKey,
-          authorized = keypair.publicKey,
+          nonceAuthority = keypair.publicKey,
         )
       )
       .setRecentBlockHash(blockhash.blockhash)
@@ -88,16 +88,16 @@ class RPCIntegrationTest {
 
     val testTransaction = Transaction.Builder()
       .addInstruction(
-        SystemProgram.nonceAdvance(
+        SystemProgram.advanceNonceAccount(
           nonceAccount = nonceAccount.publicKey,
-          authorized = keypair.publicKey,
+          nonceAuthority = keypair.publicKey,
         )
       )
       .addInstruction(
-        SystemProgram.transfer(
-          fromPublicKey = keypair.publicKey,
-          toPublicKey = nonceAccount.publicKey,
-          lamports = 1_000_000_000,
+        SystemProgram.transferSol(
+          source = keypair.publicKey,
+          destination = nonceAccount.publicKey,
+          amount = 1_000_000_000UL,
         )
       )
       .setRecentBlockHash(nonce!!.nonce)
@@ -122,10 +122,10 @@ class RPCIntegrationTest {
     println("Keypair: ${keypair.publicKey}")
     val initTransaction = Transaction.Builder()
       .addInstruction(
-        SystemProgram.transfer(
+        SystemProgram.transferSol(
           keypair.publicKey,
           PublicKey.fromBase58("11111111111111111111111111111111"),
-          1,
+          1UL,
         )
       )
 
