@@ -19,7 +19,7 @@ class ProgramGenerator(private val program: ProgramNode) {
     val fileName = program.name.toPascalCase() + "Program"
     
     return FileSpec.builder(packageName, fileName)
-      .indent("  ") // Use 2 spaces
+      .indent("  ")
       .addImport("net.avianlabs.solana.domain.core", "AccountMeta", "TransactionInstruction")
       .addImport("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
       .addImport("net.avianlabs.solana.domain.program.Program.Companion", "createTransactionInstruction")
@@ -35,7 +35,6 @@ class ProgramGenerator(private val program: ProgramNode) {
       .addSuperinterface(ClassName(packageName, "Program"))
       .addProperty(generateProgramIdProperty())
       .apply {
-        // Add sysvar constants if they're used
         collectSysvarConstants().forEach { (name, address) ->
           addProperty(
             PropertySpec.builder(name, ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey"))
@@ -45,7 +44,6 @@ class ProgramGenerator(private val program: ProgramNode) {
           )
         }
         
-        // Add account size constants if present
         program.accounts.forEach { account ->
           account.size?.let { size ->
             val constName = "${account.name.toScreamingSnakeCase()}_LENGTH"
@@ -64,12 +62,10 @@ class ProgramGenerator(private val program: ProgramNode) {
         program.instructions.forEach { instruction ->
           addFunction(generateInstructionFunction(instruction))
           
-          // Generate deprecated wrappers for renamed functions
           DeprecationMapper.getDeprecationForInstruction(instruction.name)?.let { deprecation ->
             addFunction(DeprecatedFunctionGenerator(instruction, deprecation).generate())
           }
           
-          // Also generate internal version with programId parameter for Token2022 etc
           if (program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") {
             addFunction(generateInternalInstructionFunction(instruction))
           }
@@ -86,9 +82,8 @@ class ProgramGenerator(private val program: ProgramNode) {
           (defaultValue as? JsonObject)?.let { obj ->
             if (obj["kind"]?.jsonPrimitive?.content == "publicKeyValueNode") {
               val pubkey = obj["publicKey"]?.jsonPrimitive?.content
-              if (pubkey?.startsWith("Sysvar") == true) {
-                // Convert to proper constant name format
-                val name = account.name
+            if (pubkey?.startsWith("Sysvar") == true) {
+              val name = account.name
                   .replace(Regex("([a-z])([A-Z])"), "$1_$2")
                   .replace("Sysvar", "SYSVAR")
                   .uppercase()
@@ -138,7 +133,6 @@ class ProgramGenerator(private val program: ProgramNode) {
   }
   
   private fun getInstructionIndexType(): TypeName {
-    // Determine type based on first instruction's discriminator
     val firstInstruction = program.instructions.firstOrNull() ?: return UBYTE
     val discriminatorNode = firstInstruction.discriminators.firstOrNull() ?: return UBYTE
     
@@ -167,12 +161,15 @@ class ProgramGenerator(private val program: ProgramNode) {
     return FunSpec.builder(functionName)
       .addModifiers(KModifier.PUBLIC)
       .apply {
-        // Add account parameters (skip accounts with fixed defaults)
+        if (instruction.docs.isNotEmpty()) {
+          addKdoc(instruction.docs.joinToString("\n"))
+        }
+      }
+      .apply {
         instruction.accounts.forEach { account ->
           val shouldSkip = account.defaultValue?.let { defaultValue ->
             (defaultValue as? JsonObject)?.let { obj ->
               val kind = obj["kind"]?.jsonPrimitive?.content
-              // Skip payer and publicKey fixed addresses
               kind == "payerValueNode" || kind == "publicKeyValueNode"
             } ?: false
           } ?: false
@@ -184,7 +181,6 @@ class ProgramGenerator(private val program: ProgramNode) {
             )
           }
         }
-        // Add argument parameters
         nonDiscriminatorArgs.forEach { arg ->
           addParameter(
             arg.name.toCamelCase(),
@@ -214,7 +210,7 @@ class ProgramGenerator(private val program: ProgramNode) {
           val isSigner = when (val signerValue = account.isSigner) {
             is JsonPrimitive -> {
               if (signerValue.isString && signerValue.content == "either") {
-                true // Default to true for "either" case
+                true
               } else {
                 signerValue.booleanOrNull ?: true
               }
@@ -222,36 +218,29 @@ class ProgramGenerator(private val program: ProgramNode) {
             else -> true
           }
           
-          // Determine account reference
           val (accountRef, skip) = when {
             account.defaultValue != null -> {
               (account.defaultValue as? JsonObject)?.let { obj ->
                 when (obj["kind"]?.jsonPrimitive?.content) {
                   "publicKeyValueNode" -> {
                     val pubkey = obj["publicKey"]?.jsonPrimitive?.content ?: ""
-                    if (pubkey.startsWith("Sysvar")) {
-                      // Use sysvar constant
-                      val name = account.name
-                        .replace(Regex("([a-z])([A-Z])"), "$1_$2")
-                        .replace("Sysvar", "SYSVAR")
-                        .uppercase()
-                      name to false
-                    } else if (pubkey == "11111111111111111111111111111111") {
-                      // System program
-                      "SystemProgram.programId" to false
-                    } else if (pubkey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") {
-                      // Token program
-                      "TokenProgram.programId" to false
-                    } else if (pubkey.isNotEmpty()) {
-                      // Other fixed address - inline it
-                      "PublicKey.fromBase58(\"$pubkey\")" to false
-                    } else {
-                      account.name.toCamelCase() to false
+                    when {
+                      pubkey.startsWith("Sysvar") -> {
+                        val name = account.name
+                          .replace(Regex("([a-z])([A-Z])"), "$1_$2")
+                          .replace("Sysvar", "SYSVAR")
+                          .uppercase()
+                        name to false
+                      }
+                      pubkey == "11111111111111111111111111111111" -> "SystemProgram.programId" to false
+                      pubkey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" -> "TokenProgram.programId" to false
+                      pubkey.isNotEmpty() -> "PublicKey.fromBase58(\"$pubkey\")" to false
+                      else -> account.name.toCamelCase() to false
                     }
                   }
-                  "payerValueNode" -> null to true // Skip payer
-                  "pdaValueNode" -> null to true // Skip PDA (computed from seeds)
-                  "identityValueNode" -> account.name.toCamelCase() to false // Identity is parameter
+                  "payerValueNode" -> null to true
+                  "pdaValueNode" -> null to true
+                  "identityValueNode" -> account.name.toCamelCase() to false
                   else -> account.name.toCamelCase() to false
                 }
               } ?: (account.name.toCamelCase() to false)
@@ -274,7 +263,6 @@ class ProgramGenerator(private val program: ProgramNode) {
       .add("data = Buffer()\n")
       .indent()
       .apply {
-        // Write discriminator
         val discriminatorArg = instruction.arguments.find { arg ->
           instruction.discriminators.any { it.name == arg.name }
         }
@@ -284,7 +272,6 @@ class ProgramGenerator(private val program: ProgramNode) {
           else -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
         }
         
-        // Write arguments
         args.forEach { arg ->
           when (arg.type.format) {
             "u64" -> add(".writeLongLe(%L.toLong())\n", arg.name.toCamelCase())
@@ -302,9 +289,9 @@ class ProgramGenerator(private val program: ProgramNode) {
             }
           }
         }
+        add(".readByteArray(),\n")
       }
       .unindent()
-      .add(".readByteArray(),\n")
       .unindent()
       .add(")\n")
       .build()
@@ -354,7 +341,6 @@ class ProgramGenerator(private val program: ProgramNode) {
     return FunSpec.builder(functionName)
       .addModifiers(KModifier.INTERNAL)
       .apply {
-        // Add account parameters
         instruction.accounts.forEach { account ->
           val shouldSkip = account.defaultValue?.let { defaultValue ->
             (defaultValue as? JsonObject)?.let { obj ->
@@ -370,14 +356,12 @@ class ProgramGenerator(private val program: ProgramNode) {
             )
           }
         }
-        // Add argument parameters
         nonDiscriminatorArgs.forEach { arg ->
           addParameter(
             arg.name.toCamelCase(),
             mapTypeNodeToKotlinType(arg.type)
           )
         }
-        // Add programId parameter
         addParameter(
           "programId",
           ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
@@ -484,9 +468,9 @@ class ProgramGenerator(private val program: ProgramNode) {
             }
           }
         }
+        add(".readByteArray(),\n")
       }
       .unindent()
-      .add(".readByteArray(),\n")
       .unindent()
       .add(")\n")
       .build()
