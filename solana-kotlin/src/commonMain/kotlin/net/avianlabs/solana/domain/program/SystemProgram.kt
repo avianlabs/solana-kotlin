@@ -72,7 +72,7 @@ public object SystemProgram : Program {
   @Deprecated(
     message = "Use transferSol instead",
     replaceWith =
-        ReplaceWith("transferSol(fromPublicKey = fromPublicKey, toPublicKey = toPublicKey, amount = lamports)"),
+        ReplaceWith("transferSol(source = fromPublicKey, destination = toPublicKey, amount = lamports.toULong())"),
   )
   public fun transfer(
     fromPublicKey: PublicKey,

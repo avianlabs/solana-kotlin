@@ -9,6 +9,37 @@ dependencies {
     implementation(libs.okio)
 }
 
+tasks.register("syncIdl") {
+    group = "codegen"
+    description = "Download latest IDL files from Solana program repos"
+    
+    doLast {
+        val idlDir = file("idl")
+        idlDir.mkdirs()
+        
+        val idls = mapOf(
+            "system.json" to "https://raw.githubusercontent.com/solana-program/system/main/program/idl.json",
+            "token.json" to "https://raw.githubusercontent.com/solana-program/token/main/program/idl.json",
+            "compute-budget.json" to "https://raw.githubusercontent.com/solana-program/compute-budget/main/program/idl.json"
+        )
+        
+        idls.forEach { (filename, url) ->
+            val outputFile = idlDir.resolve(filename)
+            logger.lifecycle("Downloading $filename from $url")
+            
+            exec {
+                commandLine("curl", "-sL", url, "-o", outputFile.absolutePath)
+            }
+            
+            if (outputFile.exists() && outputFile.length() > 0) {
+                logger.lifecycle("  ✓ Downloaded ${outputFile.length()} bytes")
+            } else {
+                throw GradleException("Failed to download $filename")
+            }
+        }
+    }
+}
+
 tasks.register("generateSolanaCode", JavaExec::class) {
     group = "codegen"
     description = "Generate Solana program code from IDL files"

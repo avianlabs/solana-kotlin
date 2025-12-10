@@ -5,12 +5,22 @@ generates Kotlin code from Codama IDL files for Solana programs.
 ## Usage
 
 ```bash
-# generate all program code
+# download latest IDL files from upstream
+./gradlew :codegen:syncIdl
+
+# generate all program code from IDLs
 ./gradlew :codegen:generateSolanaCode
 
 # verify generated code is up-to-date (for CI)
 ./gradlew :codegen:checkGeneratedCode
 ```
+
+## Automation
+
+a github action (`.github/workflows/update_idl.yaml`) runs weekly to:
+- sync IDLs from upstream
+- regenerate code
+- create PR with changes
 
 ## Source of Truth
 
@@ -31,29 +41,16 @@ The following files are generated and should NOT be manually edited:
 
 ## Updating IDLs
 
-to update to the latest IDLs:
+automated via workflow or manually:
 
 ```bash
-cd codegen/idl
-
-# system program
-curl -sL https://raw.githubusercontent.com/solana-program/system/main/program/idl.json -o system.json
-
-# token program (includes ATA)
-curl -sL https://raw.githubusercontent.com/solana-program/token/main/program/idl.json -o token.json
-
-# compute budget
-curl -sL https://raw.githubusercontent.com/solana-program/compute-budget/main/program/idl.json -o compute-budget.json
-```
-
-then regenerate:
-
-```bash
-./gradlew :codegen:generateSolanaCode
+./gradlew :codegen:syncIdl :codegen:generateSolanaCode
 ```
 
 ## Architecture
 
 - `idl/CodamaIdl.kt` - data classes for parsing Codama IDL JSON
-- `generator/ProgramGenerator.kt` - KotlinPoet-based code generator
+- `generator/ProgramGenerator.kt` - main KotlinPoet code generator
+- `generator/DeprecationMapper.kt` - maps old API to new (for migration)
+- `generator/DeprecatedFunctionGenerator.kt` - generates backward-compat wrappers
 - `GeneratePrograms.kt` - main entry point
