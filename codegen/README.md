@@ -54,3 +54,14 @@ automated via workflow or manually:
 - `generator/DeprecationMapper.kt` - maps old API to new (for migration)
 - `generator/DeprecatedFunctionGenerator.kt` - generates backward-compat wrappers
 - `GeneratePrograms.kt` - main entry point
+
+## CI Integration
+
+add to your CI workflow:
+
+\`\`\`yaml
+- name: Check generated code
+  run: ./gradlew :codegen:checkGeneratedCode
+\`\`\`
+
+this task will fail if generated code differs from committed code, ensuring IDLs and generated output stay in sync.
