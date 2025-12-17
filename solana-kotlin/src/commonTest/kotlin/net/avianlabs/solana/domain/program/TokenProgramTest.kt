@@ -11,9 +11,9 @@ class TokenProgramTest {
     val tokenTransfer = TokenProgram.transferChecked(
       source = PublicKey(ByteArray(32)),
       destination = PublicKey(ByteArray(32)),
-      owner = PublicKey(ByteArray(32)),
-      amount = 0u,
-      decimals = 0u,
+      authority = PublicKey(ByteArray(32)),
+      amount = 0UL,
+      decimals = 0u.toUByte(),
       mint = PublicKey(ByteArray(32)),
     )
 
@@ -28,9 +28,9 @@ class TokenProgramTest {
     val token2022Transfer = Token2022Program.transferChecked(
       source = PublicKey(ByteArray(32)),
       destination = PublicKey(ByteArray(32)),
-      owner = PublicKey(ByteArray(32)),
-      amount = 0u,
-      decimals = 0u,
+      authority = PublicKey(ByteArray(32)),
+      amount = 0UL,
+      decimals = 0u.toUByte(),
       mint = PublicKey(ByteArray(32)),
     )
 
