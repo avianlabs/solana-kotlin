@@ -1,6 +1,7 @@
 package net.avianlabs.solana.codegen.generator
 
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import kotlinx.serialization.json.*
 import net.avianlabs.solana.codegen.idl.*
 
@@ -61,46 +62,63 @@ class ProgramGenerator(private val program: ProgramNode) {
           }
         }
 
-        DeprecationMapper.getDeprecatedConstantsForProgram(program.name).forEach { deprecatedConst ->
-          val type = when (deprecatedConst.type) {
-            DeprecationMapper.ConstantType.PUBLIC_KEY ->
-              ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
-            DeprecationMapper.ConstantType.LONG -> LONG
+        DeprecationMapper.getDeprecatedConstantsForProgram(program.name)
+          .forEach { deprecatedConst ->
+            val type = when (deprecatedConst.type) {
+              DeprecationMapper.ConstantType.PUBLIC_KEY ->
+                ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+
+              DeprecationMapper.ConstantType.LONG -> LONG
+            }
+            addProperty(
+              PropertySpec.builder(deprecatedConst.oldName, type)
+                .addModifiers(KModifier.PUBLIC)
+                .getter(
+                  FunSpec.getterBuilder().addStatement("return %L", deprecatedConst.newName).build()
+                )
+                .addAnnotation(
+                  AnnotationSpec.builder(Deprecated::class)
+                    .addMember("message = %S", "Use ${deprecatedConst.newName} instead")
+                    .addMember("replaceWith = ReplaceWith(%S)", deprecatedConst.newName)
+                    .build()
+                )
+                .build()
+            )
           }
-          addProperty(
-            PropertySpec.builder(deprecatedConst.oldName, type)
-              .addModifiers(KModifier.PUBLIC)
-              .getter(FunSpec.getterBuilder().addStatement("return %L", deprecatedConst.newName).build())
-              .addAnnotation(
-                AnnotationSpec.builder(Deprecated::class)
-                  .addMember("message = %S", "Use ${deprecatedConst.newName} instead")
-                  .addMember("replaceWith = ReplaceWith(%S)", deprecatedConst.newName)
-                  .build()
-              )
-              .build()
-          )
-        }
 
         program.definedTypes.forEach { definedType ->
-          if (definedType.type.kind == "enumTypeNode") {
-            addType(generateDefinedEnum(definedType))
+          when (definedType.type.kind) {
+            "enumTypeNode" -> {
+              val hasComplexVariants = definedType.type.variants?.any { 
+                it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+              } ?: false
+              
+              if (hasComplexVariants) {
+                addType(generateSealedClassEnum(definedType))
+              } else {
+                addType(generateDefinedEnum(definedType))
+              }
+            }
+            "structTypeNode" -> {
+              addType(generateDefinedStruct(definedType))
+            }
+            "fixedSizeTypeNode" -> addType(generateFixedSizeType(definedType))
           }
         }
 
-        if (program.instructions.isNotEmpty()) {
+        val numericInstructions = program.instructions.filter { hasNumericDiscriminator(it) }
+        if (numericInstructions.isNotEmpty()) {
           addType(generateInstructionEnum())
         }
-        val isTokenProgram = program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         program.instructions.forEach { instruction ->
-          if (isTokenProgram) {
-            addFunction(generateDelegatingInstructionFunction(instruction))
-            addFunction(generateInternalInstructionFunction(instruction))
-          } else {
-            addFunction(generateInstructionFunction(instruction))
-          }
+          addFunction(generateInstructionFunction(instruction))
 
           DeprecationMapper.getDeprecationForInstruction(instruction.name)?.let { deprecation ->
             addFunction(DeprecatedFunctionGenerator(instruction, deprecation).generate())
+          }
+
+          if (program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") {
+            addFunction(generateInternalInstructionFunction(instruction))
           }
         }
       }
@@ -141,6 +159,8 @@ class ProgramGenerator(private val program: ProgramNode) {
   }
 
   private fun generateInstructionEnum(): TypeSpec {
+    val numericInstructions = program.instructions.filter { hasNumericDiscriminator(it) }
+    
     return TypeSpec.enumBuilder("Instruction")
       .addModifiers(KModifier.PUBLIC)
       .primaryConstructor(
@@ -155,7 +175,7 @@ class ProgramGenerator(private val program: ProgramNode) {
           .build()
       )
       .apply {
-        program.instructions.forEach { instruction ->
+        numericInstructions.forEach { instruction ->
           val discriminator = getInstructionDiscriminator(instruction)
           addEnumConstant(
             instruction.name.toPascalCase(),
@@ -168,9 +188,15 @@ class ProgramGenerator(private val program: ProgramNode) {
       .build()
   }
 
+  private fun hasNumericDiscriminator(instruction: InstructionNode): Boolean {
+    val discriminatorNode = instruction.discriminators.firstOrNull() ?: return false
+    val argNode = instruction.arguments.find { it.name == discriminatorNode.name } ?: return false
+    return argNode.type.kind == "numberTypeNode"
+  }
+
   private fun generateDefinedEnum(definedType: DefinedTypeNode): TypeSpec {
     val enumType = definedType.type
-    val sizeType = enumType.size?.let { mapTypeNodeToKotlinType(it) } ?: UBYTE
+    val sizeType = getSizeTypeFromJson(enumType.size) ?: UBYTE
 
     return TypeSpec.enumBuilder(definedType.name.toPascalCase())
       .addModifiers(KModifier.PUBLIC)
@@ -196,6 +222,343 @@ class ProgramGenerator(private val program: ProgramNode) {
         }
       }
       .build()
+  }
+
+  private fun generateSealedClassEnum(definedType: DefinedTypeNode): TypeSpec {
+    val enumType = definedType.type
+    val className = definedType.name.toPascalCase()
+    val programClassName = program.name.toPascalCase() + "Program"
+
+    return TypeSpec.classBuilder(className)
+      .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
+      .addFunction(
+        FunSpec.builder("serialize")
+          .addModifiers(KModifier.PUBLIC, KModifier.ABSTRACT)
+          .returns(ClassName("kotlin", "ByteArray"))
+          .build()
+      )
+      .apply {
+        enumType.variants?.forEachIndexed { index, variant ->
+          val variantName = variant.name.toPascalCase()
+          when (variant.kind) {
+            "enumEmptyVariantTypeNode" -> {
+              addType(
+                TypeSpec.objectBuilder(variantName)
+                  .superclass(ClassName(packageName, programClassName, className))
+                  .addFunction(
+                    FunSpec.builder("serialize")
+                      .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                      .returns(ClassName("kotlin", "ByteArray"))
+                      .addStatement("return byteArrayOf(%L.toByte())", index)
+                      .build()
+                  )
+                  .build()
+              )
+            }
+            "enumStructVariantTypeNode" -> {
+              val structType = variant.struct
+              val fields = extractStructFields(structType)
+              
+              if (fields.isEmpty()) {
+                addType(
+                  TypeSpec.objectBuilder(variantName)
+                    .superclass(ClassName(packageName, programClassName, className))
+                    .addFunction(
+                      FunSpec.builder("serialize")
+                        .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                        .returns(ClassName("kotlin", "ByteArray"))
+                        .addStatement("return byteArrayOf(%L.toByte())", index)
+                        .build()
+                    )
+                    .build()
+                )
+              } else {
+                addType(
+                  TypeSpec.classBuilder(variantName)
+                    .addModifiers(KModifier.DATA)
+                    .superclass(ClassName(packageName, programClassName, className))
+                    .primaryConstructor(
+                      FunSpec.constructorBuilder()
+                        .apply {
+                          fields.forEach { field ->
+                            addParameter(field.name.toCamelCase(), mapTypeNodeToKotlinTypeSafe(field.type))
+                          }
+                        }
+                        .build()
+                    )
+                    .apply {
+                      fields.forEach { field ->
+                        addProperty(
+                          PropertySpec.builder(field.name.toCamelCase(), mapTypeNodeToKotlinTypeSafe(field.type))
+                            .initializer(field.name.toCamelCase())
+                            .build()
+                        )
+                      }
+                    }
+                    .addFunction(
+                      FunSpec.builder("serialize")
+                        .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                        .returns(ClassName("kotlin", "ByteArray"))
+                        .addCode(generateStructSerializeCode(index, fields))
+                        .build()
+                    )
+                    .build()
+                )
+              }
+            }
+            "enumTupleVariantTypeNode" -> {
+              val tupleType = variant.tuple
+              val items = tupleType?.items ?: emptyList()
+              
+              if (items.isEmpty()) {
+                addType(
+                  TypeSpec.objectBuilder(variantName)
+                    .superclass(ClassName(packageName, programClassName, className))
+                    .addFunction(
+                      FunSpec.builder("serialize")
+                        .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                        .returns(ClassName("kotlin", "ByteArray"))
+                        .addStatement("return byteArrayOf(%L.toByte())", index)
+                        .build()
+                    )
+                    .build()
+                )
+              } else {
+                addType(
+                  TypeSpec.classBuilder(variantName)
+                    .addModifiers(KModifier.DATA)
+                    .superclass(ClassName(packageName, programClassName, className))
+                    .primaryConstructor(
+                      FunSpec.constructorBuilder()
+                        .apply {
+                          items.forEachIndexed { idx, itemType ->
+                            addParameter("value$idx", mapTypeNodeToKotlinTypeSafe(itemType))
+                          }
+                        }
+                        .build()
+                    )
+                    .apply {
+                      items.forEachIndexed { idx, itemType ->
+                        addProperty(
+                          PropertySpec.builder("value$idx", mapTypeNodeToKotlinTypeSafe(itemType))
+                            .initializer("value$idx")
+                            .build()
+                        )
+                      }
+                    }
+                    .addFunction(
+                      FunSpec.builder("serialize")
+                        .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                        .returns(ClassName("kotlin", "ByteArray"))
+                        .addCode(generateTupleSerializeCode(index, items))
+                        .build()
+                    )
+                    .build()
+                )
+              }
+            }
+          }
+        }
+      }
+      .build()
+  }
+
+  private fun generateStructSerializeCode(discriminator: Int, fields: List<StructFieldTypeNode>): CodeBlock {
+    return CodeBlock.builder()
+      .addStatement("val buffer = Buffer()")
+      .addStatement("buffer.writeByte(%L)", discriminator)
+      .apply {
+        fields.forEach { field ->
+          val paramName = field.name.toCamelCase()
+          addStructFieldSerialization(paramName, field.type)
+        }
+      }
+      .addStatement("return buffer.readByteArray()")
+      .build()
+  }
+
+  private fun CodeBlock.Builder.addStructFieldSerialization(paramName: String, typeNode: TypeNode) {
+    when (typeNode.kind) {
+      "publicKeyTypeNode" -> addStatement("buffer.write(%L.bytes)", paramName)
+      "numberTypeNode" -> when (typeNode.format) {
+        "u64" -> addStatement("buffer.writeLongLe(%L.toLong())", paramName)
+        "i64" -> addStatement("buffer.writeLongLe(%L)", paramName)
+        "u8" -> addStatement("buffer.writeByte(%L.toInt())", paramName)
+        "i8" -> addStatement("buffer.writeByte(%L.toInt())", paramName)
+        "u32" -> addStatement("buffer.writeIntLe(%L.toInt())", paramName)
+        "i32" -> addStatement("buffer.writeIntLe(%L)", paramName)
+        "u16", "shortU16" -> addStatement("buffer.writeShortLe(%L.toInt())", paramName)
+        "i16" -> addStatement("buffer.writeShortLe(%L.toInt())", paramName)
+        "f32" -> addStatement("buffer.writeIntLe(%L.toRawBits())", paramName)
+        "f64" -> addStatement("buffer.writeLongLe(%L.toRawBits())", paramName)
+      }
+      "booleanTypeNode" -> addStatement("buffer.writeByte(if (%L) 1 else 0)", paramName)
+      "bytesTypeNode" -> addStatement("buffer.write(%L)", paramName)
+      "stringTypeNode" -> {
+        addStatement("val %LBytes = %L.encodeToByteArray()", paramName, paramName)
+        addStatement("buffer.writeIntLe(%LBytes.size)", paramName)
+        addStatement("buffer.write(%LBytes)", paramName)
+      }
+      "sizePrefixTypeNode" -> {
+        val innerType = typeNode.type
+        if (innerType?.kind == "stringTypeNode") {
+          addStatement("val %LBytes = %L.encodeToByteArray()", paramName, paramName)
+          addStatement("buffer.writeIntLe(%LBytes.size)", paramName)
+          addStatement("buffer.write(%LBytes)", paramName)
+        } else if (innerType != null) {
+          addStructFieldSerialization(paramName, innerType)
+        }
+      }
+      "fixedSizeTypeNode" -> {
+        val innerType = typeNode.type
+        if (innerType?.kind == "bytesTypeNode") {
+          addStatement("buffer.write(%L.bytes)", paramName)
+        } else if (innerType != null) {
+          addStructFieldSerialization(paramName, innerType)
+        }
+      }
+      "zeroableOptionTypeNode" -> {
+        val innerType = typeNode.item ?: return
+        val zeroSize = getTypeSize(innerType)
+        addStatement("if (%L != null) { buffer.write(%L.bytes) } else { buffer.write(ByteArray(%L)) }", paramName, paramName, zeroSize)
+      }
+      "optionTypeNode" -> {
+        val innerType = typeNode.item ?: return
+        addStatement("if (%L != null) { buffer.writeByte(1); buffer.write(%L.bytes) } else { buffer.writeByte(0) }", paramName, paramName)
+      }
+      "definedTypeLinkNode" -> {
+        val typeName = typeNode.name ?: ""
+        val definedType = program.definedTypes.find { it.name == typeName }
+        when (definedType?.type?.kind) {
+          "enumTypeNode" -> {
+            val hasComplexVariants = definedType.type.variants?.any { 
+              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+            } ?: false
+            if (hasComplexVariants) {
+              addStatement("buffer.write(%L.serialize())", paramName)
+            } else {
+              addStatement("buffer.writeByte(%L.value.toInt())", paramName)
+            }
+          }
+          "fixedSizeTypeNode" -> addStatement("buffer.write(%L.bytes)", paramName)
+          "structTypeNode" -> addStatement("buffer.write(%L.serialize())", paramName)
+          else -> addStatement("buffer.writeByte(%L.value.toInt())", paramName)
+        }
+      }
+      "amountTypeNode" -> {
+        val innerType = typeNode.number ?: return
+        addStructFieldSerialization(paramName, innerType)
+      }
+      else -> { }
+    }
+  }
+
+  private fun generateTupleSerializeCode(discriminator: Int, items: List<TypeNode>): CodeBlock {
+    return CodeBlock.builder()
+      .addStatement("val buffer = Buffer()")
+      .addStatement("buffer.writeByte(%L)", discriminator)
+      .apply {
+        items.forEachIndexed { idx, itemType ->
+          addStructFieldSerialization("value$idx", itemType)
+        }
+      }
+      .addStatement("return buffer.readByteArray()")
+      .build()
+  }
+
+  private fun extractStructFields(structType: TypeNode?): List<StructFieldTypeNode> {
+    if (structType == null) return emptyList()
+    
+    return when (structType.kind) {
+      "structTypeNode" -> structType.fields ?: emptyList()
+      "sizePrefixTypeNode" -> {
+        val innerType = structType.type
+        if (innerType?.kind == "structTypeNode") {
+          innerType.fields ?: emptyList()
+        } else {
+          emptyList()
+        }
+      }
+      else -> emptyList()
+    }
+  }
+
+  private fun generateDefinedStruct(definedType: DefinedTypeNode): TypeSpec {
+    val structType = definedType.type
+    val fields = structType.fields ?: emptyList()
+    val className = definedType.name.toPascalCase()
+
+    return TypeSpec.classBuilder(className)
+      .addModifiers(KModifier.PUBLIC, KModifier.DATA)
+      .primaryConstructor(
+        FunSpec.constructorBuilder()
+          .apply {
+            fields.forEach { field ->
+              addParameter(field.name.toCamelCase(), mapTypeNodeToKotlinTypeSafe(field.type))
+            }
+          }
+          .build()
+      )
+      .apply {
+        fields.forEach { field ->
+          addProperty(
+            PropertySpec.builder(field.name.toCamelCase(), mapTypeNodeToKotlinTypeSafe(field.type))
+              .initializer(field.name.toCamelCase())
+              .build()
+          )
+        }
+      }
+      .addFunction(
+        FunSpec.builder("serialize")
+          .addModifiers(KModifier.PUBLIC)
+          .returns(ClassName("kotlin", "ByteArray"))
+          .addCode(
+            CodeBlock.builder()
+              .addStatement("val buffer = Buffer()")
+              .apply {
+                fields.forEach { field ->
+                  addStructFieldSerialization(field.name.toCamelCase(), field.type)
+                }
+              }
+              .addStatement("return buffer.readByteArray()")
+              .build()
+          )
+          .build()
+      )
+      .build()
+  }
+
+  private fun generateFixedSizeType(definedType: DefinedTypeNode): TypeSpec {
+    val className = definedType.name.toPascalCase()
+    val size = (definedType.type.size as? JsonPrimitive)?.int ?: 32
+
+    return TypeSpec.classBuilder(className)
+      .addModifiers(KModifier.PUBLIC, KModifier.VALUE)
+      .addAnnotation(ClassName("kotlin.jvm", "JvmInline"))
+      .primaryConstructor(
+        FunSpec.constructorBuilder()
+          .addParameter("bytes", ClassName("kotlin", "ByteArray"))
+          .build()
+      )
+      .addProperty(
+        PropertySpec.builder("bytes", ClassName("kotlin", "ByteArray"))
+          .initializer("bytes")
+          .build()
+      )
+      .addInitializerBlock(
+        CodeBlock.builder()
+          .addStatement("require(bytes.size == %L) { %S }", size, "$className must be $size bytes")
+          .build()
+      )
+      .build()
+  }
+
+  private fun mapTypeNodeToKotlinTypeSafe(typeNode: TypeNode): TypeName {
+    return try {
+      mapTypeNodeToKotlinType(typeNode)
+    } catch (e: Exception) {
+      ANY
+    }
   }
 
   private fun getInstructionIndexType(): TypeName {
@@ -224,6 +587,8 @@ class ProgramGenerator(private val program: ProgramNode) {
       instruction.discriminators.none { it.name == arg.name }
     }
 
+    val isTokenProgram = program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+
     return FunSpec.builder(functionName)
       .addModifiers(KModifier.PUBLIC)
       .apply {
@@ -233,7 +598,37 @@ class ProgramGenerator(private val program: ProgramNode) {
       }
       .instructionParameters(instruction, nonDiscriminatorArgs)
       .returns(ClassName("net.avianlabs.solana.domain.core", "TransactionInstruction"))
-      .addCode(generateInstructionBody(instruction, nonDiscriminatorArgs))
+      .apply {
+        if (isTokenProgram) {
+          addCode(generateDelegationToInternal(instruction, nonDiscriminatorArgs))
+        } else {
+          addCode(generateInstructionBody(instruction, nonDiscriminatorArgs))
+        }
+      }
+      .build()
+  }
+
+  private fun generateDelegationToInternal(
+    instruction: InstructionNode,
+    args: List<InstructionArgumentNode>
+  ): CodeBlock {
+    val internalFunctionName = "create" + instruction.name.toPascalCase() + "Instruction"
+    val params = mutableListOf<String>()
+
+    instruction.accounts.forEach { account ->
+      val name = account.name.toCamelCase()
+      params.add("$name = $name")
+    }
+
+    args.forEach { arg ->
+      val name = if (arg.name.toCamelCase() == "programId") "targetProgramId" else arg.name.toCamelCase()
+      params.add("$name = $name")
+    }
+
+    params.add("programId = programId")
+
+    return CodeBlock.builder()
+      .addStatement("return %L(%L)", internalFunctionName, params.joinToString(", "))
       .build()
   }
 
@@ -248,7 +643,8 @@ class ProgramGenerator(private val program: ProgramNode) {
       )
     }
     nonDiscriminatorArgs.forEach { arg ->
-      addParameter(arg.name.toCamelCase(), mapTypeNodeToKotlinType(arg.type))
+      val paramName = if (arg.name.toCamelCase() == "programId") "targetProgramId" else arg.name.toCamelCase()
+      addParameter(paramName, mapTypeNodeToKotlinType(arg.type))
     }
     instruction.accounts.filter { it.hasPublicKeyDefault() }.forEach { account ->
       val defaultExpr = getDefaultExpression(account)
@@ -271,6 +667,7 @@ class ProgramGenerator(private val program: ProgramNode) {
           .uppercase()
         name
       }
+
       pubkey == "11111111111111111111111111111111" -> "SystemProgram.programId"
       pubkey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA" -> "TokenProgram.programId"
       pubkey.isNotEmpty() -> "PublicKey.fromBase58(\"$pubkey\")"
@@ -327,23 +724,36 @@ class ProgramGenerator(private val program: ProgramNode) {
     val discriminatorArg = instruction.arguments.find { arg ->
       instruction.discriminators.any { it.name == arg.name }
     }
-    when (discriminatorArg?.type?.format) {
-      "u8" -> add(".writeByte(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
-      "u32" -> add(
-        ".writeIntLe(Instruction.%L.index.toInt())\n",
-        instruction.name.toPascalCase()
-      )
 
-      else -> add(
-        ".writeIntLe(Instruction.%L.index.toInt())\n",
-        instruction.name.toPascalCase()
-      )
+    when (discriminatorArg?.type?.kind) {
+      "bytesTypeNode" -> {
+        val defaultValue = discriminatorArg.defaultValue as? JsonObject
+        val hexData = defaultValue?.get("data")?.jsonPrimitive?.content
+        if (hexData != null) {
+          val byteArrayLiteral = hexToByteArrayLiteral(hexData)
+          add(".write($byteArrayLiteral)\n")
+        }
+      }
+      "numberTypeNode" -> {
+        when (discriminatorArg.type.format) {
+          "u8" -> add(".writeByte(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+          "u32" -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+          else -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+        }
+      }
+      else -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
     }
 
     args.forEach { arg ->
-      addSerializationCode(arg.name.toCamelCase(), arg.type)
+      val paramName = if (arg.name.toCamelCase() == "programId") "targetProgramId" else arg.name.toCamelCase()
+      addSerializationCode(paramName, arg.type)
     }
     add(".readByteArray(),\n")
+  }
+
+  private fun hexToByteArrayLiteral(hex: String): String {
+    val hexPairs = hex.chunked(2)
+    return "byteArrayOf(${hexPairs.joinToString(", ") { "0x${it}.toByte()" }})"
   }
 
   private fun CodeBlock.Builder.addSerializationCode(paramName: String, typeNode: TypeNode) {
@@ -355,16 +765,20 @@ class ProgramGenerator(private val program: ProgramNode) {
         "i8" -> add(".writeByte(%L.toInt())\n", paramName)
         "u32" -> add(".writeIntLe(%L.toInt())\n", paramName)
         "i32" -> add(".writeIntLe(%L)\n", paramName)
-        "u16" -> add(".writeShortLe(%L.toInt())\n", paramName)
+        "u16", "shortU16" -> add(".writeShortLe(%L.toInt())\n", paramName)
         "i16" -> add(".writeShortLe(%L.toInt())\n", paramName)
+        "f32" -> add(".writeIntLe(%L.toRawBits())\n", paramName)
+        "f64" -> add(".writeLongLe(%L.toRawBits())\n", paramName)
       }
 
       "publicKeyTypeNode" -> add(".write(%L.bytes)\n", paramName)
       "stringTypeNode" -> add(".writeUtf8(%L)\n", paramName)
       "booleanTypeNode" -> add(".writeByte(if (%L) 1 else 0)\n", paramName)
+      "bytesTypeNode" -> add(".write(%L)\n", paramName)
+
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: error("optionTypeNode missing item")
-        val prefixFormat = typeNode.prefix?.format ?: "u8"
+        val prefixFormat = getPrefixFormat(typeNode.prefix) ?: "u32"
         add(".apply {\n")
         add("  if (%L != null) {\n", paramName)
         when (prefixFormat) {
@@ -385,9 +799,30 @@ class ProgramGenerator(private val program: ProgramNode) {
         add("}\n")
       }
 
+      "zeroableOptionTypeNode" -> {
+        val innerType = typeNode.item ?: error("zeroableOptionTypeNode missing item")
+        val zeroSize = getTypeSize(innerType)
+        add(".apply {\n")
+        add("  if (%L != null) {\n", paramName)
+        addSerializationCodeWithoutPrefix(paramName, innerType, "    ")
+        add("  } else {\n")
+        add("    write(ByteArray(%L))\n", zeroSize)
+        add("  }\n")
+        add("}\n")
+      }
+
+      "remainderOptionTypeNode" -> {
+        val innerType = typeNode.item ?: error("remainderOptionTypeNode missing item")
+        add(".apply {\n")
+        add("  if (%L != null) {\n", paramName)
+        add("    ").addSerializationCode(paramName, innerType)
+        add("  }\n")
+        add("}\n")
+      }
+
       "sizePrefixTypeNode" -> {
         val innerType = typeNode.type ?: error("sizePrefixTypeNode missing type")
-        val prefixFormat = typeNode.prefix?.format ?: "u64"
+        val prefixFormat = getPrefixFormat(typeNode.prefix) ?: "u64"
         if (innerType.kind == "stringTypeNode") {
           add(".apply {\n")
           add("  val bytes = %L.encodeToByteArray()\n", paramName)
@@ -400,19 +835,135 @@ class ProgramGenerator(private val program: ProgramNode) {
           }
           add("  write(bytes)\n")
           add("}\n")
+        } else {
+          addSerializationCode(paramName, innerType)
         }
       }
 
-      "definedTypeLinkNode" -> {
-        val backingFormat = typeNode.name?.let { name ->
-          program.definedTypes.find { it.name == name }?.type?.size?.format
+      "fixedSizeTypeNode" -> {
+        val innerType = typeNode.type ?: error("fixedSizeTypeNode missing type")
+        addSerializationCode(paramName, innerType)
+      }
+
+      "amountTypeNode" -> {
+        val innerType = typeNode.number ?: error("amountTypeNode missing number")
+        addSerializationCode(paramName, innerType)
+      }
+
+      "tupleTypeNode" -> {
+        val items = typeNode.items ?: error("tupleTypeNode missing items")
+        when (items.size) {
+          2 -> {
+            addSerializationCode("$paramName.first", items[0])
+            addSerializationCode("$paramName.second", items[1])
+          }
+          3 -> {
+            addSerializationCode("$paramName.first", items[0])
+            addSerializationCode("$paramName.second", items[1])
+            addSerializationCode("$paramName.third", items[2])
+          }
+          else -> error("Tuple with ${items.size} items not supported")
         }
-        when (backingFormat) {
-          "u16", "i16" -> add(".writeShortLe(%L.value.toInt())\n", paramName)
-          "u32", "i32" -> add(".writeIntLe(%L.value.toInt())\n", paramName)
+      }
+
+      "mapTypeNode" -> {
+        val keyType = typeNode.key ?: error("mapTypeNode missing key")
+        val valueType = typeNode.value ?: error("mapTypeNode missing value")
+        add(".apply {\n")
+        add("  writeIntLe(%L.size)\n", paramName)
+        add("  %L.forEach { (k, v) ->\n", paramName)
+        add("    ").addSerializationCode("k", keyType)
+        add("    ").addSerializationCode("v", valueType)
+        add("  }\n")
+        add("}\n")
+      }
+
+      "arrayTypeNode" -> {
+        val itemType = typeNode.item ?: error("arrayTypeNode missing item")
+        add(".apply {\n")
+        add("  %L.forEach { item ->\n", paramName)
+        addSerializationCodeWithoutPrefix("item", itemType, "    ")
+        add("  }\n")
+        add("}\n")
+      }
+
+      "definedTypeLinkNode" -> {
+        val typeName = typeNode.name ?: ""
+        val definedType = program.definedTypes.find { it.name == typeName }
+        when (definedType?.type?.kind) {
+          "enumTypeNode" -> {
+            val hasComplexVariants = definedType.type.variants?.any { 
+              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+            } ?: false
+            if (hasComplexVariants) {
+              add(".write(%L.serialize())\n", paramName)
+            } else {
+              add(".writeByte(%L.value.toInt())\n", paramName)
+            }
+          }
+          "fixedSizeTypeNode" -> add(".write(%L.bytes)\n", paramName)
+          "structTypeNode" -> add(".write(%L.serialize())\n", paramName)
           else -> add(".writeByte(%L.value.toInt())\n", paramName)
         }
       }
+
+      "hiddenPrefixTypeNode", "preOffsetTypeNode" -> {
+        val innerType = typeNode.type ?: error("${typeNode.kind} missing type")
+        addSerializationCode(paramName, innerType)
+      }
+    }
+  }
+
+  private fun getTypeSize(typeNode: TypeNode): Int {
+    return when (typeNode.kind) {
+      "publicKeyTypeNode" -> 32
+      "numberTypeNode" -> when (typeNode.format) {
+        "u8", "i8" -> 1
+        "u16", "i16" -> 2
+        "u32", "i32", "f32" -> 4
+        "u64", "i64", "f64" -> 8
+        else -> 8
+      }
+      "booleanTypeNode" -> 1
+      else -> 32 // default to pubkey size for zeroable options
+    }
+  }
+
+  private fun CodeBlock.Builder.addSerializationCodeWithoutPrefix(paramName: String, typeNode: TypeNode, indent: String = "") {
+    when (typeNode.kind) {
+      "publicKeyTypeNode" -> add("${indent}write(%L.bytes)\n", paramName)
+      "numberTypeNode" -> when (typeNode.format) {
+        "u64" -> add("${indent}writeLongLe(%L.toLong())\n", paramName)
+        "i64" -> add("${indent}writeLongLe(%L)\n", paramName)
+        "u8" -> add("${indent}writeByte(%L.toInt())\n", paramName)
+        "i8" -> add("${indent}writeByte(%L.toInt())\n", paramName)
+        "u32" -> add("${indent}writeIntLe(%L.toInt())\n", paramName)
+        "i32" -> add("${indent}writeIntLe(%L)\n", paramName)
+        "u16", "shortU16" -> add("${indent}writeShortLe(%L.toInt())\n", paramName)
+        "i16" -> add("${indent}writeShortLe(%L.toInt())\n", paramName)
+        "f32" -> add("${indent}writeIntLe(%L.toRawBits())\n", paramName)
+        "f64" -> add("${indent}writeLongLe(%L.toRawBits())\n", paramName)
+      }
+      "bytesTypeNode" -> add("${indent}write(%L)\n", paramName)
+      "definedTypeLinkNode" -> {
+        val typeName = typeNode.name ?: ""
+        val definedType = program.definedTypes.find { it.name == typeName }
+        when (definedType?.type?.kind) {
+          "enumTypeNode" -> {
+            val hasComplexVariants = definedType.type.variants?.any { 
+              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+            } ?: false
+            if (hasComplexVariants) {
+              add("${indent}write(%L.serialize())\n", paramName)
+            } else {
+              add("${indent}writeByte(%L.value.toInt())\n", paramName)
+            }
+          }
+          "fixedSizeTypeNode" -> add("${indent}write(%L.bytes)\n", paramName)
+          else -> add("${indent}writeByte(%L.value.toInt())\n", paramName)
+        }
+      }
+      else -> add("${indent}write(%L.serialize())\n", paramName)
     }
   }
 
@@ -427,14 +978,29 @@ class ProgramGenerator(private val program: ProgramNode) {
         "i16" -> SHORT
         "i32" -> INT
         "i64" -> LONG
+        "f32" -> FLOAT
+        "f64" -> DOUBLE
+        "shortU16" -> USHORT
         else -> error("Unsupported number format: ${typeNode.format}")
       }
 
       "publicKeyTypeNode" -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
       "stringTypeNode" -> STRING
       "booleanTypeNode" -> BOOLEAN
+      "bytesTypeNode" -> ClassName("kotlin", "ByteArray")
+
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: error("optionTypeNode missing item")
+        mapTypeNodeToKotlinType(innerType).copy(nullable = true)
+      }
+
+      "zeroableOptionTypeNode" -> {
+        val innerType = typeNode.item ?: error("zeroableOptionTypeNode missing item")
+        mapTypeNodeToKotlinType(innerType).copy(nullable = true)
+      }
+
+      "remainderOptionTypeNode" -> {
+        val innerType = typeNode.item ?: error("remainderOptionTypeNode missing item")
         mapTypeNodeToKotlinType(innerType).copy(nullable = true)
       }
 
@@ -443,45 +1009,75 @@ class ProgramGenerator(private val program: ProgramNode) {
         mapTypeNodeToKotlinType(innerType)
       }
 
+      "fixedSizeTypeNode" -> {
+        val innerType = typeNode.type ?: error("fixedSizeTypeNode missing type")
+        mapTypeNodeToKotlinType(innerType)
+      }
+
+      "amountTypeNode" -> {
+        val innerType = typeNode.number ?: error("amountTypeNode missing number")
+        mapTypeNodeToKotlinType(innerType)
+      }
+
+      "tupleTypeNode" -> {
+        val items = typeNode.items ?: error("tupleTypeNode missing items")
+        when (items.size) {
+          2 -> ClassName("kotlin", "Pair").parameterizedBy(
+            mapTypeNodeToKotlinType(items[0]),
+            mapTypeNodeToKotlinType(items[1])
+          )
+          3 -> ClassName("kotlin", "Triple").parameterizedBy(
+            mapTypeNodeToKotlinType(items[0]),
+            mapTypeNodeToKotlinType(items[1]),
+            mapTypeNodeToKotlinType(items[2])
+          )
+          else -> ClassName("kotlin", "List").parameterizedBy(ANY)
+        }
+      }
+
+      "mapTypeNode" -> {
+        val keyType = typeNode.key ?: error("mapTypeNode missing key")
+        val valueType = typeNode.value ?: error("mapTypeNode missing value")
+        ClassName("kotlin.collections", "Map").parameterizedBy(
+          mapTypeNodeToKotlinType(keyType),
+          mapTypeNodeToKotlinType(valueType)
+        )
+      }
+
+      "arrayTypeNode" -> {
+        val itemType = typeNode.item ?: error("arrayTypeNode missing item")
+        ClassName("kotlin.collections", "List").parameterizedBy(mapTypeNodeToKotlinType(itemType))
+      }
+
       "definedTypeLinkNode" -> {
         val typeName = typeNode.name ?: error("definedTypeLinkNode missing name")
         ClassName(packageName, program.name.toPascalCase() + "Program", typeName.toPascalCase())
       }
 
+      "hiddenPrefixTypeNode", "preOffsetTypeNode" -> {
+        val innerType = typeNode.type ?: error("${typeNode.kind} missing type")
+        mapTypeNodeToKotlinType(innerType)
+      }
+
+      "structTypeNode" -> ANY
+
       else -> error("Unsupported type node kind: ${typeNode.kind}")
     }
   }
 
-  private fun generateDelegatingInstructionFunction(instruction: InstructionNode): FunSpec {
-    val functionName = instruction.name.toCamelCase()
-    val internalName = "create" + instruction.name.toPascalCase() + "Instruction"
-    val nonDiscriminatorArgs = instruction.arguments.filter { arg ->
-      instruction.discriminators.none { it.name == arg.name }
-    }
+  private fun String.toPascalCase(): String {
+    return split('_', '-')
+      .joinToString("") { it.replaceFirstChar(Char::uppercaseChar) }
+  }
 
-    val paramNames = mutableListOf<String>()
-    instruction.accounts.filter { !it.hasPublicKeyDefault() }.forEach { account ->
-      paramNames.add("${account.name.toCamelCase()} = ${account.name.toCamelCase()}")
-    }
-    nonDiscriminatorArgs.forEach { arg ->
-      paramNames.add("${arg.name.toCamelCase()} = ${arg.name.toCamelCase()}")
-    }
-    instruction.accounts.filter { it.hasPublicKeyDefault() }.forEach { account ->
-      paramNames.add("${account.name.toCamelCase()} = ${account.name.toCamelCase()}")
-    }
-    paramNames.add("programId = programId")
+  private fun String.toCamelCase(): String {
+    val pascal = toPascalCase()
+    return pascal.replaceFirstChar(Char::lowercaseChar)
+  }
 
-    return FunSpec.builder(functionName)
-      .addModifiers(KModifier.PUBLIC)
-      .apply {
-        if (instruction.docs.isNotEmpty()) {
-          addKdoc(instruction.docs.joinToString("\n"))
-        }
-      }
-      .instructionParameters(instruction, nonDiscriminatorArgs)
-      .returns(ClassName("net.avianlabs.solana.domain.core", "TransactionInstruction"))
-      .addStatement("return %L(%L)", internalName, paramNames.joinToString(", "))
-      .build()
+  private fun String.toScreamingSnakeCase(): String {
+    return split('_', '-')
+      .joinToString("_") { it.uppercase() }
   }
 
   private fun generateInternalInstructionFunction(instruction: InstructionNode): FunSpec {
@@ -501,5 +1097,31 @@ class ProgramGenerator(private val program: ProgramNode) {
       .returns(ClassName("net.avianlabs.solana.domain.core", "TransactionInstruction"))
       .addCode(generateInstructionBody(instruction, nonDiscriminatorArgs))
       .build()
+  }
+
+  private fun getPrefixFormat(prefix: JsonElement?): String? {
+    if (prefix == null) return null
+    return when (prefix) {
+      is JsonObject -> prefix["format"]?.jsonPrimitive?.content
+      else -> null
+    }
+  }
+
+  private fun getSizeTypeFromJson(size: JsonElement?): TypeName? {
+    if (size == null) return null
+    return when (size) {
+      is JsonObject -> {
+        val format = size["format"]?.jsonPrimitive?.content
+        when (format) {
+          "u8" -> UBYTE
+          "u16" -> USHORT
+          "u32" -> UINT
+          "u64" -> ULONG
+          else -> null
+        }
+      }
+
+      else -> null
+    }
   }
 }
