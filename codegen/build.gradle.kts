@@ -20,6 +20,7 @@ tasks.register("syncIdl") {
         val idls = mapOf(
             "system.json" to "https://raw.githubusercontent.com/solana-program/system/main/program/idl.json",
             "token.json" to "https://raw.githubusercontent.com/solana-program/token/main/program/idl.json",
+            "token-2022.json" to "https://raw.githubusercontent.com/solana-program/token-2022/main/interface/idl.json",
             "compute-budget.json" to "https://raw.githubusercontent.com/solana-program/compute-budget/main/program/idl.json"
         )
         
@@ -58,6 +59,7 @@ tasks.register<Exec>("checkGeneratedCode") {
     commandLine("git", "diff", "--exit-code", 
         "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/SystemProgram.kt",
         "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/TokenProgram.kt",
+        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/Token2022Program.kt",
         "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/ComputeBudgetProgram.kt",
         "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/AssociatedTokenProgram.kt"
     )
