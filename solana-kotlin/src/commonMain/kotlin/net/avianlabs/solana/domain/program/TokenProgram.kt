@@ -44,8 +44,8 @@ public object TokenProgram : Program {
     mintAuthority: PublicKey,
     freezeAuthority: PublicKey?,
     rent: PublicKey = RENT,
-  ): TransactionInstruction = createInitializeMintInstruction(mint = mint, decimals = decimals,
-      mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, rent = rent, programId =
+  ): TransactionInstruction = createInitializeMintInstruction(mint = mint, rent = rent, decimals =
+      decimals, mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, programId =
       programId)
 
   internal fun createInitializeMintInstruction(
@@ -132,8 +132,8 @@ public object TokenProgram : Program {
     multisig: PublicKey,
     m: UByte,
     rent: PublicKey = RENT,
-  ): TransactionInstruction = createInitializeMultisigInstruction(multisig = multisig, m = m, rent =
-      rent, programId = programId)
+  ): TransactionInstruction = createInitializeMultisigInstruction(multisig = multisig, rent = rent,
+      m = m, programId = programId)
 
   internal fun createInitializeMultisigInstruction(
     multisig: PublicKey,
@@ -587,7 +587,7 @@ public object TokenProgram : Program {
     owner: PublicKey,
     rent: PublicKey = RENT,
   ): TransactionInstruction = createInitializeAccount2Instruction(account = account, mint = mint,
-      owner = owner, rent = rent, programId = programId)
+      rent = rent, owner = owner, programId = programId)
 
   internal fun createInitializeAccount2Instruction(
     account: PublicKey,

@@ -29,7 +29,7 @@ public object AssociatedTokenProgram : Program {
     owner: PublicKey,
     mint: PublicKey,
     systemProgram: PublicKey = SystemProgram.programId,
-    tokenProgram: PublicKey = TokenProgram.programId,
+    tokenProgram: PublicKey = PublicKey.fromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -72,7 +72,7 @@ public object AssociatedTokenProgram : Program {
     owner: PublicKey,
     mint: PublicKey,
     systemProgram: PublicKey = SystemProgram.programId,
-    tokenProgram: PublicKey = TokenProgram.programId,
+    tokenProgram: PublicKey = PublicKey.fromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -124,7 +124,7 @@ public object AssociatedTokenProgram : Program {
     ownerAssociatedAccountAddress: PublicKey,
     ownerTokenMintAddress: PublicKey,
     walletAddress: PublicKey,
-    tokenProgram: PublicKey = TokenProgram.programId,
+    tokenProgram: PublicKey = PublicKey.fromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
