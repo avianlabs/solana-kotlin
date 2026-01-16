@@ -1,0 +1,56 @@
+name: Update Solana IDLs
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-idl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Sync IDL files
+        run: ./gradlew :codegen:syncIdl
+
+      - name: Generate code
+        run: ./gradlew :codegen:generateSolanaCode
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        id: cpr
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "update Solana program IDLs and generated code"
+          title: "Update Solana IDLs"
+          body: |
+            automated update of Solana program IDLs from upstream repos:
+            - system program
+            - token program (includes ATA)
+            - compute budget program
+
+            regenerated Kotlin code to match.
+          branch: "update-solana-idls"
+          base: "main"
+          labels: "dependencies"
+
+      - name: PR Info
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
