@@ -15,15 +15,12 @@ group = "net.avianlabs.solana"
 version = properties["version"] as String
 
 kotlin {
-  targetHierarchy.default()
+  applyDefaultHierarchyTemplate()
   explicitApi()
 
   jvm {
-    // set the target JVM version
-    compilations.all {
-      kotlinOptions {
-        jvmTarget = "17"
-      }
+    compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
   }
 
@@ -122,8 +119,8 @@ multiplatformSwiftPackage {
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  kotlinOptions {
-    jvmTarget = "17"
+  compilerOptions {
+    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
   }
 }
 
