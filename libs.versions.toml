@@ -9,9 +9,9 @@ androidGradle = "8.13.2"
 androidJunit5 = "2.0.1"
 detekt = "1.23.8"
 jacoco = "0.8.7"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 mavenPublish = "0.36.0"
-skie = "0.10.9"
+skie = "0.10.10"
 
 # Libraries
 arrow = "2.1.2"
