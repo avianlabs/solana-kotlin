@@ -29,7 +29,7 @@ public suspend fun SolanaClient.sendTransaction(
 ): Response<String> = invoke(
   method = "sendTransaction",
   params = buildJsonArray {
-    add(transaction.serialize().encodeBase64())
+    add(transaction.serialize().toByteArray().encodeBase64())
     add(buildJsonObject {
       put("encoding", "base64")
       put("skipPreflight", skipPreflight)

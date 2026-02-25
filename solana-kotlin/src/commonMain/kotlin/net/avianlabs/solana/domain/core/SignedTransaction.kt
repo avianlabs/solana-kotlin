@@ -63,8 +63,6 @@ public data class SignedTransaction internal constructor(
     out.write(signaturesLength)
     signerKeys.forEach(out::write)
     out.write(signedMessage)
-    return out.readByteArray(bufferSize.toLong())
+    return SerializedTransaction(out.readByteArray(bufferSize.toLong()))
   }
 }
-
-public typealias SerializedTransaction = ByteArray
