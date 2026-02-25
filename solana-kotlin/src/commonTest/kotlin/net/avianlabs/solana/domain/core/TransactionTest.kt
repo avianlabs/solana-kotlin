@@ -28,7 +28,7 @@ class TransactionTest {
       .build()
       .sign(keypair)
 
-    val serialized = transaction.serialize().encodeBase64()
+    val serialized = transaction.serialize().toByteArray().encodeBase64()
     val expected =
       "AbY2fW8NzhzkDyTK3Av5Kn3/aBwxWWlGYjdMWHU4sLtT55yooXG3gKAFKCeQtYb7S86WOkWU6MVEsqP26vBw/gYBAA" +
           "IDqOvmfBiMqjpmh9Jg7DEAe1kg4Rnce0pv/ly9hIF7IyQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" +
@@ -64,7 +64,7 @@ class TransactionTest {
           "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZY5hBIuHu2Tv+5WayrPUoI8ytBhM3HsRYE3SA3zA6HoBAg" +
           "IBAQwCAAAAAQAAAAAAAAA="
 
-    assertEquals(expected, transaction.encodeBase64())
+    assertEquals(expected, transaction.toByteArray().encodeBase64())
   }
 
   @Test
@@ -94,6 +94,6 @@ class TransactionTest {
           "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGWOYQSLh7tk7/uVmsqz1KCPMrQYTNx7EWBN0gN8wOh6AQICAQ" +
           "EMAgAAAAEAAAAAAAAA"
 
-    assertEquals(expected, transaction.encodeBase64())
+    assertEquals(expected, transaction.toByteArray().encodeBase64())
   }
 }

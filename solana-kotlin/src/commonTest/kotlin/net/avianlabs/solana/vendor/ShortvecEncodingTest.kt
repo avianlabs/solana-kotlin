@@ -1,7 +1,9 @@
 package net.avianlabs.solana.vendor
 
+import okio.Buffer
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
 
 class ShortvecEncodingTest {
   @Test
@@ -42,5 +44,17 @@ class ShortvecEncodingTest {
       byteArrayOf(-128, -128, -128, 1)/* [0x80, 0x80, 0x80, 0x01] */,
       ShortVecEncoding.encodeLength(2097152) // 0x200000
     )
+  }
+
+  @Test
+  fun decodeLengthFromBufferedSource() {
+    val testCases = listOf(
+      0, 1, 5, 127, 128, 255, 256, 32767, 2097152,
+    )
+    for (value in testCases) {
+      val encoded = ShortVecEncoding.encodeLength(value)
+      val source = Buffer().apply { write(encoded) }
+      assertEquals(value, ShortVecEncoding.decodeLength(source), "Failed for value $value")
+    }
   }
 }

@@ -136,7 +136,7 @@ class RPCIntegrationTest {
 
 
     val serialized = toSimulate.sign(emptyList()).serialize()
-    println("Serialized: ${serialized.encodeBase64()}")
+    println("Serialized: ${serialized.toByteArray().encodeBase64()}")
 
     val simulated =
       client.simulateTransaction(toSimulate, sigVerify = false, replaceRecentBlockhash = true)

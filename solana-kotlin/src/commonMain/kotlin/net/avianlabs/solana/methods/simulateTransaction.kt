@@ -36,7 +36,7 @@ public suspend fun SolanaClient.simulateTransaction(
 ): Response<RPC<SimulateTransactionResponse>> = invoke(
   method = "simulateTransaction",
   params = buildJsonArray {
-    add(transaction.sign(emptyList()).serialize().encodeBase64())
+    add(transaction.sign(emptyList()).serialize().toByteArray().encodeBase64())
     addJsonObject {
       put("encoding", "base64")
       commitment?.let { put("commitment", it.value) }
