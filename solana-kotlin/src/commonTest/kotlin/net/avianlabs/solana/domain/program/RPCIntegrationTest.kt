@@ -9,7 +9,6 @@ import net.avianlabs.solana.client.RpcKtorClient
 import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.Transaction
 import net.avianlabs.solana.domain.core.decode
-import net.avianlabs.solana.domain.core.serialize
 import net.avianlabs.solana.methods.*
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
@@ -80,7 +79,7 @@ class RPCIntegrationTest {
     println("Initialized nonce account: $initSignature")
     delay(1.seconds)
 
-    val lamportsPerSignature = client.getFeeForMessage(initTransaction.message.serialize())
+    val lamportsPerSignature = client.getFeeForMessage(initTransaction.serializedMessage)
     println("Lamports per signature: $lamportsPerSignature")
 
     val nonce = client.getNonce(nonceAccount.publicKey, Commitment.Processed)

@@ -7,6 +7,7 @@ import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.client.Response.RPC
 import net.avianlabs.solana.domain.core.Commitment
+import net.avianlabs.solana.domain.core.SignedTransaction
 import net.avianlabs.solana.domain.core.Transaction
 
 /**
@@ -37,6 +38,53 @@ public suspend fun SolanaClient.simulateTransaction(
   method = "simulateTransaction",
   params = buildJsonArray {
     add(transaction.sign(emptyList()).serialize().toByteArray().encodeBase64())
+    addJsonObject {
+      put("encoding", "base64")
+      commitment?.let { put("commitment", it.value) }
+      sigVerify?.let { put("sigVerify", it) }
+      replaceRecentBlockhash?.let { put("replaceRecentBlockhash", it) }
+      minContextSlot?.let { put("minContextSlot", it.toString()) }
+      innerInstructions?.let { put("innerInstructions", it) }
+      accounts?.let {
+        putJsonObject("accounts") {
+          putJsonArray("addresses") {
+            it.forEach { add(it) }
+          }
+          put("encoding", "base58")
+        }
+      }
+    }
+  }
+)
+
+/**
+ * Simulate a signed transaction and return the result
+ *
+ * @param transaction Signed transaction to simulate
+ * @param commitment Commitment level to simulate the transaction at
+ * @param sigVerify if true the transaction signatures will be verified (conflicts with
+ * replaceRecentBlockhash)
+ * @param replaceRecentBlockhash if true the transaction recent blockhash will be replaced with the
+ * most recent blockhash. (conflicts with sigVerify)
+ * @param minContextSlot the minimum slot that the request can be evaluated at
+ * @param innerInstructions If true the response will include inner instructions. These inner
+ * instructions will be jsonParsed where possible, otherwise json.
+ * @param accounts Accounts configuration object
+ *
+ * @return Simulated transaction result
+ */
+public suspend fun SolanaClient.simulateTransaction(
+  transaction: SignedTransaction,
+  commitment: Commitment? = null,
+  sigVerify: Boolean? = null,
+  replaceRecentBlockhash: Boolean? = null,
+  minContextSlot: ULong? = null,
+  innerInstructions: Boolean? = null,
+  accounts: List<String>? = null,
+): Response<RPC<SimulateTransactionResponse>> = invoke(
+  method = "simulateTransaction",
+  params = buildJsonArray {
+    add(transaction.serialize().toByteArray().encodeBase64())
     addJsonObject {
       put("encoding", "base64")
       commitment?.let { put("commitment", it.value) }
