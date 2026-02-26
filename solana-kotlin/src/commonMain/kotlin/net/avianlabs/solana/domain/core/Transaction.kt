@@ -3,13 +3,13 @@ package net.avianlabs.solana.domain.core
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
-public open class Transaction internal constructor(
+public class Transaction internal constructor(
   public val message: Message,
 ) {
 
   public fun sign(signer: Signer): SignedTransaction = sign(listOf(signer))
 
-  public open fun sign(signers: List<Signer>): SignedTransaction {
+  public fun sign(signers: List<Signer>): SignedTransaction {
     val message = when (message.feePayer) {
       // fee payer is the first signer by default
       null -> message.newBuilder()
@@ -19,8 +19,8 @@ public open class Transaction internal constructor(
       else -> message
     }
 
-    val serializedMessage = message
-      .serialize()
+    val serializedMessage = message.serialize()
+    val signerKeys = message.accountKeys.filter { it.isSigner }.map { it.publicKey }
 
     val signatures = signers.associate { signer ->
       signer.publicKey to
@@ -28,9 +28,9 @@ public open class Transaction internal constructor(
     }
 
     return SignedTransaction(
-      originalMessage = message,
-      signedMessage = serializedMessage,
+      serializedMessage = serializedMessage,
       signatures = signatures,
+      signerKeys = signerKeys,
     )
   }
 
