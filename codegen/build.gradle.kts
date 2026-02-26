@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     kotlin("jvm")
     alias(libs.plugins.kotlinSerialization)
@@ -27,10 +29,12 @@ tasks.register("syncIdl") {
             val outputFile = idlDir.resolve(filename)
             logger.lifecycle("Downloading $filename from $url")
             
-            exec {
-                commandLine("curl", "-sL", url, "-o", outputFile.absolutePath)
+            URI(url).toURL().openStream().use { input ->
+                outputFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
             }
-            
+
             if (outputFile.exists() && outputFile.length() > 0) {
                 logger.lifecycle("  ✓ Downloaded ${outputFile.length()} bytes")
             } else {
