@@ -12,6 +12,8 @@
 ./gradlew mingwX64Test
 ```
 
+Linting uses **detekt** (runs as part of `check`). Swift package: `./gradlew :solana-kotlin:createSwiftPackage`.
+
 Integration tests (`RPCIntegrationTest`) are `@Ignore`d by default — they require a local `solana-test-validator` running.
 
 ## Project Structure
@@ -28,6 +30,8 @@ KMP targets: **JVM** (17+), **iosArm64**, **iosSimulatorArm64**, **linuxX64**, *
 
 Dependency versions are managed centrally in `libs.versions.toml`.
 
+Key versions: **Kotlin 2.3.0**, **Ktor 3.2.0**, **okio 3.16.4**, **Arrow 2.1.2**. Requires **Java 18+**.
+
 ## Code Style
 
 Configured in `.editorconfig`:
@@ -35,6 +39,8 @@ Configured in `.editorconfig`:
 - **Explicit API mode** enforced — all public declarations must have explicit `public` visibility
 
 ## Key Patterns
+
+**Solana wire format**: Transactions are `[compact-u16 sig count][64-byte signatures...][message bytes]`. Messages are `[3-byte header][compact-u16 account count][32-byte keys...][32-byte blockhash][instructions...]`. Compact-u16 is implemented in `ShortVecEncoding`.
 
 **RPC methods** are `suspend` extension functions on `SolanaClient`, one per file in `solana-kotlin/.../methods/`:
 ```kotlin
@@ -58,12 +64,16 @@ Transaction.Builder()
 
 **Serialization**: `kotlinx.serialization` for JSON-RPC payloads; `okio.Buffer` with little-endian encoding for binary transaction/instruction data.
 
+**Immutability convention**: `sign()` methods return new instances rather than mutating (see `SignedTransaction.sign()`). Prefer inline value classes over wrapper types when adding behavior to existing data types.
+
 ## Gotchas
 
 - **Memory**: Gradle needs `-Xmx3g` for native compilation (set in `gradle.properties`)
 - **iOS targets**: Require macOS with Xcode; builds on other OSes skip iOS automatically (`kotlin.native.ignoreDisabledTargets=true`)
 - **Explicit API**: All public symbols need explicit `public` modifier — the compiler will reject implicit visibility
 - **cinterop**: `tweetnacl-multiplatform` compiles C code via CKLib plugin; `.def` files live in `src/nativeInterop/cinterop/`
+- **SKIE**: Swift Kotlin Interop Engine is applied to `solana-kotlin` — changes to public API affect Swift package generation
+- **Versioning**: Version lives in `gradle.properties`. Snapshot builds use `-Psnapshot=true`. Releases publish to Maven Central via `publishAllPublicationsToCentralPortal`
 
 ## Testing
 
