@@ -98,6 +98,9 @@ kotlin {
 
 skie {
   features {
+    group("net.avianlabs.solana") {
+      DefaultArgumentInterop.Enabled(true)
+    }
     group("net.avianlabs.solana.tweetnacl") {
       ClassInterop.CInteropFrameworkName("TweetNaClMultiplatform")
       DefaultArgumentInterop.Enabled(true)
@@ -109,9 +112,9 @@ skie {
 }
 
 multiplatformSwiftPackage {
-  swiftToolsVersion("5.9")
+  swiftToolsVersion("5.10")
   targetPlatforms {
-    iOS { v("16") }
+    iOS { v("17") }
   }
   packageName("SolanaKotlin")
   zipFileName("SolanaKotlin")

@@ -1,11 +1,13 @@
 package net.avianlabs.solana.tweetnacl.ed25519
 
+import co.touchlab.skie.configuration.annotations.SkieVisibility
 import net.avianlabs.solana.tweetnacl.TweetNaCl
+import net.avianlabs.solana.tweetnacl.secureRandomBytes
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 
 public data class Ed25519Keypair(
   public val publicKey: PublicKey,
-  public val secretKey: ByteArray,
+  @property:SkieVisibility.PublicButReplaced public val secretKey: ByteArray,
 ) {
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -43,5 +45,8 @@ public data class Ed25519Keypair(
 
     public fun fromBase58(base58: String): Ed25519Keypair =
       fromSecretKeyBytes(base58.decodeBase58())
+
+    public fun generate(): Ed25519Keypair =
+      fromSecretKeyBytes(secureRandomBytes(32))
   }
 }
