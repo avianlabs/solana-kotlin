@@ -11,18 +11,24 @@ import net.avianlabs.solana.domain.core.Commitment
  *
  * @param signature Transaction signature, as base-58 encoded string
  * @param commitment Optional [Commitment] level
+ * @param maxSupportedTransactionVersion The max transaction version to return in responses.
+ *   If the requested transaction is a higher version, an error will be returned.
+ *   If omitted, only legacy transactions will be returned, and any versioned transaction
+ *   will prompt the error.
  *
  */
 public suspend fun SolanaClient.getTransaction(
   signature: String,
   commitment: Commitment? = null,
+  maxSupportedTransactionVersion: Int? = null,
 ): Response<TransactionResponse?> = invoke(
   method = "getTransaction",
   params = buildJsonArray {
     add(signature)
-    commitment?.let {
+    if (commitment != null || maxSupportedTransactionVersion != null) {
       addJsonObject {
-        put("commitment", it.value)
+        commitment?.let { put("commitment", it.value) }
+        maxSupportedTransactionVersion?.let { put("maxSupportedTransactionVersion", it) }
       }
     }
   }
@@ -34,6 +40,7 @@ public data class TransactionResponse(
   val slot: Long?,
   val transaction: Transaction?,
   val blockTime: Long?,
+  val version: JsonElement? = null,
 ) {
 
   @Serializable
@@ -56,6 +63,14 @@ public data class TransactionResponse(
     val header: Header,
     val instructions: List<Instruction>,
     val recentBlockhash: String,
+    val addressTableLookups: List<AddressTableLookup>? = null,
+  )
+
+  @Serializable
+  public data class AddressTableLookup(
+    val accountKey: String,
+    val writableIndexes: List<Int>,
+    val readonlyIndexes: List<Int>,
   )
 
   @Serializable
@@ -75,6 +90,7 @@ public data class TransactionResponse(
     val postBalances: List<Long>,
     val preBalances: List<Long>,
     val logMessages: List<String>?,
+    val loadedAddresses: LoadedAddresses? = null,
   ) {
 
     @Serializable
@@ -83,6 +99,12 @@ public data class TransactionResponse(
       val instructions: List<Instruction>,
     )
   }
+
+  @Serializable
+  public data class LoadedAddresses(
+    val writable: List<String> = emptyList(),
+    val readonly: List<String> = emptyList(),
+  )
 
   @Serializable
   public data class Transaction(

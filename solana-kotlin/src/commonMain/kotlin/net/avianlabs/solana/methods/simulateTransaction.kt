@@ -81,6 +81,7 @@ public suspend fun SolanaClient.simulateTransaction(
   minContextSlot: ULong? = null,
   innerInstructions: Boolean? = null,
   accounts: List<String>? = null,
+  maxSupportedTransactionVersion: Int? = null,
 ): Response<RPC<SimulateTransactionResponse>> = invoke(
   method = "simulateTransaction",
   params = buildJsonArray {
@@ -100,6 +101,7 @@ public suspend fun SolanaClient.simulateTransaction(
           put("encoding", "base58")
         }
       }
+      maxSupportedTransactionVersion?.let { put("maxSupportedTransactionVersion", it) }
     }
   }
 )

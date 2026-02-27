@@ -34,17 +34,28 @@ public value class SerializedTransaction(private val bytes: ByteArray) {
     // 3. Remaining bytes → messageBytes
     val messageBytes = source.readByteArray()
 
-    // 4. Parse message header: numRequiredSignatures (byte 0)
-    val numRequiredSignatures = messageBytes[0].toInt() and 0xFF
+    // 4. Detect versioned (V0) vs legacy message format.
+    //    Legacy: byte 0 is numRequiredSignatures (small value, high bit clear)
+    //    V0:     byte 0 is version prefix 0x80 (high bit set)
+    val headerOffset = if (messageBytes[0].toInt() and 0x80 != 0) {
+      val version = messageBytes[0].toInt() and 0x7F
+      require(version == 0) { "Unsupported transaction version: $version" }
+      1
+    } else {
+      0
+    }
 
-    // 5. Skip 2 header bytes (readonly signed + readonly unsigned),
+    // 5. Parse message header: numRequiredSignatures
+    val numRequiredSignatures = messageBytes[headerOffset].toInt() and 0xFF
+
+    // 6. Skip 2 header bytes (readonly signed + readonly unsigned),
     //    skip compact-u16 account count
     val messageSource = Buffer().apply {
-      write(messageBytes, 3, messageBytes.size - 3)
+      write(messageBytes, headerOffset + 3, messageBytes.size - (headerOffset + 3))
     }
     ShortVecEncoding.decodeLength(messageSource)
 
-    // 6. Read first numRequiredSignatures × 32-byte keys → signerKeys
+    // 7. Read first numRequiredSignatures × 32-byte keys → signerKeys
     val signerKeys = (0 until numRequiredSignatures).map {
       PublicKey(messageSource.readByteArray(TweetNaCl.Signature.PUBLIC_KEY_BYTES.toLong()))
     }
