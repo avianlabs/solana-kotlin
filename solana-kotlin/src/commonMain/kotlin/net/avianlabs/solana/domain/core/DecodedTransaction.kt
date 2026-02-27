@@ -176,7 +176,12 @@ private fun TransactionResponse.Message.isAccountSigner(index: Int): Boolean =
 
 public fun TransactionResponse.decode(): DecodedTransaction? {
   val message = transaction?.message ?: return null
-  val accounts = transaction.message.accountKeys.map { PublicKey.fromBase58(it) }
+  // For V0 transactions, the full account list includes addresses loaded from ALTs.
+  // Order: [static keys] + [writable from loadedAddresses] + [readonly from loadedAddresses]
+  val staticAccounts = transaction.message.accountKeys.map { PublicKey.fromBase58(it) }
+  val loadedWritable = meta?.loadedAddresses?.writable?.map { PublicKey.fromBase58(it) }.orEmpty()
+  val loadedReadonly = meta?.loadedAddresses?.readonly?.map { PublicKey.fromBase58(it) }.orEmpty()
+  val accounts = staticAccounts + loadedWritable + loadedReadonly
   val signatures = transaction.signatures.mapIndexed { index, signature ->
     SignaturePublicKeyPair(
       signature = if (signature == defaultSignature) null else signature.decodeBase58(),
