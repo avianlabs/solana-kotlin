@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./gradlew -Psnapshot=false properties --no-daemon --console=plain -q | grep "^version:" | awk '{printf $2}'
+sed -n 's/^version=//p' gradle.properties
