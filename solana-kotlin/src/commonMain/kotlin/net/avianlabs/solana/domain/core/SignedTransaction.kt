@@ -1,5 +1,6 @@
 package net.avianlabs.solana.domain.core
 
+import co.touchlab.skie.configuration.annotations.SkieVisibility
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
@@ -46,6 +47,7 @@ public data class SignedTransaction(
   override fun toString(): String =
     "SignedTransaction(signatures=${signatures.values.map { it.encodeToBase58String() }})"
 
+  @SkieVisibility.PublicButReplaced
   public fun serialize(includeNullSignatures: Boolean = false): SerializedTransaction {
     val orderedSigs = signerKeys.mapNotNull {
       signatures[it]

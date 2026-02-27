@@ -50,6 +50,7 @@ kotlin {
 
     val commonMain by getting {
       dependencies {
+        implementation(libs.skie.configurationAnnotations)
       }
     }
     val commonTest by getting {
@@ -101,9 +102,9 @@ cklib {
 }
 
 multiplatformSwiftPackage {
-  swiftToolsVersion("5.9")
+  swiftToolsVersion("5.10")
   targetPlatforms {
-    iOS { v("16") }
+    iOS { v("17") }
   }
   packageName("TweetNaClMultiplatform")
   distributionMode { local() }
