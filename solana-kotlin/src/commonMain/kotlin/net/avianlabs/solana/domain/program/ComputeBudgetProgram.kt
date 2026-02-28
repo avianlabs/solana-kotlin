@@ -3,7 +3,7 @@
 // Instead, update the IDL and regenerate using:
 // ./gradlew :codegen:generateSolanaCode
 //
-// IDL source: codegen/idl/computeBudget.json
+// IDL source: codegen/idl/compute-budget.json
 
 package net.avianlabs.solana.domain.program
 

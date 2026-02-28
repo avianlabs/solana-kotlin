@@ -53,7 +53,7 @@ public suspend fun SolanaClient.getBalance(
 **Transaction building** uses a Builder pattern:
 ```kotlin
 Transaction.Builder()
-  .addInstruction(SystemProgram.transfer(from, to, lamports))
+  .addInstruction(SystemProgram.transferSol(from, to, lamports))
   .setRecentBlockHash(blockhash)
   .setFeePayer(keypair.publicKey)
   .build()

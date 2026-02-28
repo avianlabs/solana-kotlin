@@ -44,26 +44,9 @@ public object TokenProgram : Program {
     mintAuthority: PublicKey,
     freezeAuthority: PublicKey?,
     rent: PublicKey = RENT,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMint.index.toInt())
-      .writeByte(decimals.toInt())
-      .write(mintAuthority.bytes)
-      .apply {
-        if (freezeAuthority != null) {
-          writeByte(1)
-          .write(freezeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
-      }
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createInitializeMintInstruction(mint = mint, decimals = decimals,
+      mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, rent = rent, programId =
+      programId)
 
   internal fun createInitializeMintInstruction(
     mint: PublicKey,
@@ -110,18 +93,8 @@ public object TokenProgram : Program {
     mint: PublicKey,
     owner: PublicKey,
     rent: PublicKey = RENT,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = false, isWritable = false),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount.index.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createInitializeAccountInstruction(account = account, mint = mint,
+      owner = owner, rent = rent, programId = programId)
 
   internal fun createInitializeAccountInstruction(
     account: PublicKey,
@@ -159,17 +132,8 @@ public object TokenProgram : Program {
     multisig: PublicKey,
     m: UByte,
     rent: PublicKey = RENT,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(multisig, isSigner = false, isWritable = true),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMultisig.index.toInt())
-      .writeByte(m.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createInitializeMultisigInstruction(multisig = multisig, m = m, rent =
+      rent, programId = programId)
 
   internal fun createInitializeMultisigInstruction(
     multisig: PublicKey,
@@ -198,18 +162,8 @@ public object TokenProgram : Program {
     destination: PublicKey,
     authority: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(destination, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Transfer.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createTransferInstruction(source = source, destination = destination,
+      authority = authority, amount = amount, programId = programId)
 
   internal fun createTransferInstruction(
     source: PublicKey,
@@ -239,18 +193,8 @@ public object TokenProgram : Program {
     `delegate`: PublicKey,
     owner: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(delegate, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Approve.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createApproveInstruction(source = source, delegate = delegate, owner =
+      owner, amount = amount, programId = programId)
 
   internal fun createApproveInstruction(
     source: PublicKey,
@@ -275,16 +219,7 @@ public object TokenProgram : Program {
    * Revokes the delegate's authority.
    */
   public fun revoke(source: PublicKey, owner: PublicKey): TransactionInstruction =
-      createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Revoke.index.toInt())
-      .readByteArray(),
-  )
+      createRevokeInstruction(source = source, owner = owner, programId = programId)
 
   internal fun createRevokeInstruction(
     source: PublicKey,
@@ -309,25 +244,8 @@ public object TokenProgram : Program {
     owner: PublicKey,
     authorityType: AuthorityType,
     newAuthority: PublicKey?,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(owned, isSigner = false, isWritable = true),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.SetAuthority.index.toInt())
-      .writeByte(authorityType.value.toInt())
-      .apply {
-        if (newAuthority != null) {
-          writeByte(1)
-          .write(newAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
-      }
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createSetAuthorityInstruction(owned = owned, owner = owner,
+      authorityType = authorityType, newAuthority = newAuthority, programId = programId)
 
   internal fun createSetAuthorityInstruction(
     owned: PublicKey,
@@ -363,18 +281,8 @@ public object TokenProgram : Program {
     token: PublicKey,
     mintAuthority: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(token, isSigner = false, isWritable = true),
-      AccountMeta(mintAuthority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.MintTo.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createMintToInstruction(mint = mint, token = token, mintAuthority =
+      mintAuthority, amount = amount, programId = programId)
 
   internal fun createMintToInstruction(
     mint: PublicKey,
@@ -404,18 +312,8 @@ public object TokenProgram : Program {
     mint: PublicKey,
     authority: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Burn.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createBurnInstruction(account = account, mint = mint, authority =
+      authority, amount = amount, programId = programId)
 
   internal fun createBurnInstruction(
     account: PublicKey,
@@ -444,17 +342,8 @@ public object TokenProgram : Program {
     account: PublicKey,
     destination: PublicKey,
     owner: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(destination, isSigner = false, isWritable = true),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.CloseAccount.index.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createCloseAccountInstruction(account = account, destination =
+      destination, owner = owner, programId = programId)
 
   internal fun createCloseAccountInstruction(
     account: PublicKey,
@@ -480,17 +369,8 @@ public object TokenProgram : Program {
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.FreezeAccount.index.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createFreezeAccountInstruction(account = account, mint = mint, owner =
+      owner, programId = programId)
 
   internal fun createFreezeAccountInstruction(
     account: PublicKey,
@@ -516,17 +396,8 @@ public object TokenProgram : Program {
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.ThawAccount.index.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createThawAccountInstruction(account = account, mint = mint, owner =
+      owner, programId = programId)
 
   internal fun createThawAccountInstruction(
     account: PublicKey,
@@ -561,20 +432,9 @@ public object TokenProgram : Program {
     authority: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(destination, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.TransferChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createTransferCheckedInstruction(source = source, mint = mint,
+      destination = destination, authority = authority, amount = amount, decimals = decimals,
+      programId = programId)
 
   internal fun createTransferCheckedInstruction(
     source: PublicKey,
@@ -614,20 +474,8 @@ public object TokenProgram : Program {
     owner: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(delegate, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.ApproveChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createApproveCheckedInstruction(source = source, mint = mint, delegate
+      = delegate, owner = owner, amount = amount, decimals = decimals, programId = programId)
 
   internal fun createApproveCheckedInstruction(
     source: PublicKey,
@@ -665,19 +513,8 @@ public object TokenProgram : Program {
     mintAuthority: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(token, isSigner = false, isWritable = true),
-      AccountMeta(mintAuthority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.MintToChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createMintToCheckedInstruction(mint = mint, token = token,
+      mintAuthority = mintAuthority, amount = amount, decimals = decimals, programId = programId)
 
   internal fun createMintToCheckedInstruction(
     mint: PublicKey,
@@ -714,19 +551,8 @@ public object TokenProgram : Program {
     authority: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.BurnChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createBurnCheckedInstruction(account = account, mint = mint, authority
+      = authority, amount = amount, decimals = decimals, programId = programId)
 
   internal fun createBurnCheckedInstruction(
     account: PublicKey,
@@ -760,18 +586,8 @@ public object TokenProgram : Program {
     mint: PublicKey,
     owner: PublicKey,
     rent: PublicKey = RENT,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount2.index.toInt())
-      .write(owner.bytes)
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createInitializeAccount2Instruction(account = account, mint = mint,
+      owner = owner, rent = rent, programId = programId)
 
   internal fun createInitializeAccount2Instruction(
     account: PublicKey,
@@ -799,15 +615,8 @@ public object TokenProgram : Program {
    * `system_instruction::transfer` to move lamports to a wrapped token
    * account, and needs to have its token `amount` field updated.
    */
-  public fun syncNative(account: PublicKey): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.SyncNative.index.toInt())
-      .readByteArray(),
-  )
+  public fun syncNative(account: PublicKey): TransactionInstruction =
+      createSyncNativeInstruction(account = account, programId = programId)
 
   internal fun createSyncNativeInstruction(account: PublicKey, programId: PublicKey):
       TransactionInstruction = createTransactionInstruction(
@@ -827,17 +636,8 @@ public object TokenProgram : Program {
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount3.index.toInt())
-      .write(owner.bytes)
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createInitializeAccount3Instruction(account = account, mint = mint,
+      owner = owner, programId = programId)
 
   internal fun createInitializeAccount3Instruction(
     account: PublicKey,
@@ -860,16 +660,7 @@ public object TokenProgram : Program {
    * Like InitializeMultisig, but does not require the Rent sysvar to be provided.
    */
   public fun initializeMultisig2(multisig: PublicKey, m: UByte): TransactionInstruction =
-      createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(multisig, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMultisig2.index.toInt())
-      .writeByte(m.toInt())
-      .readByteArray(),
-  )
+      createInitializeMultisig2Instruction(multisig = multisig, m = m, programId = programId)
 
   internal fun createInitializeMultisig2Instruction(
     multisig: PublicKey,
@@ -894,25 +685,8 @@ public object TokenProgram : Program {
     decimals: UByte,
     mintAuthority: PublicKey,
     freezeAuthority: PublicKey?,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMint2.index.toInt())
-      .writeByte(decimals.toInt())
-      .write(mintAuthority.bytes)
-      .apply {
-        if (freezeAuthority != null) {
-          writeByte(1)
-          .write(freezeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
-      }
-      .readByteArray(),
-  )
+  ): TransactionInstruction = createInitializeMint2Instruction(mint = mint, decimals = decimals,
+      mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, programId = programId)
 
   internal fun createInitializeMint2Instruction(
     mint: PublicKey,
@@ -948,15 +722,7 @@ public object TokenProgram : Program {
    * the return data as a little-endian `u64`.
    */
   public fun getAccountDataSize(mint: PublicKey): TransactionInstruction =
-      createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.GetAccountDataSize.index.toInt())
-      .readByteArray(),
-  )
+      createGetAccountDataSizeInstruction(mint = mint, programId = programId)
 
   internal fun createGetAccountDataSizeInstruction(mint: PublicKey, programId: PublicKey):
       TransactionInstruction = createTransactionInstruction(
@@ -979,15 +745,7 @@ public object TokenProgram : Program {
    * with the Associated Token Account program.
    */
   public fun initializeImmutableOwner(account: PublicKey): TransactionInstruction =
-      createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeImmutableOwner.index.toInt())
-      .readByteArray(),
-  )
+      createInitializeImmutableOwnerInstruction(account = account, programId = programId)
 
   internal fun createInitializeImmutableOwnerInstruction(account: PublicKey, programId: PublicKey):
       TransactionInstruction = createTransactionInstruction(
@@ -1011,16 +769,7 @@ public object TokenProgram : Program {
    * with `String::from_utf8`.
    */
   public fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction =
-      createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.AmountToUiAmount.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
+      createAmountToUiAmountInstruction(mint = mint, amount = amount, programId = programId)
 
   internal fun createAmountToUiAmountInstruction(
     mint: PublicKey,
@@ -1046,16 +795,7 @@ public object TokenProgram : Program {
    * the return data as a little-endian `u64`.
    */
   public fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction =
-      createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.UiAmountToAmount.index.toInt())
-      .writeUtf8(uiAmount)
-      .readByteArray(),
-  )
+      createUiAmountToAmountInstruction(mint = mint, uiAmount = uiAmount, programId = programId)
 
   internal fun createUiAmountToAmountInstruction(
     mint: PublicKey,
