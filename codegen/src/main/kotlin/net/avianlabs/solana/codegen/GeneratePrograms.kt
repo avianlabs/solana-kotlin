@@ -28,8 +28,8 @@ fun main() {
     val idlText = idlFile.readText()
     val rootNode = json.decodeFromString<RootNode>(idlText)
 
-    generateProgram(rootNode.program, outputDir)
-    rootNode.additionalPrograms.forEach { generateProgram(it, outputDir) }
+    generateProgram(rootNode.program, outputDir, idlFile.name)
+    rootNode.additionalPrograms.forEach { generateProgram(it, outputDir, idlFile.name) }
 
     println("  ✓ Generated ${rootNode.program.name}")
     if (rootNode.additionalPrograms.isNotEmpty()) {
@@ -40,7 +40,7 @@ fun main() {
   println("\n✓ Code generation complete!")
 }
 
-fun generateProgram(program: net.avianlabs.solana.codegen.idl.ProgramNode, outputDir: File) {
+fun generateProgram(program: net.avianlabs.solana.codegen.idl.ProgramNode, outputDir: File, idlFileName: String) {
   val generator = ProgramGenerator(program)
   val fileSpec = generator.generate()
 
@@ -53,7 +53,7 @@ fun generateProgram(program: net.avianlabs.solana.codegen.idl.ProgramNode, outpu
 // Instead, update the IDL and regenerate using:
 // ./gradlew :codegen:generateSolanaCode
 //
-// IDL source: codegen/idl/${program.name}.json
+// IDL source: codegen/idl/$idlFileName
 
 """
 
