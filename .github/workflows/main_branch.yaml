@@ -20,7 +20,7 @@ permissions:
 jobs:
   dependency-submission:
     name: Submit dependency graph
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -45,7 +45,7 @@ jobs:
 
   build:
     name: Build Project
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
