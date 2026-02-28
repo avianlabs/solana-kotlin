@@ -90,15 +90,17 @@ class ProgramGenerator(private val program: ProgramNode) {
         if (program.instructions.isNotEmpty()) {
           addType(generateInstructionEnum())
         }
+        val isTokenProgram = program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         program.instructions.forEach { instruction ->
-          addFunction(generateInstructionFunction(instruction))
+          if (isTokenProgram) {
+            addFunction(generateDelegatingInstructionFunction(instruction))
+            addFunction(generateInternalInstructionFunction(instruction))
+          } else {
+            addFunction(generateInstructionFunction(instruction))
+          }
 
           DeprecationMapper.getDeprecationForInstruction(instruction.name)?.let { deprecation ->
             addFunction(DeprecatedFunctionGenerator(instruction, deprecation).generate())
-          }
-
-          if (program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") {
-            addFunction(generateInternalInstructionFunction(instruction))
           }
         }
       }
@@ -362,7 +364,7 @@ class ProgramGenerator(private val program: ProgramNode) {
       "booleanTypeNode" -> add(".writeByte(if (%L) 1 else 0)\n", paramName)
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: error("optionTypeNode missing item")
-        val prefixFormat = typeNode.prefix?.format ?: "u32"
+        val prefixFormat = typeNode.prefix?.format ?: "u8"
         add(".apply {\n")
         add("  if (%L != null) {\n", paramName)
         when (prefixFormat) {
@@ -401,7 +403,16 @@ class ProgramGenerator(private val program: ProgramNode) {
         }
       }
 
-      "definedTypeLinkNode" -> add(".writeByte(%L.value.toInt())\n", paramName)
+      "definedTypeLinkNode" -> {
+        val backingFormat = typeNode.name?.let { name ->
+          program.definedTypes.find { it.name == name }?.type?.size?.format
+        }
+        when (backingFormat) {
+          "u16", "i16" -> add(".writeShortLe(%L.value.toInt())\n", paramName)
+          "u32", "i32" -> add(".writeIntLe(%L.value.toInt())\n", paramName)
+          else -> add(".writeByte(%L.value.toInt())\n", paramName)
+        }
+      }
     }
   }
 
@@ -441,18 +452,36 @@ class ProgramGenerator(private val program: ProgramNode) {
     }
   }
 
-  private fun mapTypeNodeToKotlinTypeSafe(typeNode: TypeNode): TypeName {
-    return try {
-      mapTypeNodeToKotlinType(typeNode)
-    } catch (e: IllegalStateException) {
-      System.err.println("Warning: unmapped type ${typeNode.kind}, falling back to Any")
-      ANY
+  private fun generateDelegatingInstructionFunction(instruction: InstructionNode): FunSpec {
+    val functionName = instruction.name.toCamelCase()
+    val internalName = "create" + instruction.name.toPascalCase() + "Instruction"
+    val nonDiscriminatorArgs = instruction.arguments.filter { arg ->
+      instruction.discriminators.none { it.name == arg.name }
     }
-  }
 
-  private fun String.toScreamingSnakeCase(): String {
-    return split('_', '-')
-      .joinToString("_") { it.uppercase() }
+    val paramNames = mutableListOf<String>()
+    instruction.accounts.filter { !it.hasPublicKeyDefault() }.forEach { account ->
+      paramNames.add("${account.name.toCamelCase()} = ${account.name.toCamelCase()}")
+    }
+    nonDiscriminatorArgs.forEach { arg ->
+      paramNames.add("${arg.name.toCamelCase()} = ${arg.name.toCamelCase()}")
+    }
+    instruction.accounts.filter { it.hasPublicKeyDefault() }.forEach { account ->
+      paramNames.add("${account.name.toCamelCase()} = ${account.name.toCamelCase()}")
+    }
+    paramNames.add("programId = programId")
+
+    return FunSpec.builder(functionName)
+      .addModifiers(KModifier.PUBLIC)
+      .apply {
+        if (instruction.docs.isNotEmpty()) {
+          addKdoc(instruction.docs.joinToString("\n"))
+        }
+      }
+      .instructionParameters(instruction, nonDiscriminatorArgs)
+      .returns(ClassName("net.avianlabs.solana.domain.core", "TransactionInstruction"))
+      .addStatement("return %L(%L)", internalName, paramNames.joinToString(", "))
+      .build()
   }
 
   private fun generateInternalInstructionFunction(instruction: InstructionNode): FunSpec {
