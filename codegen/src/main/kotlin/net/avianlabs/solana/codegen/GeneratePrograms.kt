@@ -2,12 +2,12 @@ package net.avianlabs.solana.codegen
 
 import kotlinx.serialization.json.Json
 import net.avianlabs.solana.codegen.generator.ProgramGenerator
+import net.avianlabs.solana.codegen.generator.toPascalCase
 import net.avianlabs.solana.codegen.idl.RootNode
 import java.io.File
 
 val json = Json {
   ignoreUnknownKeys = true
-  isLenient = true
 }
 
 fun main() {
@@ -61,9 +61,4 @@ fun generateProgram(program: net.avianlabs.solana.codegen.idl.ProgramNode, outpu
   fileSpec.writeTo(generatedCode)
 
   outputFile.writeText(header + generatedCode.toString())
-}
-
-private fun String.toPascalCase(): String {
-  return split('_', '-')
-    .joinToString("") { it.replaceFirstChar(Char::uppercaseChar) }
 }

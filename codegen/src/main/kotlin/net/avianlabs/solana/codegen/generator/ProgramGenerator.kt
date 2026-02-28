@@ -441,14 +441,13 @@ class ProgramGenerator(private val program: ProgramNode) {
     }
   }
 
-  private fun String.toPascalCase(): String {
-    return split('_', '-')
-      .joinToString("") { it.replaceFirstChar(Char::uppercaseChar) }
-  }
-
-  private fun String.toCamelCase(): String {
-    val pascal = toPascalCase()
-    return pascal.replaceFirstChar(Char::lowercaseChar)
+  private fun mapTypeNodeToKotlinTypeSafe(typeNode: TypeNode): TypeName {
+    return try {
+      mapTypeNodeToKotlinType(typeNode)
+    } catch (e: IllegalStateException) {
+      System.err.println("Warning: unmapped type ${typeNode.kind}, falling back to Any")
+      ANY
+    }
   }
 
   private fun String.toScreamingSnakeCase(): String {

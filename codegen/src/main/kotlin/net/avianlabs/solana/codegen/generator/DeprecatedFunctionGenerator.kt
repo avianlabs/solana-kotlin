@@ -80,6 +80,20 @@ class DeprecatedFunctionGenerator(
         ?: arg.name.toCamelCase()
       val argType = when (arg.type.kind) {
         "publicKeyTypeNode" -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+        "numberTypeNode" -> when (arg.type.format) {
+          "u8" -> BYTE
+          "u16" -> SHORT
+          "u32" -> INT
+          "u64" -> LONG
+          "i8" -> BYTE
+          "i16" -> SHORT
+          "i32" -> INT
+          "i64" -> LONG
+          "f32" -> FLOAT
+          "f64" -> DOUBLE
+          else -> LONG
+        }
+        "booleanTypeNode" -> BOOLEAN
         else -> LONG
       }
       addParameter(oldParamName, argType)
@@ -138,9 +152,4 @@ class DeprecatedFunctionGenerator(
     return params.joinToString(", ")
   }
 
-  private fun String.toCamelCase(): String {
-    val pascal = split('_', '-')
-      .joinToString("") { it.replaceFirstChar(Char::uppercaseChar) }
-    return pascal.replaceFirstChar(Char::lowercaseChar)
-  }
 }

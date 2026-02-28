@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     implementation(libs.serializationJson)
-    implementation("com.squareup:kotlinpoet:1.18.1")
+    implementation(libs.kotlinPoet)
     implementation(libs.okio)
 }
 
@@ -59,11 +59,8 @@ tasks.register<Exec>("checkGeneratedCode") {
     
     dependsOn("generateSolanaCode")
     
-    commandLine("git", "diff", "--exit-code", 
-        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/SystemProgram.kt",
-        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/TokenProgram.kt",
-        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/ComputeBudgetProgram.kt",
-        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/AssociatedTokenProgram.kt"
+    commandLine("git", "diff", "--exit-code",
+        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/"
     )
     
     doLast {
