@@ -133,7 +133,7 @@ class DeprecatedFunctionGenerator(
     instruction.accounts.forEach { account ->
       val oldName = deprecation.paramMapping[account.name.toCamelCase()]
         ?: account.name.toCamelCase()
-      params.add(oldName)
+      params.add("${account.name.toCamelCase()} = $oldName")
     }
 
     args.forEach { arg ->
@@ -146,7 +146,7 @@ class DeprecatedFunctionGenerator(
         "u32" -> "$oldName.toUInt()"
         else -> oldName
       }
-      params.add(conversion)
+      params.add("${arg.name.toCamelCase()} = $conversion")
     }
 
     return params.joinToString(", ")
