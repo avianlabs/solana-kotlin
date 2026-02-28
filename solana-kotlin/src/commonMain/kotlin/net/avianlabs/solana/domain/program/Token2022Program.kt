@@ -670,6 +670,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeTransferFeeConfig.index.toInt())
+      .writeByte(0) // TransferFee sub-discriminator
       .apply {
         if (transferFeeConfigAuthority != null) {
           writeByte(1)
@@ -716,6 +717,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.TransferCheckedWithFee.index.toInt())
+      .writeByte(1) // TransferFee sub-discriminator
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .writeLongLe(fee.toLong())
@@ -739,6 +741,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromMint.index.toInt())
+      .writeByte(2) // TransferFee sub-discriminator
       .readByteArray(),
   )
 
@@ -760,6 +763,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromAccounts.index.toInt())
+      .writeByte(3) // TransferFee sub-discriminator
       .writeByte(numTokenAccounts.toInt())
       .readByteArray(),
   )
@@ -780,6 +784,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.HarvestWithheldTokensToMint.index.toInt())
+      .writeByte(4) // TransferFee sub-discriminator
       .readByteArray(),
   )
 
@@ -800,6 +805,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.SetTransferFee.index.toInt())
+      .writeByte(5) // TransferFee sub-discriminator
       .writeShortLe(transferFeeBasisPoints.toInt())
       .writeLongLe(maximumFee.toLong())
       .readByteArray(),
@@ -828,6 +834,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeConfidentialTransferMint.index.toInt())
+      .writeByte(0) // ConfidentialTransfer sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -865,6 +872,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateConfidentialTransferMint.index.toInt())
+      .writeByte(1) // ConfidentialTransfer sub-discriminator
       .writeByte(if (autoApproveNewAccounts) 1 else 0)
       .apply {
         if (auditorElgamalPubkey != null) {
@@ -915,6 +923,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfigureConfidentialTransferAccount.index.toInt())
+      .writeByte(2) // ConfidentialTransfer sub-discriminator
       .write(decryptableZeroBalance.bytes)
       .writeLongLe(maximumPendingBalanceCreditCounter.toLong())
       .writeByte(proofInstructionOffset.toInt())
@@ -943,6 +952,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ApproveConfidentialTransferAccount.index.toInt())
+      .writeByte(3) // ConfidentialTransfer sub-discriminator
       .readByteArray(),
   )
 
@@ -983,6 +993,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EmptyConfidentialTransferAccount.index.toInt())
+      .writeByte(4) // ConfidentialTransfer sub-discriminator
       .writeByte(proofInstructionOffset.toInt())
       .readByteArray(),
   )
@@ -1013,6 +1024,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialDeposit.index.toInt())
+      .writeByte(5) // ConfidentialTransfer sub-discriminator
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .readByteArray(),
@@ -1058,6 +1070,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialWithdraw.index.toInt())
+      .writeByte(6) // ConfidentialTransfer sub-discriminator
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .write(newDecryptableAvailableBalance.bytes)
@@ -1108,6 +1121,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialTransfer.index.toInt())
+      .writeByte(7) // ConfidentialTransfer sub-discriminator
       .write(newSourceDecryptableAvailableBalance.bytes)
       .writeByte(equalityProofInstructionOffset.toInt())
       .writeByte(ciphertextValidityProofInstructionOffset.toInt())
@@ -1141,6 +1155,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ApplyConfidentialPendingBalance.index.toInt())
+      .writeByte(8) // ConfidentialTransfer sub-discriminator
       .writeLongLe(expectedPendingBalanceCreditCounter.toLong())
       .write(newDecryptableAvailableBalance.bytes)
       .readByteArray(),
@@ -1159,6 +1174,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableConfidentialCredits.index.toInt())
+      .writeByte(9) // ConfidentialTransfer sub-discriminator
       .readByteArray(),
   )
 
@@ -1181,6 +1197,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableConfidentialCredits.index.toInt())
+      .writeByte(10) // ConfidentialTransfer sub-discriminator
       .readByteArray(),
   )
 
@@ -1197,6 +1214,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableNonConfidentialCredits.index.toInt())
+      .writeByte(11) // ConfidentialTransfer sub-discriminator
       .readByteArray(),
   )
 
@@ -1216,6 +1234,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableNonConfidentialCredits.index.toInt())
+      .writeByte(12) // ConfidentialTransfer sub-discriminator
       .readByteArray(),
   )
 
@@ -1272,6 +1291,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialTransferWithFee.index.toInt())
+      .writeByte(13) // ConfidentialTransfer sub-discriminator
       .write(newSourceDecryptableAvailableBalance.bytes)
       .writeByte(equalityProofInstructionOffset.toInt())
       .writeByte(transferAmountCiphertextValidityProofInstructionOffset.toInt())
@@ -1299,6 +1319,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeDefaultAccountState.index.toInt())
+      .writeByte(0) // DefaultAccountState sub-discriminator
       .writeByte(state.value.toInt())
       .readByteArray(),
   )
@@ -1319,6 +1340,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateDefaultAccountState.index.toInt())
+      .writeByte(1) // DefaultAccountState sub-discriminator
       .writeByte(state.value.toInt())
       .readByteArray(),
   )
@@ -1346,7 +1368,7 @@ public object Token2022Program : Program {
       .writeByte(Instruction.Reallocate.index.toInt())
       .apply {
         newExtensionTypes.forEach { item ->
-          writeByte(item.value.toInt())
+          writeShortLe(item.value.toInt())
         }
       }
       .readByteArray(),
@@ -1365,6 +1387,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableMemoTransfers.index.toInt())
+      .writeByte(0) // MemoTransfers sub-discriminator
       .readByteArray(),
   )
 
@@ -1383,6 +1406,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableMemoTransfers.index.toInt())
+      .writeByte(1) // MemoTransfers sub-discriminator
       .readByteArray(),
   )
 
@@ -1446,6 +1470,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeInterestBearingMint.index.toInt())
+      .writeByte(0) // InterestBearingMint sub-discriminator
       .apply {
         if (rateAuthority != null) {
           write(rateAuthority.bytes)
@@ -1473,6 +1498,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateRateInterestBearingMint.index.toInt())
+      .writeByte(1) // InterestBearingMint sub-discriminator
       .writeShortLe(rate.toInt())
       .readByteArray(),
   )
@@ -1495,6 +1521,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableCpiGuard.index.toInt())
+      .writeByte(0) // CpiGuard sub-discriminator
       .readByteArray(),
   )
 
@@ -1512,6 +1539,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableCpiGuard.index.toInt())
+      .writeByte(1) // CpiGuard sub-discriminator
       .readByteArray(),
   )
 
@@ -1556,6 +1584,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeTransferHook.index.toInt())
+      .writeByte(0) // TransferHook sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1594,6 +1623,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateTransferHook.index.toInt())
+      .writeByte(1) // TransferHook sub-discriminator
       .apply {
         if (targetProgramId != null) {
           write(targetProgramId.bytes)
@@ -1624,6 +1654,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeConfidentialTransferFee.index.toInt())
+      .writeByte(0) // ConfidentialTransferFee sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1671,6 +1702,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromMintForConfidentialTransferFee.index.toInt())
+      .writeByte(1) // ConfidentialTransferFee sub-discriminator
       .writeByte(proofInstructionOffset.toInt())
       .write(newDecryptableAvailableBalance.bytes)
       .readByteArray(),
@@ -1703,6 +1735,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromAccountsForConfidentialTransferFee.index.toInt())
+      .writeByte(2) // ConfidentialTransferFee sub-discriminator
       .writeByte(numTokenAccounts.toInt())
       .writeByte(proofInstructionOffset.toInt())
       .write(newDecryptableAvailableBalance.bytes)
@@ -1725,6 +1758,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.HarvestWithheldTokensToMintForConfidentialTransferFee.index.toInt())
+      .writeByte(3) // ConfidentialTransferFee sub-discriminator
       .readByteArray(),
   )
 
@@ -1740,6 +1774,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableHarvestToMint.index.toInt())
+      .writeByte(4) // ConfidentialTransferFee sub-discriminator
       .readByteArray(),
   )
 
@@ -1755,6 +1790,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableHarvestToMint.index.toInt())
+      .writeByte(5) // ConfidentialTransferFee sub-discriminator
       .readByteArray(),
   )
 
@@ -1800,6 +1836,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeMetadataPointer.index.toInt())
+      .writeByte(0) // MetadataPointer sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1833,6 +1870,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateMetadataPointer.index.toInt())
+      .writeByte(1) // MetadataPointer sub-discriminator
       .apply {
         if (metadataAddress != null) {
           write(metadataAddress.bytes)
@@ -1864,6 +1902,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeGroupPointer.index.toInt())
+      .writeByte(0) // GroupPointer sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1897,6 +1936,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateGroupPointer.index.toInt())
+      .writeByte(1) // GroupPointer sub-discriminator
       .apply {
         if (groupAddress != null) {
           write(groupAddress.bytes)
@@ -1928,6 +1968,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeGroupMemberPointer.index.toInt())
+      .writeByte(0) // GroupMemberPointer sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1961,6 +2002,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateGroupMemberPointer.index.toInt())
+      .writeByte(1) // GroupMemberPointer sub-discriminator
       .apply {
         if (memberAddress != null) {
           write(memberAddress.bytes)
@@ -1991,6 +2033,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeScaledUiAmountMint.index.toInt())
+      .writeByte(0) // ScaledUiAmountMint sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -2020,6 +2063,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateMultiplierScaledUiMint.index.toInt())
+      .writeByte(1) // ScaledUiAmountMint sub-discriminator
       .writeLongLe(multiplier.toRawBits())
       .writeLongLe(effectiveTimestamp)
       .readByteArray(),
@@ -2038,6 +2082,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializePausableConfig.index.toInt())
+      .writeByte(0) // Pausable sub-discriminator
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -2062,6 +2107,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.Pause.index.toInt())
+      .writeByte(1) // Pausable sub-discriminator
       .readByteArray(),
   )
 
@@ -2079,6 +2125,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.Resume.index.toInt())
+      .writeByte(2) // Pausable sub-discriminator
       .readByteArray(),
   )
 
@@ -2724,6 +2771,14 @@ public object Token2022Program : Program {
         val uriBytes = uri.encodeToByteArray()
         buffer.writeIntLe(uriBytes.size)
         buffer.write(uriBytes)
+        additionalMetadata.forEach { (key, value) ->
+          val keyBytes = key.encodeToByteArray()
+          buffer.writeIntLe(keyBytes.size)
+          buffer.write(keyBytes)
+          val valueBytes = value.encodeToByteArray()
+          buffer.writeIntLe(valueBytes.size)
+          buffer.write(valueBytes)
+        }
         return buffer.readByteArray()
       }
     }
