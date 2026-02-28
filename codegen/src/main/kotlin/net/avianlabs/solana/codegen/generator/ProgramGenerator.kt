@@ -629,6 +629,7 @@ class ProgramGenerator(private val program: ProgramNode) {
     return try {
       mapTypeNodeToKotlinType(typeNode)
     } catch (e: Exception) {
+      System.err.println("  ⚠ Warning: Could not map type node '${typeNode.kind}' to Kotlin type: ${e.message}")
       ANY
     }
   }
