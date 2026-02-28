@@ -823,13 +823,20 @@ class ProgramGenerator(private val program: ProgramNode) {
         val defaultValue = arg.defaultValue as? JsonObject ?: return@forEach
         when (defaultValue["kind"]?.jsonPrimitive?.content) {
           "numberValueNode" -> {
-            val number = defaultValue["number"]?.jsonPrimitive?.int ?: return@forEach
             when (arg.type.format) {
-              "u8" -> add(".writeByte(%L)\n", number)
-              "u16" -> add(".writeShortLe(%L)\n", number)
-              "u32" -> add(".writeIntLe(%L)\n", number)
-              "u64" -> add(".writeLongLe(%LL)\n", number)
-              else -> add(".writeByte(%L)\n", number)
+              "u64" -> {
+                val number = defaultValue["number"]?.jsonPrimitive?.long ?: return@forEach
+                add(".writeLongLe(%LL)\n", number)
+              }
+              else -> {
+                val number = defaultValue["number"]?.jsonPrimitive?.int ?: return@forEach
+                when (arg.type.format) {
+                  "u8" -> add(".writeByte(%L)\n", number)
+                  "u16" -> add(".writeShortLe(%L)\n", number)
+                  "u32" -> add(".writeIntLe(%L)\n", number)
+                  else -> add(".writeByte(%L)\n", number)
+                }
+              }
             }
           }
           "bytesValueNode" -> {
