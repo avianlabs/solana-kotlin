@@ -8,7 +8,14 @@ plugins {
 dependencies {
     implementation(libs.serializationJson)
     implementation(libs.kotlinPoet)
-    implementation(libs.okio)
+
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.junit5api)
+    testRuntimeOnly(libs.junit5Engine)
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 tasks.register("syncIdl") {
