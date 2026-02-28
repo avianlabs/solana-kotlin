@@ -71,6 +71,24 @@ public object SystemProgram : Program {
       .readByteArray(),
   )
 
+  @Deprecated(
+    message = "Use createAccount with programAddress parameter",
+    replaceWith =
+        ReplaceWith("createAccount(fromPublicKey, newAccountPublicKey, lamports.toULong(), space.toULong(), programId)"),
+  )
+  public fun createAccount(
+    fromPublicKey: PublicKey,
+    newAccountPublicKey: PublicKey,
+    lamports: Long,
+    space: Long,
+  ): TransactionInstruction = createAccount(
+    payer = fromPublicKey,
+    newAccount = newAccountPublicKey,
+    lamports = lamports.toULong(),
+    space = space.toULong(),
+    programAddress = programId,
+  )
+
   public fun assign(account: PublicKey, programAddress: PublicKey): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
@@ -158,14 +176,15 @@ public object SystemProgram : Program {
 
   @Deprecated(
     message = "Use advanceNonceAccount instead",
-    replaceWith =
-        ReplaceWith("advanceNonceAccount(nonceAccount = nonceAccount, recentBlockhashesSysvar = recentBlockhashesSysvar, nonceAuthority = authorized)"),
+    replaceWith = ReplaceWith("advanceNonceAccount(nonceAccount, authorized)"),
   )
   public fun nonceAdvance(
     nonceAccount: PublicKey,
-    recentBlockhashesSysvar: PublicKey,
     authorized: PublicKey,
-  ): TransactionInstruction = advanceNonceAccount(nonceAccount, recentBlockhashesSysvar, authorized)
+  ): TransactionInstruction = advanceNonceAccount(
+    nonceAccount = nonceAccount,
+    nonceAuthority = authorized,
+  )
 
   public fun withdrawNonceAccount(
     nonceAccount: PublicKey,
@@ -189,6 +208,23 @@ public object SystemProgram : Program {
       .readByteArray(),
   )
 
+  @Deprecated(
+    message = "Use withdrawNonceAccount instead",
+    replaceWith =
+        ReplaceWith("withdrawNonceAccount(nonceAccount, authorized, toPublicKey, lamports.toULong())"),
+  )
+  public fun nonceWithdraw(
+    nonceAccount: PublicKey,
+    authorized: PublicKey,
+    toPublicKey: PublicKey,
+    lamports: Long,
+  ): TransactionInstruction = withdrawNonceAccount(
+    nonceAccount = nonceAccount,
+    recipientAccount = toPublicKey,
+    nonceAuthority = authorized,
+    withdrawAmount = lamports.toULong(),
+  )
+
   public fun initializeNonceAccount(
     nonceAccount: PublicKey,
     nonceAuthority: PublicKey,
@@ -209,16 +245,15 @@ public object SystemProgram : Program {
 
   @Deprecated(
     message = "Use initializeNonceAccount instead",
-    replaceWith =
-        ReplaceWith("initializeNonceAccount(nonceAccount = nonceAccount, recentBlockhashesSysvar = recentBlockhashesSysvar, rentSysvar = rentSysvar, nonceAuthority = authorized)"),
+    replaceWith = ReplaceWith("initializeNonceAccount(nonceAccount, authorized)"),
   )
   public fun nonceInitialize(
     nonceAccount: PublicKey,
-    recentBlockhashesSysvar: PublicKey,
-    rentSysvar: PublicKey,
     authorized: PublicKey,
-  ): TransactionInstruction = initializeNonceAccount(nonceAccount, recentBlockhashesSysvar,
-      rentSysvar, authorized)
+  ): TransactionInstruction = initializeNonceAccount(
+    nonceAccount = nonceAccount,
+    nonceAuthority = authorized,
+  )
 
   public fun authorizeNonceAccount(
     nonceAccount: PublicKey,
@@ -234,6 +269,21 @@ public object SystemProgram : Program {
       .writeIntLe(Instruction.AuthorizeNonceAccount.index.toInt())
       .write(newNonceAuthority.bytes)
       .readByteArray(),
+  )
+
+  @Deprecated(
+    message = "Use authorizeNonceAccount instead",
+    replaceWith =
+        ReplaceWith("authorizeNonceAccount(nonceAccount, authorized, newAuthorized)"),
+  )
+  public fun nonceAuthorize(
+    nonceAccount: PublicKey,
+    authorized: PublicKey,
+    newAuthorized: PublicKey,
+  ): TransactionInstruction = authorizeNonceAccount(
+    nonceAccount = nonceAccount,
+    nonceAuthority = authorized,
+    newNonceAuthority = newAuthorized,
   )
 
   public fun allocate(newAccount: PublicKey, space: ULong): TransactionInstruction =

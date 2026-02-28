@@ -46,7 +46,9 @@ public object AssociatedTokenProgram : Program {
   )
 
   @Deprecated(
-    message = "Use createAssociatedToken instead",
+    message = "Use createAssociatedToken instead. Note: the RENT sysvar account is no longer " +
+      "included as it is no longer required by the runtime. The associatedProgramId parameter " +
+      "is ignored as AssociatedTokenProgram is a singleton with a fixed programId.",
     replaceWith =
         ReplaceWith("createAssociatedToken(payer = payer, ata = associatedAccount, owner = owner, mint = mint, systemProgram = systemProgram, tokenProgram = programId)"),
   )
@@ -58,8 +60,14 @@ public object AssociatedTokenProgram : Program {
     mint: PublicKey,
     systemProgram: PublicKey,
     programId: PublicKey,
-  ): TransactionInstruction = createAssociatedToken(payer, associatedAccount, owner, mint,
-      systemProgram, programId)
+  ): TransactionInstruction = createAssociatedToken(
+    payer = payer,
+    ata = associatedAccount,
+    owner = owner,
+    mint = mint,
+    systemProgram = systemProgram,
+    tokenProgram = programId,
+  )
 
   /**
    * Creates an associated token account for the given wallet address and
@@ -89,7 +97,9 @@ public object AssociatedTokenProgram : Program {
   )
 
   @Deprecated(
-    message = "Use createAssociatedTokenIdempotent instead",
+    message = "Use createAssociatedTokenIdempotent instead. Note: the RENT sysvar account is " +
+      "no longer included as it is no longer required by the runtime. The associatedProgramId " +
+      "parameter is ignored as AssociatedTokenProgram is a singleton with a fixed programId.",
     replaceWith =
         ReplaceWith("createAssociatedTokenIdempotent(payer = payer, ata = associatedAccount, owner = owner, mint = mint, systemProgram = systemProgram, tokenProgram = programId)"),
   )
@@ -101,8 +111,14 @@ public object AssociatedTokenProgram : Program {
     mint: PublicKey,
     systemProgram: PublicKey,
     programId: PublicKey,
-  ): TransactionInstruction = createAssociatedTokenIdempotent(payer, associatedAccount, owner, mint,
-      systemProgram, programId)
+  ): TransactionInstruction = createAssociatedTokenIdempotent(
+    payer = payer,
+    ata = associatedAccount,
+    owner = owner,
+    mint = mint,
+    systemProgram = systemProgram,
+    tokenProgram = programId,
+  )
 
   /**
    * Transfers from and closes a nested associated token account: an
