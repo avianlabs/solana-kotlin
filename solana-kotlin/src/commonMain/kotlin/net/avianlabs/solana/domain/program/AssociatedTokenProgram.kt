@@ -58,8 +58,8 @@ public object AssociatedTokenProgram : Program {
     mint: PublicKey,
     systemProgram: PublicKey,
     programId: PublicKey,
-  ): TransactionInstruction = createAssociatedToken(payer, associatedAccount, owner, mint,
-      systemProgram, programId)
+  ): TransactionInstruction = createAssociatedToken(payer = payer, ata = associatedAccount, owner =
+      owner, mint = mint, systemProgram = systemProgram, tokenProgram = programId)
 
   /**
    * Creates an associated token account for the given wallet address and
@@ -101,8 +101,9 @@ public object AssociatedTokenProgram : Program {
     mint: PublicKey,
     systemProgram: PublicKey,
     programId: PublicKey,
-  ): TransactionInstruction = createAssociatedTokenIdempotent(payer, associatedAccount, owner, mint,
-      systemProgram, programId)
+  ): TransactionInstruction = createAssociatedTokenIdempotent(payer = payer, ata =
+      associatedAccount, owner = owner, mint = mint, systemProgram = systemProgram, tokenProgram =
+      programId)
 
   /**
    * Transfers from and closes a nested associated token account: an

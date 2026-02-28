@@ -59,8 +59,8 @@ public object ComputeBudgetProgram : Program {
     message = "Use setComputeUnitLimit instead",
     replaceWith = ReplaceWith("setComputeUnitLimit(units = maxUnits.toUInt())"),
   )
-  public fun setComputeUnitLimit(maxUnits: Int): TransactionInstruction =
-      setComputeUnitLimit(maxUnits.toUInt())
+  public fun setComputeUnitLimit(maxUnits: Int): TransactionInstruction = setComputeUnitLimit(units
+      = maxUnits.toUInt())
 
   public fun setComputeUnitPrice(microLamports: ULong): TransactionInstruction =
       createTransactionInstruction(

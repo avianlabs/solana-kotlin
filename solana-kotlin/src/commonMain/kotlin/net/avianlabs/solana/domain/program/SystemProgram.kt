@@ -108,7 +108,8 @@ public object SystemProgram : Program {
     fromPublicKey: PublicKey,
     toPublicKey: PublicKey,
     lamports: Long,
-  ): TransactionInstruction = transferSol(fromPublicKey, toPublicKey, lamports.toULong())
+  ): TransactionInstruction = transferSol(source = fromPublicKey, destination = toPublicKey, amount
+      = lamports.toULong())
 
   public fun createAccountWithSeed(
     payer: PublicKey,
@@ -165,7 +166,8 @@ public object SystemProgram : Program {
     nonceAccount: PublicKey,
     recentBlockhashesSysvar: PublicKey,
     authorized: PublicKey,
-  ): TransactionInstruction = advanceNonceAccount(nonceAccount, recentBlockhashesSysvar, authorized)
+  ): TransactionInstruction = advanceNonceAccount(nonceAccount = nonceAccount,
+      recentBlockhashesSysvar = recentBlockhashesSysvar, nonceAuthority = authorized)
 
   public fun withdrawNonceAccount(
     nonceAccount: PublicKey,
@@ -217,8 +219,9 @@ public object SystemProgram : Program {
     recentBlockhashesSysvar: PublicKey,
     rentSysvar: PublicKey,
     authorized: PublicKey,
-  ): TransactionInstruction = initializeNonceAccount(nonceAccount, recentBlockhashesSysvar,
-      rentSysvar, authorized)
+  ): TransactionInstruction = initializeNonceAccount(nonceAccount = nonceAccount,
+      recentBlockhashesSysvar = recentBlockhashesSysvar, rentSysvar = rentSysvar, nonceAuthority =
+      authorized)
 
   public fun authorizeNonceAccount(
     nonceAccount: PublicKey,
