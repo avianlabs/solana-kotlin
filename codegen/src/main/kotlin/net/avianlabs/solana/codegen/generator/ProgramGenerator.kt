@@ -224,10 +224,27 @@ class ProgramGenerator(private val program: ProgramNode) {
       .build()
   }
 
+  private fun getEnumSizeFormat(enumType: TypeNode): String {
+    val size = enumType.size
+    if (size is JsonObject) {
+      return size["format"]?.jsonPrimitive?.content ?: "u8"
+    }
+    return "u8"
+  }
+
+  private fun addDiscriminatorWrite(builder: CodeBlock.Builder, format: String, discriminator: Int) {
+    when (format) {
+      "u16" -> builder.addStatement("buffer.writeShortLe(%L)", discriminator)
+      "u32" -> builder.addStatement("buffer.writeIntLe(%L)", discriminator)
+      else -> builder.addStatement("buffer.writeByte(%L)", discriminator)
+    }
+  }
+
   private fun generateSealedClassEnum(definedType: DefinedTypeNode): TypeSpec {
     val enumType = definedType.type
     val className = definedType.name.toPascalCase()
     val programClassName = program.name.toPascalCase() + "Program"
+    val sizeFormat = getEnumSizeFormat(enumType)
 
     return TypeSpec.classBuilder(className)
       .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
@@ -249,7 +266,19 @@ class ProgramGenerator(private val program: ProgramNode) {
                     FunSpec.builder("serialize")
                       .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                       .returns(ClassName("kotlin", "ByteArray"))
-                      .addStatement("return byteArrayOf(%L.toByte())", index)
+                      .addCode(
+                        CodeBlock.builder()
+                          .apply {
+                            if (sizeFormat == "u8") {
+                              addStatement("return byteArrayOf(%L.toByte())", index)
+                            } else {
+                              addStatement("val buffer = Buffer()")
+                              addDiscriminatorWrite(this, sizeFormat, index)
+                              addStatement("return buffer.readByteArray()")
+                            }
+                          }
+                          .build()
+                      )
                       .build()
                   )
                   .build()
@@ -258,7 +287,7 @@ class ProgramGenerator(private val program: ProgramNode) {
             "enumStructVariantTypeNode" -> {
               val structType = variant.struct
               val fields = extractStructFields(structType)
-              
+
               if (fields.isEmpty()) {
                 addType(
                   TypeSpec.objectBuilder(variantName)
@@ -267,7 +296,19 @@ class ProgramGenerator(private val program: ProgramNode) {
                       FunSpec.builder("serialize")
                         .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                         .returns(ClassName("kotlin", "ByteArray"))
-                        .addStatement("return byteArrayOf(%L.toByte())", index)
+                        .addCode(
+                          CodeBlock.builder()
+                            .apply {
+                              if (sizeFormat == "u8") {
+                                addStatement("return byteArrayOf(%L.toByte())", index)
+                              } else {
+                                addStatement("val buffer = Buffer()")
+                                addDiscriminatorWrite(this, sizeFormat, index)
+                                addStatement("return buffer.readByteArray()")
+                              }
+                            }
+                            .build()
+                        )
                         .build()
                     )
                     .build()
@@ -299,7 +340,7 @@ class ProgramGenerator(private val program: ProgramNode) {
                       FunSpec.builder("serialize")
                         .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                         .returns(ClassName("kotlin", "ByteArray"))
-                        .addCode(generateStructSerializeCode(index, fields))
+                        .addCode(generateStructSerializeCode(index, fields, sizeFormat))
                         .build()
                     )
                     .build()
@@ -309,7 +350,7 @@ class ProgramGenerator(private val program: ProgramNode) {
             "enumTupleVariantTypeNode" -> {
               val tupleType = variant.tuple
               val items = tupleType?.items ?: emptyList()
-              
+
               if (items.isEmpty()) {
                 addType(
                   TypeSpec.objectBuilder(variantName)
@@ -318,7 +359,19 @@ class ProgramGenerator(private val program: ProgramNode) {
                       FunSpec.builder("serialize")
                         .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                         .returns(ClassName("kotlin", "ByteArray"))
-                        .addStatement("return byteArrayOf(%L.toByte())", index)
+                        .addCode(
+                          CodeBlock.builder()
+                            .apply {
+                              if (sizeFormat == "u8") {
+                                addStatement("return byteArrayOf(%L.toByte())", index)
+                              } else {
+                                addStatement("val buffer = Buffer()")
+                                addDiscriminatorWrite(this, sizeFormat, index)
+                                addStatement("return buffer.readByteArray()")
+                              }
+                            }
+                            .build()
+                        )
                         .build()
                     )
                     .build()
@@ -350,7 +403,7 @@ class ProgramGenerator(private val program: ProgramNode) {
                       FunSpec.builder("serialize")
                         .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                         .returns(ClassName("kotlin", "ByteArray"))
-                        .addCode(generateTupleSerializeCode(index, items))
+                        .addCode(generateTupleSerializeCode(index, items, sizeFormat))
                         .build()
                     )
                     .build()
@@ -363,10 +416,14 @@ class ProgramGenerator(private val program: ProgramNode) {
       .build()
   }
 
-  private fun generateStructSerializeCode(discriminator: Int, fields: List<StructFieldTypeNode>): CodeBlock {
+  private fun generateStructSerializeCode(
+    discriminator: Int,
+    fields: List<StructFieldTypeNode>,
+    sizeFormat: String = "u8",
+  ): CodeBlock {
     return CodeBlock.builder()
       .addStatement("val buffer = Buffer()")
-      .addStatement("buffer.writeByte(%L)", discriminator)
+      .apply { addDiscriminatorWrite(this, sizeFormat, discriminator) }
       .apply {
         fields.forEach { field ->
           val paramName = field.name.toCamelCase()
@@ -420,11 +477,20 @@ class ProgramGenerator(private val program: ProgramNode) {
       "zeroableOptionTypeNode" -> {
         val innerType = typeNode.item ?: return
         val zeroSize = getTypeSize(innerType)
-        addStatement("if (%L != null) { buffer.write(%L.bytes) } else { buffer.write(ByteArray(%L)) }", paramName, paramName, zeroSize)
+        beginControlFlow("if (%L != null)", paramName)
+        addStructFieldSerialization(paramName, innerType)
+        nextControlFlow("else")
+        addStatement("buffer.write(ByteArray(%L))", zeroSize)
+        endControlFlow()
       }
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: return
-        addStatement("if (%L != null) { buffer.writeByte(1); buffer.write(%L.bytes) } else { buffer.writeByte(0) }", paramName, paramName)
+        beginControlFlow("if (%L != null)", paramName)
+        addStatement("buffer.writeByte(1)")
+        addStructFieldSerialization(paramName, innerType)
+        nextControlFlow("else")
+        addStatement("buffer.writeByte(0)")
+        endControlFlow()
       }
       "definedTypeLinkNode" -> {
         val typeName = typeNode.name ?: ""
@@ -449,14 +515,20 @@ class ProgramGenerator(private val program: ProgramNode) {
         val innerType = typeNode.number ?: return
         addStructFieldSerialization(paramName, innerType)
       }
-      else -> { }
+      else -> {
+        addStatement("// TODO: unsupported type %L for field %L", typeNode.kind, paramName)
+      }
     }
   }
 
-  private fun generateTupleSerializeCode(discriminator: Int, items: List<TypeNode>): CodeBlock {
+  private fun generateTupleSerializeCode(
+    discriminator: Int,
+    items: List<TypeNode>,
+    sizeFormat: String = "u8",
+  ): CodeBlock {
     return CodeBlock.builder()
       .addStatement("val buffer = Buffer()")
-      .addStatement("buffer.writeByte(%L)", discriminator)
+      .apply { addDiscriminatorWrite(this, sizeFormat, discriminator) }
       .apply {
         items.forEachIndexed { idx, itemType ->
           addStructFieldSerialization("value$idx", itemType)
@@ -742,6 +814,30 @@ class ProgramGenerator(private val program: ProgramNode) {
         }
       }
       else -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+    }
+
+    // Write default values for omitted sub-discriminator arguments
+    instruction.arguments.forEach { arg ->
+      if (arg.defaultValueStrategy == "omitted" && arg != discriminatorArg && arg.defaultValue != null) {
+        val defaultValue = arg.defaultValue as? JsonObject ?: return@forEach
+        when (defaultValue["kind"]?.jsonPrimitive?.content) {
+          "numberValueNode" -> {
+            val number = defaultValue["number"]?.jsonPrimitive?.int ?: return@forEach
+            when (arg.type.format) {
+              "u8" -> add(".writeByte(%L)\n", number)
+              "u16" -> add(".writeShortLe(%L)\n", number)
+              "u32" -> add(".writeIntLe(%L)\n", number)
+              "u64" -> add(".writeLongLe(%LL)\n", number)
+              else -> add(".writeByte(%L)\n", number)
+            }
+          }
+          "bytesValueNode" -> {
+            val hexData = defaultValue["data"]?.jsonPrimitive?.content ?: return@forEach
+            val byteArrayLiteral = hexToByteArrayLiteral(hexData)
+            add(".write($byteArrayLiteral)\n")
+          }
+        }
+      }
     }
 
     args.forEach { arg ->
