@@ -63,6 +63,14 @@ object DeprecationMapper {
         "nonceAuthority" to "authorized"
       )
     ),
+    // ComputeBudgetProgram
+    DeprecatedFunction(
+      oldName = "setComputeUnitLimit",
+      newName = "setComputeUnitLimit",
+      paramMapping = mapOf(
+        "units" to "maxUnits"
+      )
+    ),
     // AssociatedTokenProgram
     DeprecatedFunction(
       oldName = "createAssociatedTokenAccountInstruction",

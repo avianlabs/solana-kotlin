@@ -7,6 +7,8 @@
 
 package net.avianlabs.solana.domain.program
 
+import kotlin.Deprecated
+import kotlin.Int
 import kotlin.UByte
 import kotlin.UInt
 import kotlin.ULong
@@ -52,6 +54,13 @@ public object ComputeBudgetProgram : Program {
       .writeIntLe(units.toInt())
       .readByteArray(),
   )
+
+  @Deprecated(
+    message = "Use setComputeUnitLimit instead",
+    replaceWith = ReplaceWith("setComputeUnitLimit(units = maxUnits.toUInt())"),
+  )
+  public fun setComputeUnitLimit(maxUnits: Int): TransactionInstruction =
+      setComputeUnitLimit(maxUnits.toUInt())
 
   public fun setComputeUnitPrice(microLamports: ULong): TransactionInstruction =
       createTransactionInstruction(
