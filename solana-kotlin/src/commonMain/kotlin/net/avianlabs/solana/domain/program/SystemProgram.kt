@@ -164,8 +164,8 @@ public object SystemProgram : Program {
   )
   public fun nonceAdvance(
     nonceAccount: PublicKey,
-    recentBlockhashesSysvar: PublicKey,
     authorized: PublicKey,
+    recentBlockhashesSysvar: PublicKey = RECENT_BLOCKHASHES_SYSVAR,
   ): TransactionInstruction = advanceNonceAccount(nonceAccount = nonceAccount,
       recentBlockhashesSysvar = recentBlockhashesSysvar, nonceAuthority = authorized)
 

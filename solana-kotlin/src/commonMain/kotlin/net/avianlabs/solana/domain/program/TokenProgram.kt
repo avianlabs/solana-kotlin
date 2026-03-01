@@ -17,809 +17,148 @@ import net.avianlabs.solana.domain.program.Program.Companion.createTransactionIn
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import okio.Buffer
 
-public object TokenProgram : Program {
-  public override val programId: PublicKey =
-      PublicKey.fromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
-
-  public val RENT: PublicKey = PublicKey.fromBase58("SysvarRent111111111111111111111111111111111")
-
-  public val MINT_LENGTH: Long = 82L
-
-  public val TOKEN_LENGTH: Long = 165L
-
-  public val MULTISIG_LENGTH: Long = 355L
-
-  /**
-   * Initializes a new mint and optionally deposits all the newly minted
-   * tokens in an account.
-   *
-   * The `InitializeMint` instruction requires no signers and MUST be
-   * included within the same Transaction as the system program's
-   * `CreateAccount` instruction that creates the account being initialized.
-   * Otherwise another party can acquire ownership of the uninitialized account.
-   */
-  public fun initializeMint(
+public sealed class TokenProgram : Program {
+  public abstract fun initializeMint(
     mint: PublicKey,
     decimals: UByte,
     mintAuthority: PublicKey,
     freezeAuthority: PublicKey?,
-    rent: PublicKey = RENT,
-  ): TransactionInstruction = createInitializeMintInstruction(mint = mint, rent = rent, decimals =
-      decimals, mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, programId =
-      programId)
+    rent: PublicKey,
+  ): TransactionInstruction
 
-  internal fun createInitializeMintInstruction(
-    mint: PublicKey,
-    decimals: UByte,
-    mintAuthority: PublicKey,
-    freezeAuthority: PublicKey?,
-    rent: PublicKey = RENT,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMint.index.toInt())
-      .writeByte(decimals.toInt())
-      .write(mintAuthority.bytes)
-      .apply {
-        if (freezeAuthority != null) {
-          writeByte(1)
-          .write(freezeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
-      }
-      .readByteArray(),
-  )
-
-  /**
-   * Initializes a new account to hold tokens. If this account is associated
-   * with the native mint then the token balance of the initialized account
-   * will be equal to the amount of SOL in the account. If this account is
-   * associated with another mint, that mint must be initialized before this
-   * command can succeed.
-   *
-   * The `InitializeAccount` instruction requires no signers and MUST be
-   * included within the same Transaction as the system program's
-   * `CreateAccount` instruction that creates the account being initialized.
-   * Otherwise another party can acquire ownership of the uninitialized account.
-   */
-  public fun initializeAccount(
+  public abstract fun initializeAccount(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    rent: PublicKey = RENT,
-  ): TransactionInstruction = createInitializeAccountInstruction(account = account, mint = mint,
-      owner = owner, rent = rent, programId = programId)
+    rent: PublicKey,
+  ): TransactionInstruction
 
-  internal fun createInitializeAccountInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-    rent: PublicKey = RENT,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = false, isWritable = false),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount.index.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Initializes a multisignature account with N provided signers.
-   *
-   * Multisignature accounts can used in place of any single owner/delegate
-   * accounts in any token instruction that require an owner/delegate to be
-   * present. The variant field represents the number of signers (M)
-   * required to validate this multisignature account.
-   *
-   * The `InitializeMultisig` instruction requires no signers and MUST be
-   * included within the same Transaction as the system program's
-   * `CreateAccount` instruction that creates the account being initialized.
-   * Otherwise another party can acquire ownership of the uninitialized account.
-   */
-  public fun initializeMultisig(
+  public abstract fun initializeMultisig(
     multisig: PublicKey,
     m: UByte,
-    rent: PublicKey = RENT,
-  ): TransactionInstruction = createInitializeMultisigInstruction(multisig = multisig, rent = rent,
-      m = m, programId = programId)
+    rent: PublicKey,
+  ): TransactionInstruction
 
-  internal fun createInitializeMultisigInstruction(
-    multisig: PublicKey,
-    m: UByte,
-    rent: PublicKey = RENT,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(multisig, isSigner = false, isWritable = true),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMultisig.index.toInt())
-      .writeByte(m.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Transfers tokens from one account to another either directly or via a delegate.
-   * If this account is associated with the native mint then equal amounts
-   * of SOL and Tokens will be transferred to the destination account.
-   */
-  public fun transfer(
+  public abstract fun transfer(
     source: PublicKey,
     destination: PublicKey,
     authority: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createTransferInstruction(source = source, destination = destination,
-      authority = authority, amount = amount, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createTransferInstruction(
-    source: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
-    amount: ULong,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(destination, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Transfer.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
-
-  /**
-   * Approves a delegate. A delegate is given the authority over tokens on
-   * behalf of the source account's owner.
-   */
-  public fun approve(
+  public abstract fun approve(
     source: PublicKey,
     `delegate`: PublicKey,
     owner: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createApproveInstruction(source = source, delegate = delegate, owner =
-      owner, amount = amount, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createApproveInstruction(
-    source: PublicKey,
-    `delegate`: PublicKey,
-    owner: PublicKey,
-    amount: ULong,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(delegate, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Approve.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
+  public abstract fun revoke(source: PublicKey, owner: PublicKey): TransactionInstruction
 
-  /**
-   * Revokes the delegate's authority.
-   */
-  public fun revoke(source: PublicKey, owner: PublicKey): TransactionInstruction =
-      createRevokeInstruction(source = source, owner = owner, programId = programId)
-
-  internal fun createRevokeInstruction(
-    source: PublicKey,
-    owner: PublicKey,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Revoke.index.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Sets a new authority of a mint or account.
-   */
-  public fun setAuthority(
+  public abstract fun setAuthority(
     owned: PublicKey,
     owner: PublicKey,
     authorityType: AuthorityType,
     newAuthority: PublicKey?,
-  ): TransactionInstruction = createSetAuthorityInstruction(owned = owned, owner = owner,
-      authorityType = authorityType, newAuthority = newAuthority, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createSetAuthorityInstruction(
-    owned: PublicKey,
-    owner: PublicKey,
-    authorityType: AuthorityType,
-    newAuthority: PublicKey?,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(owned, isSigner = false, isWritable = true),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.SetAuthority.index.toInt())
-      .writeByte(authorityType.value.toInt())
-      .apply {
-        if (newAuthority != null) {
-          writeByte(1)
-          .write(newAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
-      }
-      .readByteArray(),
-  )
-
-  /**
-   * Mints new tokens to an account. The native mint does not support minting.
-   */
-  public fun mintTo(
+  public abstract fun mintTo(
     mint: PublicKey,
     token: PublicKey,
     mintAuthority: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createMintToInstruction(mint = mint, token = token, mintAuthority =
-      mintAuthority, amount = amount, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createMintToInstruction(
-    mint: PublicKey,
-    token: PublicKey,
-    mintAuthority: PublicKey,
-    amount: ULong,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(token, isSigner = false, isWritable = true),
-      AccountMeta(mintAuthority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.MintTo.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
-
-  /**
-   * Burns tokens by removing them from an account. `Burn` does not support
-   * accounts associated with the native mint, use `CloseAccount` instead.
-   */
-  public fun burn(
+  public abstract fun burn(
     account: PublicKey,
     mint: PublicKey,
     authority: PublicKey,
     amount: ULong,
-  ): TransactionInstruction = createBurnInstruction(account = account, mint = mint, authority =
-      authority, amount = amount, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createBurnInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    authority: PublicKey,
-    amount: ULong,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.Burn.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
-
-  /**
-   * Close an account by transferring all its SOL to the destination account.
-   * Non-native accounts may only be closed if its token amount is zero.
-   */
-  public fun closeAccount(
+  public abstract fun closeAccount(
     account: PublicKey,
     destination: PublicKey,
     owner: PublicKey,
-  ): TransactionInstruction = createCloseAccountInstruction(account = account, destination =
-      destination, owner = owner, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createCloseAccountInstruction(
-    account: PublicKey,
-    destination: PublicKey,
-    owner: PublicKey,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(destination, isSigner = false, isWritable = true),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.CloseAccount.index.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Freeze an Initialized account using the Mint's freeze_authority (if set).
-   */
-  public fun freezeAccount(
+  public abstract fun freezeAccount(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-  ): TransactionInstruction = createFreezeAccountInstruction(account = account, mint = mint, owner =
-      owner, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createFreezeAccountInstruction(
+  public abstract fun thawAccount(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.FreezeAccount.index.toInt())
-      .readByteArray(),
-  )
+  ): TransactionInstruction
 
-  /**
-   * Thaw a Frozen account using the Mint's freeze_authority (if set).
-   */
-  public fun thawAccount(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-  ): TransactionInstruction = createThawAccountInstruction(account = account, mint = mint, owner =
-      owner, programId = programId)
-
-  internal fun createThawAccountInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.ThawAccount.index.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Transfers tokens from one account to another either directly or via a
-   * delegate. If this account is associated with the native mint then equal
-   * amounts of SOL and Tokens will be transferred to the destination account.
-   *
-   * This instruction differs from Transfer in that the token mint and
-   * decimals value is checked by the caller. This may be useful when
-   * creating transactions offline or within a hardware wallet.
-   */
-  public fun transferChecked(
+  public abstract fun transferChecked(
     source: PublicKey,
     mint: PublicKey,
     destination: PublicKey,
     authority: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createTransferCheckedInstruction(source = source, mint = mint,
-      destination = destination, authority = authority, amount = amount, decimals = decimals,
-      programId = programId)
+  ): TransactionInstruction
 
-  internal fun createTransferCheckedInstruction(
-    source: PublicKey,
-    mint: PublicKey,
-    destination: PublicKey,
-    authority: PublicKey,
-    amount: ULong,
-    decimals: UByte,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(destination, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.TransferChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Approves a delegate. A delegate is given the authority over tokens on
-   * behalf of the source account's owner.
-   *
-   * This instruction differs from Approve in that the token mint and
-   * decimals value is checked by the caller. This may be useful when
-   * creating transactions offline or within a hardware wallet.
-   */
-  public fun approveChecked(
+  public abstract fun approveChecked(
     source: PublicKey,
     mint: PublicKey,
     `delegate`: PublicKey,
     owner: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createApproveCheckedInstruction(source = source, mint = mint, delegate
-      = delegate, owner = owner, amount = amount, decimals = decimals, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createApproveCheckedInstruction(
-    source: PublicKey,
-    mint: PublicKey,
-    `delegate`: PublicKey,
-    owner: PublicKey,
-    amount: ULong,
-    decimals: UByte,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(source, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(delegate, isSigner = false, isWritable = false),
-      AccountMeta(owner, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.ApproveChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Mints new tokens to an account. The native mint does not support minting.
-   *
-   * This instruction differs from MintTo in that the decimals value is
-   * checked by the caller. This may be useful when creating transactions
-   * offline or within a hardware wallet.
-   */
-  public fun mintToChecked(
+  public abstract fun mintToChecked(
     mint: PublicKey,
     token: PublicKey,
     mintAuthority: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createMintToCheckedInstruction(mint = mint, token = token,
-      mintAuthority = mintAuthority, amount = amount, decimals = decimals, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createMintToCheckedInstruction(
-    mint: PublicKey,
-    token: PublicKey,
-    mintAuthority: PublicKey,
-    amount: ULong,
-    decimals: UByte,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(token, isSigner = false, isWritable = true),
-      AccountMeta(mintAuthority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.MintToChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Burns tokens by removing them from an account. `BurnChecked` does not
-   * support accounts associated with the native mint, use `CloseAccount` instead.
-   *
-   * This instruction differs from Burn in that the decimals value is checked
-   * by the caller. This may be useful when creating transactions offline or
-   * within a hardware wallet.
-   */
-  public fun burnChecked(
+  public abstract fun burnChecked(
     account: PublicKey,
     mint: PublicKey,
     authority: PublicKey,
     amount: ULong,
     decimals: UByte,
-  ): TransactionInstruction = createBurnCheckedInstruction(account = account, mint = mint, authority
-      = authority, amount = amount, decimals = decimals, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createBurnCheckedInstruction(
-    account: PublicKey,
-    mint: PublicKey,
-    authority: PublicKey,
-    amount: ULong,
-    decimals: UByte,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = true),
-      AccountMeta(authority, isSigner = true, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.BurnChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Like InitializeAccount, but the owner pubkey is passed via instruction
-   * data rather than the accounts list. This variant may be preferable
-   * when using Cross Program Invocation from an instruction that does
-   * not need the owner's `AccountInfo` otherwise.
-   */
-  public fun initializeAccount2(
+  public abstract fun initializeAccount2(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    rent: PublicKey = RENT,
-  ): TransactionInstruction = createInitializeAccount2Instruction(account = account, mint = mint,
-      rent = rent, owner = owner, programId = programId)
+    rent: PublicKey,
+  ): TransactionInstruction
 
-  internal fun createInitializeAccount2Instruction(
+  public abstract fun syncNative(account: PublicKey): TransactionInstruction
+
+  public abstract fun initializeAccount3(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    rent: PublicKey = RENT,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-      AccountMeta(rent, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount2.index.toInt())
-      .write(owner.bytes)
-      .readByteArray(),
-  )
+  ): TransactionInstruction
 
-  /**
-   * Given a wrapped / native token account (a token account containing SOL)
-   * updates its amount field based on the account's underlying `lamports`.
-   * This is useful if a non-wrapped SOL account uses
-   * `system_instruction::transfer` to move lamports to a wrapped token
-   * account, and needs to have its token `amount` field updated.
-   */
-  public fun syncNative(account: PublicKey): TransactionInstruction =
-      createSyncNativeInstruction(account = account, programId = programId)
+  public abstract fun initializeMultisig2(multisig: PublicKey, m: UByte): TransactionInstruction
 
-  internal fun createSyncNativeInstruction(account: PublicKey, programId: PublicKey):
-      TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.SyncNative.index.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Like InitializeAccount2, but does not require the Rent sysvar to be provided.
-   */
-  public fun initializeAccount3(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-  ): TransactionInstruction = createInitializeAccount3Instruction(account = account, mint = mint,
-      owner = owner, programId = programId)
-
-  internal fun createInitializeAccount3Instruction(
-    account: PublicKey,
-    mint: PublicKey,
-    owner: PublicKey,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount3.index.toInt())
-      .write(owner.bytes)
-      .readByteArray(),
-  )
-
-  /**
-   * Like InitializeMultisig, but does not require the Rent sysvar to be provided.
-   */
-  public fun initializeMultisig2(multisig: PublicKey, m: UByte): TransactionInstruction =
-      createInitializeMultisig2Instruction(multisig = multisig, m = m, programId = programId)
-
-  internal fun createInitializeMultisig2Instruction(
-    multisig: PublicKey,
-    m: UByte,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(multisig, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMultisig2.index.toInt())
-      .writeByte(m.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Like [`InitializeMint`], but does not require the Rent sysvar to be provided.
-   */
-  public fun initializeMint2(
+  public abstract fun initializeMint2(
     mint: PublicKey,
     decimals: UByte,
     mintAuthority: PublicKey,
     freezeAuthority: PublicKey?,
-  ): TransactionInstruction = createInitializeMint2Instruction(mint = mint, decimals = decimals,
-      mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, programId = programId)
+  ): TransactionInstruction
 
-  internal fun createInitializeMint2Instruction(
-    mint: PublicKey,
-    decimals: UByte,
-    mintAuthority: PublicKey,
-    freezeAuthority: PublicKey?,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMint2.index.toInt())
-      .writeByte(decimals.toInt())
-      .write(mintAuthority.bytes)
-      .apply {
-        if (freezeAuthority != null) {
-          writeByte(1)
-          .write(freezeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
-      }
-      .readByteArray(),
-  )
+  public abstract fun getAccountDataSize(mint: PublicKey): TransactionInstruction
 
-  /**
-   * Gets the required size of an account for the given mint as a
-   * little-endian `u64`.
-   *
-   * Return data can be fetched using `sol_get_return_data` and deserializing
-   * the return data as a little-endian `u64`.
-   */
-  public fun getAccountDataSize(mint: PublicKey): TransactionInstruction =
-      createGetAccountDataSizeInstruction(mint = mint, programId = programId)
+  public abstract fun initializeImmutableOwner(account: PublicKey): TransactionInstruction
 
-  internal fun createGetAccountDataSizeInstruction(mint: PublicKey, programId: PublicKey):
-      TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.GetAccountDataSize.index.toInt())
-      .readByteArray(),
-  )
+  public abstract fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction
 
-  /**
-   * Initialize the Immutable Owner extension for the given token account
-   *
-   * Fails if the account has already been initialized, so must be called
-   * before `InitializeAccount`.
-   *
-   * No-ops in this version of the program, but is included for compatibility
-   * with the Associated Token Account program.
-   */
-  public fun initializeImmutableOwner(account: PublicKey): TransactionInstruction =
-      createInitializeImmutableOwnerInstruction(account = account, programId = programId)
-
-  internal fun createInitializeImmutableOwnerInstruction(account: PublicKey, programId: PublicKey):
-      TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(account, isSigner = false, isWritable = true),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeImmutableOwner.index.toInt())
-      .readByteArray(),
-  )
-
-  /**
-   * Convert an Amount of tokens to a UiAmount `string`, using the given
-   * mint. In this version of the program, the mint can only specify the
-   * number of decimals.
-   *
-   * Fails on an invalid mint.
-   *
-   * Return data can be fetched using `sol_get_return_data` and deserialized
-   * with `String::from_utf8`.
-   */
-  public fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction =
-      createAmountToUiAmountInstruction(mint = mint, amount = amount, programId = programId)
-
-  internal fun createAmountToUiAmountInstruction(
-    mint: PublicKey,
-    amount: ULong,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.AmountToUiAmount.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
-  )
-
-  /**
-   * Convert a UiAmount of tokens to a little-endian `u64` raw Amount, using
-   * the given mint. In this version of the program, the mint can only
-   * specify the number of decimals.
-   *
-   * Return data can be fetched using `sol_get_return_data` and deserializing
-   * the return data as a little-endian `u64`.
-   */
-  public fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction =
-      createUiAmountToAmountInstruction(mint = mint, uiAmount = uiAmount, programId = programId)
-
-  internal fun createUiAmountToAmountInstruction(
-    mint: PublicKey,
-    uiAmount: String,
-    programId: PublicKey,
-  ): TransactionInstruction = createTransactionInstruction(
-    programId = programId,
-    keys = listOf(
-      AccountMeta(mint, isSigner = false, isWritable = false),
-    ),
-    data = Buffer()
-      .writeByte(Instruction.UiAmountToAmount.index.toInt())
-      .writeUtf8(uiAmount)
-      .readByteArray(),
-  )
-
-  public enum class AccountState(
-    public val `value`: UByte,
-  ) {
-    Uninitialized(0u),
-    Initialized(1u),
-    Frozen(2u),
-    ;
-  }
+  public abstract fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction
 
   public enum class AuthorityType(
     public val `value`: UByte,
@@ -828,6 +167,28 @@ public object TokenProgram : Program {
     FreezeAccount(1u),
     AccountOwner(2u),
     CloseAccount(3u),
+    TransferFeeConfig(4u),
+    WithheldWithdraw(5u),
+    CloseMint(6u),
+    InterestRate(7u),
+    PermanentDelegate(8u),
+    ConfidentialTransferMint(9u),
+    TransferHookProgramId(10u),
+    ConfidentialTransferFeeConfig(11u),
+    MetadataPointer(12u),
+    GroupPointer(13u),
+    GroupMemberPointer(14u),
+    ScaledUiAmount(15u),
+    Pause(16u),
+    ;
+  }
+
+  public enum class AccountState(
+    public val `value`: UByte,
+  ) {
+    Uninitialized(0u),
+    Initialized(1u),
+    Frozen(2u),
     ;
   }
 
@@ -860,5 +221,802 @@ public object TokenProgram : Program {
     AmountToUiAmount(23u),
     UiAmountToAmount(24u),
     ;
+  }
+
+  public companion object : TokenProgram() {
+    public override val programId: PublicKey =
+        PublicKey.fromBase58("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+
+    public val RENT: PublicKey = PublicKey.fromBase58("SysvarRent111111111111111111111111111111111")
+
+    public val MINT_LENGTH: Long = 82L
+
+    public val TOKEN_LENGTH: Long = 165L
+
+    public val MULTISIG_LENGTH: Long = 355L
+
+    /**
+     * Initializes a new mint and optionally deposits all the newly minted
+     * tokens in an account.
+     *
+     * The `InitializeMint` instruction requires no signers and MUST be
+     * included within the same Transaction as the system program's
+     * `CreateAccount` instruction that creates the account being initialized.
+     * Otherwise another party can acquire ownership of the uninitialized account.
+     */
+    public override fun initializeMint(
+      mint: PublicKey,
+      decimals: UByte,
+      mintAuthority: PublicKey,
+      freezeAuthority: PublicKey?,
+      rent: PublicKey,
+    ): TransactionInstruction = createInitializeMintInstruction(mint = mint, rent = rent, decimals =
+        decimals, mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, programId =
+        programId)
+
+    internal fun createInitializeMintInstruction(
+      mint: PublicKey,
+      decimals: UByte,
+      mintAuthority: PublicKey,
+      freezeAuthority: PublicKey?,
+      rent: PublicKey = RENT,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = true),
+        AccountMeta(rent, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeMint.index.toInt())
+        .writeByte(decimals.toInt())
+        .write(mintAuthority.bytes)
+        .apply {
+          if (freezeAuthority != null) {
+            writeByte(1)
+            .write(freezeAuthority.bytes)
+          } else {
+            writeByte(0)
+          }
+        }
+        .readByteArray(),
+    )
+
+    /**
+     * Initializes a new account to hold tokens. If this account is associated
+     * with the native mint then the token balance of the initialized account
+     * will be equal to the amount of SOL in the account. If this account is
+     * associated with another mint, that mint must be initialized before this
+     * command can succeed.
+     *
+     * The `InitializeAccount` instruction requires no signers and MUST be
+     * included within the same Transaction as the system program's
+     * `CreateAccount` instruction that creates the account being initialized.
+     * Otherwise another party can acquire ownership of the uninitialized account.
+     */
+    public override fun initializeAccount(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      rent: PublicKey,
+    ): TransactionInstruction = createInitializeAccountInstruction(account = account, mint = mint,
+        owner = owner, rent = rent, programId = programId)
+
+    internal fun createInitializeAccountInstruction(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      rent: PublicKey = RENT,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+        AccountMeta(owner, isSigner = false, isWritable = false),
+        AccountMeta(rent, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeAccount.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Initializes a multisignature account with N provided signers.
+     *
+     * Multisignature accounts can used in place of any single owner/delegate
+     * accounts in any token instruction that require an owner/delegate to be
+     * present. The variant field represents the number of signers (M)
+     * required to validate this multisignature account.
+     *
+     * The `InitializeMultisig` instruction requires no signers and MUST be
+     * included within the same Transaction as the system program's
+     * `CreateAccount` instruction that creates the account being initialized.
+     * Otherwise another party can acquire ownership of the uninitialized account.
+     */
+    public override fun initializeMultisig(
+      multisig: PublicKey,
+      m: UByte,
+      rent: PublicKey,
+    ): TransactionInstruction = createInitializeMultisigInstruction(multisig = multisig, rent =
+        rent, m = m, programId = programId)
+
+    internal fun createInitializeMultisigInstruction(
+      multisig: PublicKey,
+      m: UByte,
+      rent: PublicKey = RENT,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(multisig, isSigner = false, isWritable = true),
+        AccountMeta(rent, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeMultisig.index.toInt())
+        .writeByte(m.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Transfers tokens from one account to another either directly or via a delegate.
+     * If this account is associated with the native mint then equal amounts
+     * of SOL and Tokens will be transferred to the destination account.
+     */
+    public override fun transfer(
+      source: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+    ): TransactionInstruction = createTransferInstruction(source = source, destination =
+        destination, authority = authority, amount = amount, programId = programId)
+
+    internal fun createTransferInstruction(
+      source: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(destination, isSigner = false, isWritable = true),
+        AccountMeta(authority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Transfer.index.toInt())
+        .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    /**
+     * Approves a delegate. A delegate is given the authority over tokens on
+     * behalf of the source account's owner.
+     */
+    public override fun approve(
+      source: PublicKey,
+      `delegate`: PublicKey,
+      owner: PublicKey,
+      amount: ULong,
+    ): TransactionInstruction = createApproveInstruction(source = source, delegate = delegate, owner
+        = owner, amount = amount, programId = programId)
+
+    internal fun createApproveInstruction(
+      source: PublicKey,
+      `delegate`: PublicKey,
+      owner: PublicKey,
+      amount: ULong,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(delegate, isSigner = false, isWritable = false),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Approve.index.toInt())
+        .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    /**
+     * Revokes the delegate's authority.
+     */
+    public override fun revoke(source: PublicKey, owner: PublicKey): TransactionInstruction =
+        createRevokeInstruction(source = source, owner = owner, programId = programId)
+
+    internal fun createRevokeInstruction(
+      source: PublicKey,
+      owner: PublicKey,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Revoke.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Sets a new authority of a mint or account.
+     */
+    public override fun setAuthority(
+      owned: PublicKey,
+      owner: PublicKey,
+      authorityType: AuthorityType,
+      newAuthority: PublicKey?,
+    ): TransactionInstruction = createSetAuthorityInstruction(owned = owned, owner = owner,
+        authorityType = authorityType, newAuthority = newAuthority, programId = programId)
+
+    internal fun createSetAuthorityInstruction(
+      owned: PublicKey,
+      owner: PublicKey,
+      authorityType: AuthorityType,
+      newAuthority: PublicKey?,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(owned, isSigner = false, isWritable = true),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.SetAuthority.index.toInt())
+        .writeByte(authorityType.value.toInt())
+        .apply {
+          if (newAuthority != null) {
+            writeByte(1)
+            .write(newAuthority.bytes)
+          } else {
+            writeByte(0)
+          }
+        }
+        .readByteArray(),
+    )
+
+    /**
+     * Mints new tokens to an account. The native mint does not support minting.
+     */
+    public override fun mintTo(
+      mint: PublicKey,
+      token: PublicKey,
+      mintAuthority: PublicKey,
+      amount: ULong,
+    ): TransactionInstruction = createMintToInstruction(mint = mint, token = token, mintAuthority =
+        mintAuthority, amount = amount, programId = programId)
+
+    internal fun createMintToInstruction(
+      mint: PublicKey,
+      token: PublicKey,
+      mintAuthority: PublicKey,
+      amount: ULong,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = true),
+        AccountMeta(token, isSigner = false, isWritable = true),
+        AccountMeta(mintAuthority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.MintTo.index.toInt())
+        .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    /**
+     * Burns tokens by removing them from an account. `Burn` does not support
+     * accounts associated with the native mint, use `CloseAccount` instead.
+     */
+    public override fun burn(
+      account: PublicKey,
+      mint: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+    ): TransactionInstruction = createBurnInstruction(account = account, mint = mint, authority =
+        authority, amount = amount, programId = programId)
+
+    internal fun createBurnInstruction(
+      account: PublicKey,
+      mint: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = true),
+        AccountMeta(authority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Burn.index.toInt())
+        .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    /**
+     * Close an account by transferring all its SOL to the destination account.
+     * Non-native accounts may only be closed if its token amount is zero.
+     */
+    public override fun closeAccount(
+      account: PublicKey,
+      destination: PublicKey,
+      owner: PublicKey,
+    ): TransactionInstruction = createCloseAccountInstruction(account = account, destination =
+        destination, owner = owner, programId = programId)
+
+    internal fun createCloseAccountInstruction(
+      account: PublicKey,
+      destination: PublicKey,
+      owner: PublicKey,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(destination, isSigner = false, isWritable = true),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.CloseAccount.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Freeze an Initialized account using the Mint's freeze_authority (if set).
+     */
+    public override fun freezeAccount(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+    ): TransactionInstruction = createFreezeAccountInstruction(account = account, mint = mint, owner
+        = owner, programId = programId)
+
+    internal fun createFreezeAccountInstruction(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.FreezeAccount.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Thaw a Frozen account using the Mint's freeze_authority (if set).
+     */
+    public override fun thawAccount(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+    ): TransactionInstruction = createThawAccountInstruction(account = account, mint = mint, owner =
+        owner, programId = programId)
+
+    internal fun createThawAccountInstruction(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.ThawAccount.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Transfers tokens from one account to another either directly or via a
+     * delegate. If this account is associated with the native mint then equal
+     * amounts of SOL and Tokens will be transferred to the destination account.
+     *
+     * This instruction differs from Transfer in that the token mint and
+     * decimals value is checked by the caller. This may be useful when
+     * creating transactions offline or within a hardware wallet.
+     */
+    public override fun transferChecked(
+      source: PublicKey,
+      mint: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+    ): TransactionInstruction = createTransferCheckedInstruction(source = source, mint = mint,
+        destination = destination, authority = authority, amount = amount, decimals = decimals,
+        programId = programId)
+
+    internal fun createTransferCheckedInstruction(
+      source: PublicKey,
+      mint: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+        AccountMeta(destination, isSigner = false, isWritable = true),
+        AccountMeta(authority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.TransferChecked.index.toInt())
+        .writeLongLe(amount.toLong())
+        .writeByte(decimals.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Approves a delegate. A delegate is given the authority over tokens on
+     * behalf of the source account's owner.
+     *
+     * This instruction differs from Approve in that the token mint and
+     * decimals value is checked by the caller. This may be useful when
+     * creating transactions offline or within a hardware wallet.
+     */
+    public override fun approveChecked(
+      source: PublicKey,
+      mint: PublicKey,
+      `delegate`: PublicKey,
+      owner: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+    ): TransactionInstruction = createApproveCheckedInstruction(source = source, mint = mint,
+        delegate = delegate, owner = owner, amount = amount, decimals = decimals, programId =
+        programId)
+
+    internal fun createApproveCheckedInstruction(
+      source: PublicKey,
+      mint: PublicKey,
+      `delegate`: PublicKey,
+      owner: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+        AccountMeta(delegate, isSigner = false, isWritable = false),
+        AccountMeta(owner, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.ApproveChecked.index.toInt())
+        .writeLongLe(amount.toLong())
+        .writeByte(decimals.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Mints new tokens to an account. The native mint does not support minting.
+     *
+     * This instruction differs from MintTo in that the decimals value is
+     * checked by the caller. This may be useful when creating transactions
+     * offline or within a hardware wallet.
+     */
+    public override fun mintToChecked(
+      mint: PublicKey,
+      token: PublicKey,
+      mintAuthority: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+    ): TransactionInstruction = createMintToCheckedInstruction(mint = mint, token = token,
+        mintAuthority = mintAuthority, amount = amount, decimals = decimals, programId = programId)
+
+    internal fun createMintToCheckedInstruction(
+      mint: PublicKey,
+      token: PublicKey,
+      mintAuthority: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = true),
+        AccountMeta(token, isSigner = false, isWritable = true),
+        AccountMeta(mintAuthority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.MintToChecked.index.toInt())
+        .writeLongLe(amount.toLong())
+        .writeByte(decimals.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Burns tokens by removing them from an account. `BurnChecked` does not
+     * support accounts associated with the native mint, use `CloseAccount` instead.
+     *
+     * This instruction differs from Burn in that the decimals value is checked
+     * by the caller. This may be useful when creating transactions offline or
+     * within a hardware wallet.
+     */
+    public override fun burnChecked(
+      account: PublicKey,
+      mint: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+    ): TransactionInstruction = createBurnCheckedInstruction(account = account, mint = mint,
+        authority = authority, amount = amount, decimals = decimals, programId = programId)
+
+    internal fun createBurnCheckedInstruction(
+      account: PublicKey,
+      mint: PublicKey,
+      authority: PublicKey,
+      amount: ULong,
+      decimals: UByte,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = true),
+        AccountMeta(authority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.BurnChecked.index.toInt())
+        .writeLongLe(amount.toLong())
+        .writeByte(decimals.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Like InitializeAccount, but the owner pubkey is passed via instruction
+     * data rather than the accounts list. This variant may be preferable
+     * when using Cross Program Invocation from an instruction that does
+     * not need the owner's `AccountInfo` otherwise.
+     */
+    public override fun initializeAccount2(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      rent: PublicKey,
+    ): TransactionInstruction = createInitializeAccount2Instruction(account = account, mint = mint,
+        rent = rent, owner = owner, programId = programId)
+
+    internal fun createInitializeAccount2Instruction(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      rent: PublicKey = RENT,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+        AccountMeta(rent, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeAccount2.index.toInt())
+        .write(owner.bytes)
+        .readByteArray(),
+    )
+
+    /**
+     * Given a wrapped / native token account (a token account containing SOL)
+     * updates its amount field based on the account's underlying `lamports`.
+     * This is useful if a non-wrapped SOL account uses
+     * `system_instruction::transfer` to move lamports to a wrapped token
+     * account, and needs to have its token `amount` field updated.
+     */
+    public override fun syncNative(account: PublicKey): TransactionInstruction =
+        createSyncNativeInstruction(account = account, programId = programId)
+
+    internal fun createSyncNativeInstruction(account: PublicKey, programId: PublicKey):
+        TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.SyncNative.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Like InitializeAccount2, but does not require the Rent sysvar to be provided.
+     */
+    public override fun initializeAccount3(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+    ): TransactionInstruction = createInitializeAccount3Instruction(account = account, mint = mint,
+        owner = owner, programId = programId)
+
+    internal fun createInitializeAccount3Instruction(
+      account: PublicKey,
+      mint: PublicKey,
+      owner: PublicKey,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(mint, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeAccount3.index.toInt())
+        .write(owner.bytes)
+        .readByteArray(),
+    )
+
+    /**
+     * Like InitializeMultisig, but does not require the Rent sysvar to be provided.
+     */
+    public override fun initializeMultisig2(multisig: PublicKey, m: UByte): TransactionInstruction =
+        createInitializeMultisig2Instruction(multisig = multisig, m = m, programId = programId)
+
+    internal fun createInitializeMultisig2Instruction(
+      multisig: PublicKey,
+      m: UByte,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(multisig, isSigner = false, isWritable = true),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeMultisig2.index.toInt())
+        .writeByte(m.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Like [`InitializeMint`], but does not require the Rent sysvar to be provided.
+     */
+    public override fun initializeMint2(
+      mint: PublicKey,
+      decimals: UByte,
+      mintAuthority: PublicKey,
+      freezeAuthority: PublicKey?,
+    ): TransactionInstruction = createInitializeMint2Instruction(mint = mint, decimals = decimals,
+        mintAuthority = mintAuthority, freezeAuthority = freezeAuthority, programId = programId)
+
+    internal fun createInitializeMint2Instruction(
+      mint: PublicKey,
+      decimals: UByte,
+      mintAuthority: PublicKey,
+      freezeAuthority: PublicKey?,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = true),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeMint2.index.toInt())
+        .writeByte(decimals.toInt())
+        .write(mintAuthority.bytes)
+        .apply {
+          if (freezeAuthority != null) {
+            writeByte(1)
+            .write(freezeAuthority.bytes)
+          } else {
+            writeByte(0)
+          }
+        }
+        .readByteArray(),
+    )
+
+    /**
+     * Gets the required size of an account for the given mint as a
+     * little-endian `u64`.
+     *
+     * Return data can be fetched using `sol_get_return_data` and deserializing
+     * the return data as a little-endian `u64`.
+     */
+    public override fun getAccountDataSize(mint: PublicKey): TransactionInstruction =
+        createGetAccountDataSizeInstruction(mint = mint, programId = programId)
+
+    internal fun createGetAccountDataSizeInstruction(mint: PublicKey, programId: PublicKey):
+        TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.GetAccountDataSize.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Initialize the Immutable Owner extension for the given token account
+     *
+     * Fails if the account has already been initialized, so must be called
+     * before `InitializeAccount`.
+     *
+     * No-ops in this version of the program, but is included for compatibility
+     * with the Associated Token Account program.
+     */
+    public override fun initializeImmutableOwner(account: PublicKey): TransactionInstruction =
+        createInitializeImmutableOwnerInstruction(account = account, programId = programId)
+
+    internal fun createInitializeImmutableOwnerInstruction(account: PublicKey,
+        programId: PublicKey): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(account, isSigner = false, isWritable = true),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.InitializeImmutableOwner.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Convert an Amount of tokens to a UiAmount `string`, using the given
+     * mint. In this version of the program, the mint can only specify the
+     * number of decimals.
+     *
+     * Fails on an invalid mint.
+     *
+     * Return data can be fetched using `sol_get_return_data` and deserialized
+     * with `String::from_utf8`.
+     */
+    public override fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction =
+        createAmountToUiAmountInstruction(mint = mint, amount = amount, programId = programId)
+
+    internal fun createAmountToUiAmountInstruction(
+      mint: PublicKey,
+      amount: ULong,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.AmountToUiAmount.index.toInt())
+        .writeLongLe(amount.toLong())
+        .readByteArray(),
+    )
+
+    /**
+     * Convert a UiAmount of tokens to a little-endian `u64` raw Amount, using
+     * the given mint. In this version of the program, the mint can only
+     * specify the number of decimals.
+     *
+     * Return data can be fetched using `sol_get_return_data` and deserializing
+     * the return data as a little-endian `u64`.
+     */
+    public override fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction
+        = createUiAmountToAmountInstruction(mint = mint, uiAmount = uiAmount, programId = programId)
+
+    internal fun createUiAmountToAmountInstruction(
+      mint: PublicKey,
+      uiAmount: String,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(mint, isSigner = false, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.UiAmountToAmount.index.toInt())
+        .writeUtf8(uiAmount)
+        .readByteArray(),
+    )
   }
 }

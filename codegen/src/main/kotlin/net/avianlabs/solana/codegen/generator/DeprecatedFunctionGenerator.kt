@@ -66,7 +66,11 @@ class DeprecatedFunctionGenerator(
       }
       addParameter(extra.name, type)
     }
-    instruction.accounts.forEach { account ->
+    // Add accounts without defaults first, then accounts with defaults (for positional arg compat)
+    val (accountsWithDefaults, accountsWithoutDefaults) = instruction.accounts.partition {
+      deprecation.accountDefaults.containsKey(it.name.toCamelCase())
+    }
+    accountsWithoutDefaults.forEach { account ->
       val oldParamName = deprecation.paramMapping[account.name.toCamelCase()]
         ?: account.name.toCamelCase()
       addParameter(
@@ -77,11 +81,19 @@ class DeprecatedFunctionGenerator(
     args.forEach { arg ->
       val oldParamName = deprecation.paramMapping[arg.name.toCamelCase()]
         ?: arg.name.toCamelCase()
-      val argType = when (arg.type.kind) {
-        "publicKeyTypeNode" -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
-        else -> LONG
-      }
+      val argType = mapArgType(arg)
       addParameter(oldParamName, argType)
+    }
+    accountsWithDefaults.forEach { account ->
+      val oldParamName = deprecation.paramMapping[account.name.toCamelCase()]
+        ?: account.name.toCamelCase()
+      val defaultValue = deprecation.accountDefaults[account.name.toCamelCase()]!!
+      addParameter(
+        ParameterSpec.builder(
+          oldParamName,
+          ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+        ).defaultValue(defaultValue).build()
+      )
     }
   }
 
@@ -121,9 +133,44 @@ class DeprecatedFunctionGenerator(
     return params.joinToString(", ")
   }
 
+  /**
+   * Maps IDL types to legacy (pre-codegen) Kotlin types for deprecated shims.
+   * Unsigned IDL types map to their signed counterparts since the old API used
+   * signed types, unless [DeprecationMapper.DeprecatedFunction.keepUnsignedTypes]
+   * is set, in which case unsigned types are preserved as-is.
+   */
+  private fun mapArgType(arg: InstructionArgumentNode): TypeName = when (arg.type.kind) {
+    "publicKeyTypeNode" -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+    "numberTypeNode" -> if (deprecation.keepUnsignedTypes) {
+      when (arg.type.format) {
+        "u8" -> U_BYTE
+        "i8" -> BYTE
+        "u16" -> U_SHORT
+        "i16" -> SHORT
+        "u32" -> U_INT
+        "i32" -> INT
+        "u64" -> U_LONG
+        "i64" -> LONG
+        else -> LONG
+      }
+    } else {
+      when (arg.type.format) {
+        "u8", "i8" -> BYTE
+        "u16", "i16" -> SHORT
+        "u32", "i32" -> INT
+        "u64", "i64" -> LONG
+        else -> LONG
+      }
+    }
+    "booleanTypeNode" -> BOOLEAN
+    "stringTypeNode" -> STRING
+    else -> LONG
+  }
+
   private fun castOldTypes(arg: InstructionArgumentNode): String {
     val oldName = deprecation.paramMapping[arg.name.toCamelCase()]
       ?: arg.name.toCamelCase()
+    if (deprecation.keepUnsignedTypes) return oldName
     val conversion = when (arg.type.format) {
       "u64" -> "$oldName.toULong()"
       "u8" -> "$oldName.toUByte()"
