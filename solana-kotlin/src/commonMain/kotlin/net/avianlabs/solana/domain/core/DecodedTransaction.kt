@@ -55,7 +55,8 @@ public sealed class DecodedInstruction(
       val from: PublicKey,
       val to: PublicKey,
       val lamports: Long,
-    ) : SystemProgram(net.avianlabs.solana.domain.program.SystemProgram.Instruction.Transfer.index)
+    ) :
+      SystemProgram(net.avianlabs.solana.domain.program.SystemProgram.Instruction.TransferSol.index)
 
     public data class CreateAccount(
       val from: PublicKey,
@@ -211,7 +212,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
       SystemProgram.programId -> {
         val programIndex = buffer.readInt().toUInt()
         when (programIndex) {
-          SystemProgram.Instruction.Transfer.index -> {
+          SystemProgram.Instruction.TransferSol.index -> {
             val (from, to) = accountsMeta!!
             DecodedInstruction.SystemProgram.Transfer(
               from = from.publicKey,
@@ -221,7 +222,8 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
           }
 
           SystemProgram.Instruction.AdvanceNonceAccount.index -> {
-            val (nonceAccount, authorizedPubkey) = accountsMeta!!
+            val nonceAccount = accountsMeta!![0]
+            val authorizedPubkey = accountsMeta[2]
             DecodedInstruction.SystemProgram.AdvanceNonceAccount(
               nonceAccount = nonceAccount.publicKey,
               authorizedPubkey = authorizedPubkey.publicKey,
@@ -229,35 +231,46 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
           }
 
           SystemProgram.Instruction.AuthorizeNonceAccount.index -> {
-            val (nonceAccount, authorizedPubkey, newAuthorizedPubkey) = accountsMeta!!
+            val nonceAccount = accountsMeta!![0]
+            val authorizedPubkey = accountsMeta[1]
+            val newAuthorizedBytes = ByteArray(32)
+            buffer.read(newAuthorizedBytes)
             DecodedInstruction.SystemProgram.AuthorizeNonceAccount(
               nonceAccount = nonceAccount.publicKey,
               authorizedPubkey = authorizedPubkey.publicKey,
-              newAuthorizedPubkey = newAuthorizedPubkey.publicKey,
+              newAuthorizedPubkey = PublicKey(newAuthorizedBytes),
             )
           }
 
           SystemProgram.Instruction.CreateAccount.index -> {
-            val (from, newAccount, owner) = accountsMeta!!
+            val (from, newAccount) = accountsMeta!!
+            val lamports = buffer.readLongLe()
+            val space = buffer.readLongLe()
+            val ownerBytes = ByteArray(32)
+            buffer.read(ownerBytes)
             DecodedInstruction.SystemProgram.CreateAccount(
               from = from.publicKey,
               newAccount = newAccount.publicKey,
-              lamports = buffer.readLongLe(),
-              space = buffer.readLongLe(),
-              owner = owner.publicKey,
+              lamports = lamports,
+              space = space,
+              owner = PublicKey(ownerBytes),
             )
           }
 
           SystemProgram.Instruction.InitializeNonceAccount.index -> {
-            val (nonceAccount, authorizedPubkey) = accountsMeta!!
+            val nonceAccount = accountsMeta!![0]
+            val authorizedBytes = ByteArray(32)
+            buffer.read(authorizedBytes)
             DecodedInstruction.SystemProgram.InitializeNonceAccount(
               nonceAccount = nonceAccount.publicKey,
-              authorizedPubkey = authorizedPubkey.publicKey,
+              authorizedPubkey = PublicKey(authorizedBytes),
             )
           }
 
           SystemProgram.Instruction.WithdrawNonceAccount.index -> {
-            val (nonceAccount, authorizedPubkey, destination) = accountsMeta!!
+            val nonceAccount = accountsMeta!![0]
+            val destination = accountsMeta[1]
+            val authorizedPubkey = accountsMeta[4]
             DecodedInstruction.SystemProgram.WithdrawNonceAccount(
               nonceAccount = nonceAccount.publicKey,
               authorizedPubkey = authorizedPubkey.publicKey,

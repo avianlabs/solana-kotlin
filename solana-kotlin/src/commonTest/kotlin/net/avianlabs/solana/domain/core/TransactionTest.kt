@@ -16,13 +16,13 @@ class TransactionTest {
 
     val transaction = Transaction.Builder()
       .addInstruction(
-        SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1)
+        SystemProgram.transferSol(keypair.publicKey, keypair.publicKey, 1UL)
       )
       .addInstruction(
-        ComputeBudgetProgram.setComputeUnitPrice(1u)
+        ComputeBudgetProgram.setComputeUnitPrice(1UL)
       )
       .addInstruction(
-        SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1)
+        SystemProgram.transferSol(keypair.publicKey, keypair.publicKey, 1UL)
       )
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .build()
@@ -50,7 +50,7 @@ class TransactionTest {
 
     val transaction = Transaction.Builder()
       .addInstruction(
-        SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1)
+        SystemProgram.transferSol(keypair.publicKey, keypair.publicKey, 1UL)
       )
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
@@ -79,7 +79,7 @@ class TransactionTest {
 
     val transaction = Transaction.Builder()
       .addInstruction(
-        SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1)
+        SystemProgram.transferSol(keypair.publicKey, keypair.publicKey, 1UL)
       )
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
