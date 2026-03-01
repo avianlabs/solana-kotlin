@@ -29,7 +29,11 @@ object DeprecationMapper {
   val deprecatedConstants: Map<String, List<DeprecatedConstant>> = mapOf(
     "system" to listOf(
       DeprecatedConstant("RENT_SYSVAR", "SYSVAR_RENT_ACCOUNT", ConstantType.PUBLIC_KEY),
-      DeprecatedConstant("RECENT_BLOCKHASHES_SYSVAR", "SYSVAR_RECENT_BLOCKHASH", ConstantType.PUBLIC_KEY),
+      DeprecatedConstant(
+        "RECENT_BLOCKHASHES_SYSVAR",
+        "SYSVAR_RECENT_BLOCKHASH",
+        ConstantType.PUBLIC_KEY
+      ),
       DeprecatedConstant("NONCE_LENGTH", "NONCE_ACCOUNT_LENGTH", ConstantType.LONG),
     )
   )

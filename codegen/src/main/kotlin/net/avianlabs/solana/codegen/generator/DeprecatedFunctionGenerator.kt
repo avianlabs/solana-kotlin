@@ -42,10 +42,11 @@ class DeprecatedFunctionGenerator(
   }
 
   private fun FunSpec.Builder.addParameters(args: List<InstructionArgumentNode>) {
-    // Add extra old params with defaults first (they came first in the old signature)
     deprecation.extraOldParams.filter { it.defaultValue != null }.forEach { extra ->
       val type = when (extra.type) {
-        DeprecationMapper.ParamType.PUBLIC_KEY -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+        DeprecationMapper.ParamType.PUBLIC_KEY ->
+          ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+
         DeprecationMapper.ParamType.LONG -> LONG
       }
       addParameter(
@@ -54,17 +55,17 @@ class DeprecatedFunctionGenerator(
           .build()
       )
     }
-
-    // Add extra old params without defaults (required params)
     deprecation.extraOldParams.filter { it.defaultValue == null }.forEach { extra ->
       val type = when (extra.type) {
-        DeprecationMapper.ParamType.PUBLIC_KEY -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+        DeprecationMapper.ParamType.PUBLIC_KEY -> ClassName(
+          "net.avianlabs.solana.tweetnacl.ed25519",
+          "PublicKey"
+        )
+
         DeprecationMapper.ParamType.LONG -> LONG
       }
       addParameter(extra.name, type)
     }
-
-    // Add account params
     instruction.accounts.forEach { account ->
       val oldParamName = deprecation.paramMapping[account.name.toCamelCase()]
         ?: account.name.toCamelCase()
@@ -73,27 +74,11 @@ class DeprecatedFunctionGenerator(
         ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
       )
     }
-
-    // Add argument params
     args.forEach { arg ->
       val oldParamName = deprecation.paramMapping[arg.name.toCamelCase()]
         ?: arg.name.toCamelCase()
       val argType = when (arg.type.kind) {
         "publicKeyTypeNode" -> ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
-        "numberTypeNode" -> when (arg.type.format) {
-          "u8" -> BYTE
-          "u16" -> SHORT
-          "u32" -> INT
-          "u64" -> LONG
-          "i8" -> BYTE
-          "i16" -> SHORT
-          "i32" -> INT
-          "i64" -> LONG
-          "f32" -> FLOAT
-          "f64" -> DOUBLE
-          else -> LONG
-        }
-        "booleanTypeNode" -> BOOLEAN
         else -> LONG
       }
       addParameter(oldParamName, argType)
@@ -112,15 +97,7 @@ class DeprecatedFunctionGenerator(
     instruction.arguments.filter { arg ->
       instruction.discriminators.none { it.name == arg.name }
     }.forEach { arg ->
-      val oldName = deprecation.paramMapping[arg.name.toCamelCase()]
-        ?: arg.name.toCamelCase()
-      val conversion = when (arg.type.format) {
-        "u64" -> "$oldName.toULong()"
-        "u8" -> "$oldName.toUByte()"
-        "u16" -> "$oldName.toUShort()"
-        "u32" -> "$oldName.toUInt()"
-        else -> oldName
-      }
+      val conversion = castOldTypes(arg)
       params.add("${arg.name.toCamelCase()} = $conversion")
     }
 
@@ -137,19 +114,29 @@ class DeprecatedFunctionGenerator(
     }
 
     args.forEach { arg ->
-      val oldName = deprecation.paramMapping[arg.name.toCamelCase()]
-        ?: arg.name.toCamelCase()
-      val conversion = when (arg.type.format) {
-        "u64" -> "$oldName.toULong()"
-        "u8" -> "$oldName.toUByte()"
-        "u16" -> "$oldName.toUShort()"
-        "u32" -> "$oldName.toUInt()"
-        else -> oldName
-      }
+      val conversion = castOldTypes(arg)
       params.add("${arg.name.toCamelCase()} = $conversion")
     }
 
     return params.joinToString(", ")
   }
 
+  private fun castOldTypes(arg: InstructionArgumentNode): String {
+    val oldName = deprecation.paramMapping[arg.name.toCamelCase()]
+      ?: arg.name.toCamelCase()
+    val conversion = when (arg.type.format) {
+      "u64" -> "$oldName.toULong()"
+      "u8" -> "$oldName.toUByte()"
+      "u16" -> "$oldName.toUShort()"
+      "u32" -> "$oldName.toUInt()"
+      else -> oldName
+    }
+    return conversion
+  }
+
+  private fun String.toCamelCase(): String {
+    val pascal = split('_', '-')
+      .joinToString("") { it.replaceFirstChar(Char::uppercaseChar) }
+    return pascal.replaceFirstChar(Char::lowercaseChar)
+  }
 }

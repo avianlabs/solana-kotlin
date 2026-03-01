@@ -132,27 +132,34 @@ data class TypeNode(
 
   // EnumTypeNode fields
   val variants: List<EnumVariantTypeNode>? = null,
-  val size: TypeNode? = null,
+  val size: JsonElement? = null,  // Can be TypeNode or number (for fixedSizeTypeNode)
 
   // ArrayTypeNode fields
   val item: TypeNode? = null,
   val count: JsonElement? = null,
 
   // OptionTypeNode fields
-  val prefix: TypeNode? = null,
+  val prefix: JsonElement? = null,  // Can be TypeNode or array of nodes
   val fixed: Boolean? = null,
 
   // StringTypeNode fields
   val encoding: String? = null,
 
-  // SizePrefixTypeNode fields
-  // uses 'type' and 'prefix' from above
+  // HiddenPrefixTypeNode / PreOffsetTypeNode fields
+  val offset: Int? = null,
+  val strategy: String? = null,
 
-  // BooleanTypeNode fields
-  // uses 'size' from above
+  // AmountTypeNode fields
+  val decimals: Int? = null,
+  val unit: String? = null,
+  val number: TypeNode? = null,
 
-  // PublicKeyTypeNode, etc.
-  // no additional fields needed
+  // TupleTypeNode fields
+  val items: List<TypeNode>? = null,
+
+  // MapTypeNode fields
+  val key: TypeNode? = null,
+  val value: TypeNode? = null,
 )
 
 @Serializable
@@ -165,7 +172,9 @@ data class StructFieldTypeNode(
 
 @Serializable
 data class EnumVariantTypeNode(
-  val kind: String, // enumEmptyVariantTypeNode, enumStructVariantTypeNode, etc.
+  val kind: String, // enumEmptyVariantTypeNode, enumStructVariantTypeNode, enumTupleVariantTypeNode
   val name: String,
-  val fields: List<StructFieldTypeNode>? = null
+  val fields: List<StructFieldTypeNode>? = null,
+  val struct: TypeNode? = null,  // for enumStructVariantTypeNode
+  val tuple: TypeNode? = null,   // for enumTupleVariantTypeNode
 )
