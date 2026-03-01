@@ -9,12 +9,12 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/codegen" />
             <option value="$PROJECT_DIR$/solana-kotlin" />
             <option value="$PROJECT_DIR$/solana-kotlin-arrow-extensions" />
             <option value="$PROJECT_DIR$/tweetnacl-multiplatform" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

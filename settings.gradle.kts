@@ -30,6 +30,7 @@ rootProject.name = "solana-kotlin-sdk"
 include(":solana-kotlin")
 include(":solana-kotlin-arrow-extensions")
 include(":tweetnacl-multiplatform")
+include(":codegen")
 
 dependencyResolutionManagement {
   versionCatalogs {
