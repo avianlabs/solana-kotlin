@@ -1,8 +1,11 @@
 package net.avianlabs.solana.domain.core
 
-import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
+@Deprecated(
+  message = "Use VersionedTransaction instead",
+  replaceWith = ReplaceWith("VersionedTransaction"),
+)
 public class Transaction internal constructor(
   public val message: Message,
 ) {
@@ -19,19 +22,7 @@ public class Transaction internal constructor(
       else -> message
     }
 
-    val serializedMessage = message.serialize()
-    val signerKeys = message.accountKeys.filter { it.isSigner }.map { it.publicKey }
-
-    val signatures = signers.associate { signer ->
-      signer.publicKey to
-        TweetNaCl.Signature.sign(serializedMessage, signer.secretKey)
-    }
-
-    return SignedTransaction(
-      serializedMessage = serializedMessage,
-      signatures = signatures,
-      signerKeys = signerKeys,
-    )
+    return SignedTransaction.sign(VersionedMessage.Legacy(message), signers)
   }
 
   override fun equals(other: Any?): Boolean {

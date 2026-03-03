@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package net.avianlabs.solana.domain.core
 
 import io.ktor.util.*
@@ -19,9 +21,10 @@ class SerializedTransactionTest {
 
   @Test
   fun roundTrip_signProducesSameBytes() {
-    val signed = Transaction.Builder()
+    val signed = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
       .build()
       .sign(keypair)
 
@@ -35,16 +38,17 @@ class SerializedTransactionTest {
 
   @Test
   fun signFromRawBytes() {
-    val signed = Transaction.Builder()
+    val signed = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
       .build()
       .sign(keypair)
 
     val expectedBase64 = signed.serialize().toByteArray().encodeBase64()
 
-    // Construct a SerializedTransaction from raw bytes and sign it
-    val fromRaw = signed.serialize(includeNullSignatures = true)
+    // Serialize (includes null signature slots), then re-sign
+    val fromRaw = signed.serialize()
       .sign(keypair)
       .toByteArray()
       .encodeBase64()
@@ -55,19 +59,19 @@ class SerializedTransactionTest {
   @Test
   fun multiSigner_partialThenComplete() {
     // Build a 2-signer transaction, sign with only keypair first
-    val partiallySigned = Transaction.Builder()
+    val partiallySigned = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
       .build()
       .sign(keypair)
-      .serialize(includeNullSignatures = true)
+      .serialize()
 
     // Now sign the serialized transaction with the missing keypair2
     val fullySigned = partiallySigned.sign(keypair2)
 
     // Build the reference: sign with both signers from scratch
-    val reference = Transaction.Builder()
+    val reference = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
@@ -80,20 +84,19 @@ class SerializedTransactionTest {
 
   @Test
   fun nullSignatureSlots_replacedCorrectly() {
-    // Serialize with null signature slots, then sign to fill them
-    val withNullSlots = Transaction.Builder()
+    // Serialize with null signature slots (unsigned), then sign to fill them
+    val withNullSlots = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
       .build()
-      .sign(emptyList())
-      .serialize(includeNullSignatures = true)
+      .serialize()
 
     // Sign with both signers
     val signed = withNullSlots.sign(listOf(keypair2, keypair))
 
     // Reference
-    val reference = Transaction.Builder()
+    val reference = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
@@ -105,39 +108,40 @@ class SerializedTransactionTest {
   }
 
   @Test
-  fun toSignedTransaction_roundTrip() {
-    // Sign via builder, serialize, convert to SignedTransaction, re-serialize
-    val signed = Transaction.Builder()
+  fun toVersionedTransaction_roundTrip() {
+    // Sign via builder, serialize, convert to VersionedTransaction, re-serialize
+    val signed = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
       .build()
       .sign(keypair)
 
     val originalBytes = signed.serialize().toByteArray()
-    val roundTripped = signed.serialize().toSignedTransaction().serialize().toByteArray()
+    val roundTripped = signed.serialize().toVersionedTransaction().serialize().toByteArray()
 
     assertContentEquals(originalBytes, roundTripped)
   }
 
   @Test
-  fun toSignedTransaction_multiSigner_partialThenComplete() {
-    // Build a 2-signer transaction, sign with only keypair first, serialize with null slots
-    val partiallySerialized = Transaction.Builder()
+  fun toVersionedTransaction_multiSigner_partialThenComplete() {
+    // Build a 2-signer transaction, sign with only keypair first, serialize
+    val partiallySerialized = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
       .build()
       .sign(keypair)
-      .serialize(includeNullSignatures = true)
+      .serialize()
 
-    // Convert to SignedTransaction, sign with missing signer, re-serialize
+    // Convert to VersionedTransaction, sign with missing signer, re-serialize
     val fullySigned = partiallySerialized
-      .toSignedTransaction()
+      .toVersionedTransaction()
       .sign(keypair2)
       .serialize()
 
     // Build the reference: sign with both signers from scratch
-    val reference = Transaction.Builder()
+    val reference = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair2.publicKey)
@@ -151,22 +155,22 @@ class SerializedTransactionTest {
   @Test
   fun equivalence_serializedSignMatchesBuilderSign() {
     // Sign via builder
-    val viaBuilder = Transaction.Builder()
+    val viaBuilder = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
       .build()
       .sign(keypair)
       .serialize()
       .toByteArray()
 
     // Sign via SerializedTransaction
-    val viaSerialized = Transaction.Builder()
+    val viaSerialized = VersionedTransaction.Builder()
       .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
       .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
       .setFeePayer(keypair.publicKey)
       .build()
-      .sign(emptyList())
-      .serialize(includeNullSignatures = true)
+      .serialize()
       .sign(keypair)
       .toByteArray()
 

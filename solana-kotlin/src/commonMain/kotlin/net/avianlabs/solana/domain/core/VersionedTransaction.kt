@@ -2,6 +2,9 @@ package net.avianlabs.solana.domain.core
 
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
+import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
+import net.avianlabs.solana.vendor.ShortVecEncoding
+import okio.Buffer
 
 /**
  * A transaction that supports both legacy and V0 (versioned) message formats.
@@ -10,35 +13,101 @@ import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
  * accounts found in them are referenced via lookup indices (V0 format),
  * reducing the on-chain transaction size. When no ALTs are provided,
  * falls back to legacy format.
+ *
+ * Signing returns a new [VersionedTransaction] instance (immutable), so the
+ * same type flows through build → sign → serialize without type changes.
  */
 public class VersionedTransaction internal constructor(
   public val message: VersionedMessage,
-  internal val resolvedLookupTables: List<AddressLookupTableAccount>,
+  public val signatures: Map<PublicKey, ByteArray>,
+  rawSerializedMessage: ByteArray?,
 ) {
 
-  public fun sign(signer: Signer): SignedTransaction = sign(listOf(signer))
+  /**
+   * Creates a [VersionedTransaction] with the given [message] and optional [signatures].
+   *
+   * The [serializedMessage] is lazily computed from [message] on first access.
+   */
+  public constructor(
+    message: VersionedMessage,
+    signatures: Map<PublicKey, ByteArray> = emptyMap(),
+  ) : this(message, signatures, null)
 
-  public fun sign(signers: List<Signer>): SignedTransaction {
-    val message = when {
-      message.feePayer == null && signers.isNotEmpty() -> rebuildWithFeePayer(signers.first().publicKey)
-      else -> message
-    }
-
-    val serializedMessage = message.serialize()
-    val signerKeys = message.staticAccountKeys
+  /**
+   * The public keys of all accounts that must sign this transaction,
+   * derived from the message's static account keys.
+   */
+  public val signerKeys: List<PublicKey>
+    get() = message.staticAccountKeys
       .filter { it.isSigner }
       .map { it.publicKey }
 
-    val signatures = signers.associate { signer ->
-      signer.publicKey to
-        TweetNaCl.Signature.sign(serializedMessage, signer.secretKey)
+  /**
+   * The binary wire-format bytes of the [message].
+   *
+   * When deserialized from raw bytes, the original bytes are preserved directly.
+   * Otherwise, lazily computed from [message] on first access.
+   */
+  public val serializedMessage: ByteArray by lazy {
+    rawSerializedMessage ?: message.serialize()
+  }
+
+  /**
+   * Signs this transaction with a single signer, returning a new
+   * [VersionedTransaction] with the accumulated signatures.
+   *
+   * If no fee payer has been set, the signer's public key is used.
+   */
+  public fun sign(signer: Signer): VersionedTransaction = sign(listOf(signer))
+
+  /**
+   * Signs this transaction with multiple signers, returning a new
+   * [VersionedTransaction] with the accumulated signatures.
+   *
+   * If no fee payer has been set, the first signer's public key is used.
+   */
+  public fun sign(signers: List<Signer>): VersionedTransaction {
+    val actualMessage = when {
+      message.feePayer == null && signers.isNotEmpty() ->
+        rebuildWithFeePayer(signers.first().publicKey)
+
+      else -> message
     }
 
-    return SignedTransaction(
-      serializedMessage = serializedMessage,
-      signatures = signatures,
-      signerKeys = signerKeys,
+    val msgBytes =
+      if (actualMessage === message) serializedMessage else actualMessage.serialize()
+    val newSignatures = signers.associate { signer ->
+      signer.publicKey to TweetNaCl.Signature.sign(msgBytes, signer.secretKey)
+    }
+
+    return VersionedTransaction(
+      message = actualMessage,
+      signatures = this.signatures + newSignatures,
+      rawSerializedMessage = msgBytes,
     )
+  }
+
+  /**
+   * Serializes this transaction to its binary wire format.
+   *
+   * All signer slots are always included in the output, with zero-filled
+   * placeholders for any signers that have not yet signed.
+   */
+  public fun serialize(): SerializedTransaction {
+    val orderedSigs = signerKeys.map { key ->
+      signatures[key] ?: ByteArray(TweetNaCl.Signature.SIGNATURE_BYTES)
+    }
+    val signaturesLength = ShortVecEncoding.encodeLength(orderedSigs.size)
+    val msgBytes = serializedMessage
+    val bufferSize =
+      signaturesLength.size +
+        orderedSigs.size * TweetNaCl.Signature.SIGNATURE_BYTES +
+        msgBytes.size
+    val out = Buffer()
+    out.write(signaturesLength)
+    orderedSigs.forEach(out::write)
+    out.write(msgBytes)
+    return SerializedTransaction(out.readByteArray(bufferSize.toLong()))
   }
 
   private fun rebuildWithFeePayer(feePayer: PublicKey): VersionedMessage =
@@ -48,8 +117,68 @@ public class VersionedTransaction internal constructor(
           .setFeePayer(feePayer)
           .build()
       )
+
       is VersionedMessage.V0 -> msg.copy(feePayer = feePayer)
     }
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || this::class != other::class) return false
+
+    other as VersionedTransaction
+
+    if (message != other.message) return false
+    if (signerKeys != other.signerKeys) return false
+    if (signatures.size != other.signatures.size) return false
+    for ((key, value) in signatures) {
+      val otherValue = other.signatures[key] ?: return false
+      if (!value.contentEquals(otherValue)) return false
+    }
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = message.hashCode()
+    result = 31 * result + signerKeys.hashCode()
+    result = 31 * result + signatures.entries.fold(0) { acc, (k, v) ->
+      acc + k.hashCode() + v.contentHashCode()
+    }
+    return result
+  }
+
+  override fun toString(): String =
+    "VersionedTransaction(signatures=${signatures.values.map { it.encodeToBase58String() }})"
+
+  public companion object {
+    /**
+     * Deserializes a [VersionedTransaction] from its binary wire format.
+     *
+     * The wire format is `[compact-u16 sig count][64-byte sigs...][message bytes]`.
+     */
+    public fun deserialize(bytes: ByteArray): VersionedTransaction {
+      val source = Buffer().apply { write(bytes) }
+
+      val numSignatures = ShortVecEncoding.decodeLength(source)
+      val existingSignatures = Array(numSignatures) {
+        source.readByteArray(TweetNaCl.Signature.SIGNATURE_BYTES.toLong())
+      }
+      val messageBytes = source.readByteArray()
+
+      val message = VersionedMessage.deserialize(messageBytes)
+      val signerKeys = message.staticAccountKeys
+        .filter { it.isSigner }
+        .map { it.publicKey }
+
+      val signatures = signerKeys.zip(existingSignatures.toList()).toMap()
+
+      return VersionedTransaction(
+        message = message,
+        signatures = signatures,
+        rawSerializedMessage = messageBytes,
+      )
+    }
+  }
 
   public class Builder {
     private var feePayer: PublicKey? = null
@@ -83,6 +212,11 @@ public class VersionedTransaction internal constructor(
       return this
     }
 
+    /**
+     * Builds the transaction, auto-detecting the message format:
+     * - Legacy when no ALTs are provided
+     * - V0 when ALTs are present
+     */
     public fun build(): VersionedTransaction {
       if (lookupTableAccounts.isEmpty()) {
         return buildLegacy()
@@ -90,8 +224,15 @@ public class VersionedTransaction internal constructor(
       return buildV0()
     }
 
-    private fun buildLegacy(): VersionedTransaction {
-      val normalizedKeys = accountKeys.normalize(feePayer)
+    /**
+     * Builds the transaction with a legacy message format.
+     *
+     * @throws IllegalArgumentException if ALTs have been added
+     */
+    public fun buildLegacy(): VersionedTransaction {
+      require(lookupTableAccounts.isEmpty()) {
+        "Cannot build legacy transaction with address lookup tables. Use buildV0() or build()."
+      }
       val message = Message.Builder()
         .apply {
           feePayer?.let { setFeePayer(it) }
@@ -101,11 +242,14 @@ public class VersionedTransaction internal constructor(
         .build()
       return VersionedTransaction(
         message = VersionedMessage.Legacy(message),
-        resolvedLookupTables = emptyList(),
       )
     }
 
-    private fun buildV0(): VersionedTransaction {
+    /**
+     * Builds the transaction with a V0 message format, even if no ALTs
+     * are provided (the address table lookups list will be empty).
+     */
+    public fun buildV0(): VersionedTransaction {
       val normalizedKeys = accountKeys.normalize(feePayer)
 
       // Build ALT index: publicKey → (ALT, indexInALT)
@@ -169,7 +313,6 @@ public class VersionedTransaction internal constructor(
 
       return VersionedTransaction(
         message = v0Message,
-        resolvedLookupTables = lookupTableAccounts,
       )
     }
   }

@@ -3,7 +3,7 @@ package net.avianlabs.solana.domain.core
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
 @ConsistentCopyVisibility
-public data class Message private constructor(
+public data class Message internal constructor(
   public val feePayer: PublicKey?,
   public val recentBlockHash: String?,
   public val accountKeys: List<AccountMeta>,
