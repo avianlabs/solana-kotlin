@@ -1,12 +1,14 @@
+@file:Suppress("DEPRECATION")
+
 package net.avianlabs.solana.domain.core
 
-import io.ktor.util.*
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
@@ -103,9 +105,9 @@ class VersionedTransactionTest {
     // Serialized message should start with 0x80 (V0 prefix)
     assertEquals(0x80.toByte(), signed.serializedMessage[0])
 
-    // Sign → serialize → parse → verify signer
+    // Sign → serialize → deserialize → verify signer
     val serialized = signed.serialize()
-    val reParsed = serialized.toSignedTransaction()
+    val reParsed = serialized.toVersionedTransaction()
     assertEquals(1, reParsed.signerKeys.size)
     assertEquals(keypair.publicKey, reParsed.signerKeys[0])
   }
@@ -167,5 +169,106 @@ class VersionedTransactionTest {
     val signed = vtx.sign(keypair)
     assertEquals(1, signed.signerKeys.size)
     assertEquals(keypair.publicKey, signed.signerKeys[0])
+  }
+
+  @Test
+  fun signReturnsVersionedTransaction() {
+    val vtx = VersionedTransaction.Builder()
+      .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+      .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
+      .build()
+
+    // sign() returns VersionedTransaction (not a different type)
+    val signed: VersionedTransaction = vtx.sign(keypair)
+    assertEquals(1, signed.signatures.size)
+    assertTrue(signed.signatures.containsKey(keypair.publicKey))
+  }
+
+  @Test
+  fun multipleSignAccumulateSignatures() {
+    val vtx = VersionedTransaction.Builder()
+      .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+      .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair2.publicKey)
+      .build()
+
+    // Two successive sign() calls should accumulate
+    val signed = vtx.sign(keypair).sign(keypair2)
+    assertEquals(2, signed.signatures.size)
+    assertTrue(signed.signatures.containsKey(keypair.publicKey))
+    assertTrue(signed.signatures.containsKey(keypair2.publicKey))
+  }
+
+  @Test
+  fun serializeDeserializeRoundTrip() {
+    val signed = VersionedTransaction.Builder()
+      .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+      .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
+      .build()
+      .sign(keypair)
+
+    val bytes = signed.serialize().toByteArray()
+    val deserialized = VersionedTransaction.deserialize(bytes)
+    val reBytes = deserialized.serialize().toByteArray()
+
+    assertContentEquals(bytes, reBytes)
+  }
+
+  @Test
+  fun buildLegacy_producesLegacyMessage() {
+    val vtx = VersionedTransaction.Builder()
+      .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+      .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
+      .buildLegacy()
+
+    assertIs<VersionedMessage.Legacy>(vtx.message)
+  }
+
+  @Test
+  fun buildLegacy_throwsWithALTs() {
+    val altKey = PublicKey(ByteArray(32) { 0xBB.toByte() })
+    val alt = AddressLookupTableAccount(
+      key = altKey,
+      addresses = listOf(keypair.publicKey),
+    )
+
+    assertFailsWith<IllegalArgumentException> {
+      VersionedTransaction.Builder()
+        .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+        .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+        .setFeePayer(keypair.publicKey)
+        .addAddressLookupTableAccount(alt)
+        .buildLegacy()
+    }
+  }
+
+  @Test
+  fun buildV0_producesV0MessageWithoutALTs() {
+    val vtx = VersionedTransaction.Builder()
+      .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+      .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
+      .buildV0()
+
+    val message = assertIs<VersionedMessage.V0>(vtx.message)
+    // V0 prefix should be present in serialized message
+    assertEquals(0x80.toByte(), vtx.serializedMessage[0])
+    assertTrue(message.addressTableLookups.isEmpty())
+  }
+
+  @Test
+  fun constructFromMessage() {
+    val message = Message.Builder()
+      .addInstruction(SystemProgram.transfer(keypair.publicKey, keypair.publicKey, 1))
+      .setRecentBlockHash("7qS6hDXGxd6ekYqnSqD7abG1jEfTcpfpjKApxWbb4gVF")
+      .setFeePayer(keypair.publicKey)
+      .build()
+
+    val vtx = VersionedTransaction(VersionedMessage.Legacy(message))
+    assertIs<VersionedMessage.Legacy>(vtx.message)
+    assertTrue(vtx.signatures.isEmpty())
   }
 }

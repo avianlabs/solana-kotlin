@@ -1,6 +1,5 @@
 package net.avianlabs.solana.domain.core
 
-import io.ktor.util.*
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
@@ -63,7 +62,7 @@ class SerializedTransactionV0Test {
     }
     val messageBytes = messageBuffer.readByteArray()
 
-    // Build full transaction: 1 null signature + message
+    // Build full transaction: null signature(s) + message
     val txBuffer = Buffer().apply {
       write(ShortVecEncoding.encodeLength(numSignatures))
       repeat(numSignatures) {
@@ -75,23 +74,23 @@ class SerializedTransactionV0Test {
   }
 
   @Test
-  fun toSignedTransaction_v0_parsesCorrectly() {
+  fun toVersionedTransaction_v0_parsesCorrectly() {
     val tx = buildMinimalV0Transaction(keypair.publicKey)
-    val signed = tx.toSignedTransaction()
+    val vtx = tx.toVersionedTransaction()
 
-    assertEquals(1, signed.signerKeys.size)
-    assertEquals(keypair.publicKey, signed.signerKeys[0])
+    assertEquals(1, vtx.signerKeys.size)
+    assertEquals(keypair.publicKey, vtx.signerKeys[0])
   }
 
   @Test
-  fun toSignedTransaction_v0_signAndRoundTrip() {
+  fun toVersionedTransaction_v0_signAndRoundTrip() {
     val tx = buildMinimalV0Transaction(keypair.publicKey)
 
     // Sign the V0 transaction
     val signed = tx.sign(keypair)
 
     // Parse it back
-    val reParsed = signed.toSignedTransaction()
+    val reParsed = signed.toVersionedTransaction()
 
     assertEquals(1, reParsed.signerKeys.size)
     assertEquals(keypair.publicKey, reParsed.signerKeys[0])
@@ -101,18 +100,18 @@ class SerializedTransactionV0Test {
   }
 
   @Test
-  fun toSignedTransaction_v0_serializeRoundTrip() {
+  fun toVersionedTransaction_v0_serializeRoundTrip() {
     val tx = buildMinimalV0Transaction(keypair.publicKey)
     val originalBytes = tx.toByteArray()
 
     // Parse → re-serialize should produce same bytes
-    val roundTripped = tx.toSignedTransaction().serialize(includeNullSignatures = true).toByteArray()
+    val roundTripped = tx.toVersionedTransaction().serialize().toByteArray()
 
     assertContentEquals(originalBytes, roundTripped)
   }
 
   @Test
-  fun toSignedTransaction_v0_resignProducesSameBytes() {
+  fun toVersionedTransaction_v0_resignProducesSameBytes() {
     val tx = buildMinimalV0Transaction(keypair.publicKey)
 
     val signed = tx.sign(keypair)
@@ -122,16 +121,17 @@ class SerializedTransactionV0Test {
   }
 
   @Test
-  fun toSignedTransaction_v0_preservesVersionPrefix() {
+  fun toVersionedTransaction_v0_preservesVersionPrefix() {
     val tx = buildMinimalV0Transaction(keypair.publicKey)
-    val signed = tx.toSignedTransaction()
+    val vtx = tx.toVersionedTransaction()
 
     // The serialized message should start with 0x80 (V0 prefix)
-    assertEquals(0x80.toByte(), signed.serializedMessage[0])
+    assertEquals(0x80.toByte(), vtx.serializedMessage[0])
   }
 
   @Test
-  fun toSignedTransaction_legacy_stillWorks() {
+  @Suppress("DEPRECATION")
+  fun toVersionedTransaction_legacy_stillWorks() {
     // Verify existing legacy behavior is unaffected
     val signed = Transaction.Builder()
       .addInstruction(
@@ -146,13 +146,13 @@ class SerializedTransactionV0Test {
       .sign(keypair)
 
     val originalBytes = signed.serialize().toByteArray()
-    val roundTripped = signed.serialize().toSignedTransaction().serialize().toByteArray()
+    val roundTripped = signed.serialize().toVersionedTransaction().serialize().toByteArray()
 
     assertContentEquals(originalBytes, roundTripped)
   }
 
   @Test
-  fun toSignedTransaction_unsupportedVersion_throws() {
+  fun toVersionedTransaction_unsupportedVersion_throws() {
     // Build a transaction with version 1 prefix (0x81)
     val messageBuffer = Buffer().apply {
       writeByte(0x81) // version 1
@@ -175,12 +175,12 @@ class SerializedTransactionV0Test {
     val tx = SerializedTransaction(txBuffer.readByteArray())
 
     assertFailsWith<IllegalArgumentException> {
-      tx.toSignedTransaction()
+      tx.toVersionedTransaction()
     }
   }
 
   @Test
-  fun toSignedTransaction_v0_withAltLookups() {
+  fun toVersionedTransaction_v0_withAltLookups() {
     // Build a V0 transaction with address table lookups
     val altKey = PublicKey(ByteArray(32) { 0xBB.toByte() })
     val recipientKey = PublicKey(ByteArray(32) { 0x42 })
@@ -224,12 +224,12 @@ class SerializedTransactionV0Test {
     val tx = SerializedTransaction(txBuffer.readByteArray())
 
     // Should parse V0 with ALT lookups without error
-    val signed = tx.toSignedTransaction()
-    assertEquals(1, signed.signerKeys.size)
-    assertEquals(keypair.publicKey, signed.signerKeys[0])
+    val vtx = tx.toVersionedTransaction()
+    assertEquals(1, vtx.signerKeys.size)
+    assertEquals(keypair.publicKey, vtx.signerKeys[0])
 
     // Round-trip preserves bytes
-    val roundTripped = signed.serialize(includeNullSignatures = true).toByteArray()
+    val roundTripped = vtx.serialize().toByteArray()
     assertContentEquals(tx.toByteArray(), roundTripped)
   }
 }

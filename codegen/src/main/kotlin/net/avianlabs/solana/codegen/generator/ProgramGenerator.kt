@@ -1182,6 +1182,7 @@ class ProgramGenerator(
             } else {
               val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
               when (sizeFormat) {
+                "u8" -> add(".writeByte(%L.value.toInt())\n", paramName)
                 "u16" -> add(".writeShortLe(%L.value.toInt())\n", paramName)
                 "u32" -> add(".writeIntLe(%L.value.toInt())\n", paramName)
                 else -> add(".writeByte(%L.value.toInt())\n", paramName)

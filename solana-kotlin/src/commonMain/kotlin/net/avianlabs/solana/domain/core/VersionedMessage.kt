@@ -15,6 +15,8 @@ public sealed class VersionedMessage {
   public abstract val staticAccountKeys: List<AccountMeta>
   public abstract val instructions: List<TransactionInstruction>
 
+  public companion object;
+
   /**
    * Wraps an existing [Message] as a legacy versioned message.
    */

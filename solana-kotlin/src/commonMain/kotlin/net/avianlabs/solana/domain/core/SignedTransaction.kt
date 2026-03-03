@@ -7,15 +7,40 @@ import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import net.avianlabs.solana.vendor.ShortVecEncoding
 import okio.Buffer
 
+@Deprecated(
+  message = "Use VersionedTransaction instead",
+  replaceWith = ReplaceWith("VersionedTransaction"),
+)
 public data class SignedTransaction(
+  public val message: VersionedMessage,
   public val serializedMessage: ByteArray,
   public val signatures: Map<PublicKey, ByteArray>,
   public val signerKeys: List<PublicKey>,
 ) {
 
+  public companion object {
+    public fun sign(message: VersionedMessage, signers: List<Signer>): SignedTransaction {
+      val serializedMessage = message.serialize()
+      val signerKeys = message.staticAccountKeys
+        .filter { it.isSigner }
+        .map { it.publicKey }
+      val signatures = signers.associate { signer ->
+        signer.publicKey to
+          TweetNaCl.Signature.sign(serializedMessage, signer.secretKey)
+      }
+      return SignedTransaction(
+        message = message,
+        serializedMessage = serializedMessage,
+        signatures = signatures,
+        signerKeys = signerKeys,
+      )
+    }
+  }
+
   public fun sign(signer: Signer): SignedTransaction = sign(listOf(signer))
 
   public fun sign(signers: List<Signer>): SignedTransaction = SignedTransaction(
+    message = message,
     serializedMessage = serializedMessage,
     signerKeys = signerKeys,
     signatures = signatures + signers.associate { signer ->
