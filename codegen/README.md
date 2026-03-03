@@ -34,10 +34,11 @@ IDL files are downloaded from official Solana program repos and stored in `codeg
 
 The following files are generated and should NOT be manually edited:
 
-- `solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/SystemProgram.kt`
-- `solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/TokenProgram.kt`
-- `solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/AssociatedTokenProgram.kt`
-- `solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/ComputeBudgetProgram.kt`
+- `solana-kotlin/src/commonMain/generated/net/avianlabs/solana/domain/program/SystemProgram.kt`
+- `solana-kotlin/src/commonMain/generated/net/avianlabs/solana/domain/program/TokenProgram.kt`
+- `solana-kotlin/src/commonMain/generated/net/avianlabs/solana/domain/program/Token2022Program.kt`
+- `solana-kotlin/src/commonMain/generated/net/avianlabs/solana/domain/program/AssociatedTokenProgram.kt`
+- `solana-kotlin/src/commonMain/generated/net/avianlabs/solana/domain/program/ComputeBudgetProgram.kt`
 
 ## Updating IDLs
 

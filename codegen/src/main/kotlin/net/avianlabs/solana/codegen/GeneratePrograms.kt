@@ -34,7 +34,7 @@ private val baseInterfaceConfigs = listOf(
 
 fun main() {
   val idlDir = File("codegen/idl")
-  val outputDir = File("solana-kotlin/src/commonMain/kotlin")
+  val outputDir = File("solana-kotlin/src/commonMain/generated")
 
   require(idlDir.exists()) { "IDL directory not found: ${idlDir.absolutePath}" }
   require(outputDir.exists()) { "Output directory not found: ${outputDir.absolutePath}" }

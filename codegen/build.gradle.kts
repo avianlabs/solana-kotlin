@@ -66,8 +66,8 @@ tasks.register<Exec>("checkGeneratedCode") {
     
     dependsOn("generateSolanaCode")
     
-    commandLine("git", "diff", "--exit-code",
-        "solana-kotlin/src/commonMain/kotlin/net/avianlabs/solana/domain/program/"
+    commandLine("git", "diff", "--exit-code", "--",
+        "solana-kotlin/src/commonMain/generated/"
     )
     
     doLast {
