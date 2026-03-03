@@ -11,16 +11,27 @@ private val USHORT = ClassName("kotlin", "UShort")
 private val UINT = ClassName("kotlin", "UInt")
 private val ULONG = ClassName("kotlin", "ULong")
 
-class ProgramGenerator(private val program: ProgramNode) {
+class ProgramGenerator(
+  private val program: ProgramNode,
+  private val sharedConfig: SharedInterfaceConfig? = null,
+) {
 
   private val packageName = "net.avianlabs.solana.domain.program"
 
   fun generate(): FileSpec {
     val fileName = program.name.toPascalCase() + "Program"
 
+    val hasAccounts = program.instructions.any { it.accounts.isNotEmpty() }
+
     return FileSpec.builder(packageName, fileName)
       .indent("  ")
-      .addImport("net.avianlabs.solana.domain.core", "AccountMeta", "TransactionInstruction")
+      .apply {
+        if (hasAccounts) {
+          addImport("net.avianlabs.solana.domain.core", "AccountMeta", "TransactionInstruction")
+        } else {
+          addImport("net.avianlabs.solana.domain.core", "TransactionInstruction")
+        }
+      }
       .addImport("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
       .addImport(
         "net.avianlabs.solana.domain.program.Program.Companion",
@@ -34,94 +45,243 @@ class ProgramGenerator(private val program: ProgramNode) {
   private fun generateProgramObject(): TypeSpec {
     val programName = program.name.toPascalCase() + "Program"
 
+    val isBaseProgram = sharedConfig?.isBaseProgram(program.publicKey) == true
+    val isNonBaseShared = sharedConfig != null && !isBaseProgram
+
+    if (isBaseProgram) {
+      return generateSealedClassProgram(programName)
+    }
+
+    val sealedSuperclass = if (isNonBaseShared) sharedConfig?.sealedClassName else null
+
     return TypeSpec.objectBuilder(programName)
-      .addSuperinterface(ClassName(packageName, "Program"))
+      .apply {
+        if (sealedSuperclass != null) {
+          superclass(ClassName(packageName, sealedSuperclass))
+        } else {
+          addSuperinterface(ClassName(packageName, "Program"))
+        }
+      }
       .addProperty(generateProgramIdProperty())
       .apply {
-        collectSysvarConstants().forEach { (name, address) ->
-          addProperty(
-            PropertySpec.builder(
-              name,
-              ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
-            )
-              .addModifiers(KModifier.PUBLIC)
-              .initializer("PublicKey.fromBase58(%S)", address)
-              .build()
-          )
-        }
+        addObjectContent(this)
+      }
+      .build()
+  }
 
-        program.accounts.forEach { account ->
-          account.size?.let { size ->
-            val constName = "${account.name.toScreamingSnakeCase()}_LENGTH"
-            addProperty(
-              PropertySpec.builder(constName, LONG)
-                .addModifiers(KModifier.PUBLIC)
-                .initializer("%LL", size)
-                .build()
-            )
+  private fun generateSealedClassProgram(programName: String): TypeSpec {
+    val config = sharedConfig!!
+
+    return TypeSpec.classBuilder(programName)
+      .addModifiers(KModifier.PUBLIC, KModifier.SEALED)
+      .addSuperinterface(ClassName(packageName, "Program"))
+      .apply {
+        // Add merged defined type enums on the sealed class
+        config.mergedDefinedTypes.forEach { (typeName, variants) ->
+          val definedType = program.definedTypes.find { it.name == typeName }
+          if (definedType != null && definedType.type.kind == "enumTypeNode") {
+            addType(generateMergedEnum(definedType, variants))
           }
         }
 
-        DeprecationMapper.getDeprecatedConstantsForProgram(program.name)
-          .forEach { deprecatedConst ->
-            val type = when (deprecatedConst.type) {
-              DeprecationMapper.ConstantType.PUBLIC_KEY ->
-                ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+        // Add non-shared defined types on the sealed class (not in companion)
+        addDefinedTypes(this, skipShared = true)
 
-              DeprecationMapper.ConstantType.LONG -> LONG
-            }
-            addProperty(
-              PropertySpec.builder(deprecatedConst.oldName, type)
-                .addModifiers(KModifier.PUBLIC)
-                .getter(
-                  FunSpec.getterBuilder().addStatement("return %L", deprecatedConst.newName).build()
-                )
-                .addAnnotation(
-                  AnnotationSpec.builder(Deprecated::class)
-                    .addMember("message = %S", "Use ${deprecatedConst.newName} instead")
-                    .addMember("replaceWith = ReplaceWith(%S)", deprecatedConst.newName)
-                    .build()
-                )
-                .build()
-            )
-          }
-
-        program.definedTypes.forEach { definedType ->
-          when (definedType.type.kind) {
-            "enumTypeNode" -> {
-              val hasComplexVariants = definedType.type.variants?.any { 
-                it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
-              } ?: false
-              
-              if (hasComplexVariants) {
-                addType(generateSealedClassEnum(definedType))
-              } else {
-                addType(generateDefinedEnum(definedType))
-              }
-            }
-            "structTypeNode" -> {
-              addType(generateDefinedStruct(definedType))
-            }
-            "fixedSizeTypeNode" -> addType(generateFixedSizeType(definedType))
-          }
-        }
-
+        // Add instruction enum on the sealed class (not in companion)
         val numericInstructions = program.instructions.filter { hasNumericDiscriminator(it) }
         if (numericInstructions.isNotEmpty()) {
           addType(generateInstructionEnum())
         }
+
+        // Add abstract method declarations for shared instructions
         program.instructions.forEach { instruction ->
-          addFunction(generateInstructionFunction(instruction))
-
-          DeprecationMapper.getDeprecationForInstruction(instruction.name)?.let { deprecation ->
-            addFunction(DeprecatedFunctionGenerator(instruction, deprecation).generate())
-          }
-
-          if (program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA") {
-            addFunction(generateInternalInstructionFunction(instruction))
-          }
+          addFunction(generateAbstractMethod(instruction))
         }
       }
+      // Add companion object with the base program implementation
+      .addType(generateCompanionImplementation(programName))
+      .build()
+  }
+
+  private fun generateCompanionImplementation(programName: String): TypeSpec {
+    return TypeSpec.companionObjectBuilder()
+      .superclass(ClassName(packageName, programName))
+      .addProperty(generateProgramIdProperty())
+      .apply {
+        addPropertiesAndConstants(this)
+        addInstructionMethods(this, isBaseProgram = true)
+      }
+      .build()
+  }
+
+  private fun addDefinedTypes(builder: TypeSpec.Builder, skipShared: Boolean) {
+    program.definedTypes.forEach { definedType ->
+      if (skipShared && sharedConfig?.isSharedDefinedType(definedType.name) == true) return@forEach
+      when (definedType.type.kind) {
+        "enumTypeNode" -> {
+          val hasComplexVariants = definedType.type.variants?.any {
+            it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode"
+          } ?: false
+
+          if (hasComplexVariants) {
+            builder.addType(generateSealedClassEnum(definedType))
+          } else {
+            builder.addType(generateDefinedEnum(definedType))
+          }
+        }
+        "structTypeNode" -> {
+          builder.addType(generateDefinedStruct(definedType))
+        }
+        "fixedSizeTypeNode" -> builder.addType(generateFixedSizeType(definedType))
+      }
+    }
+  }
+
+  private fun addPropertiesAndConstants(builder: TypeSpec.Builder) {
+    collectSysvarConstants().forEach { (name, address) ->
+      builder.addProperty(
+        PropertySpec.builder(
+          name,
+          ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+        )
+          .addModifiers(KModifier.PUBLIC)
+          .initializer("PublicKey.fromBase58(%S)", address)
+          .build()
+      )
+    }
+
+    program.accounts.forEach { account ->
+      account.size?.let { size ->
+        val constName = "${account.name.toScreamingSnakeCase()}_LENGTH"
+        builder.addProperty(
+          PropertySpec.builder(constName, LONG)
+            .addModifiers(KModifier.PUBLIC)
+            .initializer("%LL", size)
+            .build()
+        )
+      }
+    }
+
+    DeprecationMapper.getDeprecatedConstantsForProgram(program.name)
+      .forEach { deprecatedConst ->
+        val type = when (deprecatedConst.type) {
+          DeprecationMapper.ConstantType.PUBLIC_KEY ->
+            ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+
+          DeprecationMapper.ConstantType.LONG -> LONG
+        }
+        builder.addProperty(
+          PropertySpec.builder(deprecatedConst.oldName, type)
+            .addModifiers(KModifier.PUBLIC)
+            .getter(
+              FunSpec.getterBuilder().addStatement("return %L", deprecatedConst.newName).build()
+            )
+            .addAnnotation(
+              AnnotationSpec.builder(Deprecated::class)
+                .addMember("message = %S", "Use ${deprecatedConst.newName} instead")
+                .addMember("replaceWith = ReplaceWith(%S)", deprecatedConst.newName)
+                .build()
+            )
+            .build()
+        )
+      }
+  }
+
+  private fun addInstructionMethods(builder: TypeSpec.Builder, isBaseProgram: Boolean) {
+    program.instructions.forEach { instruction ->
+      builder.addFunction(generateInstructionFunction(instruction))
+
+      DeprecationMapper.getDeprecationsForInstruction(instruction.name).forEach { deprecation ->
+        builder.addFunction(DeprecatedFunctionGenerator(instruction, deprecation).generate())
+      }
+
+      if (isBaseProgram) {
+        builder.addFunction(generateInternalInstructionFunction(instruction))
+      }
+    }
+  }
+
+  /**
+   * Adds all content for a non-sealed program object (types, properties, constants, methods).
+   */
+  private fun addObjectContent(builder: TypeSpec.Builder) {
+    addDefinedTypes(builder, skipShared = false)
+    addPropertiesAndConstants(builder)
+
+    val numericInstructions = program.instructions.filter { hasNumericDiscriminator(it) }
+    if (numericInstructions.isNotEmpty()) {
+      builder.addType(generateInstructionEnum())
+    }
+
+    addInstructionMethods(builder, isBaseProgram = false)
+  }
+
+  private fun generateMergedEnum(
+    definedType: DefinedTypeNode,
+    mergedVariants: List<EnumVariantTypeNode>,
+  ): TypeSpec {
+    val sizeType = getSizeTypeFromJson(definedType.type.size) ?: UBYTE
+
+    return TypeSpec.enumBuilder(definedType.name.toPascalCase())
+      .addModifiers(KModifier.PUBLIC)
+      .primaryConstructor(
+        FunSpec.constructorBuilder()
+          .addParameter("value", sizeType)
+          .build()
+      )
+      .addProperty(
+        PropertySpec.builder("value", sizeType)
+          .addModifiers(KModifier.PUBLIC)
+          .initializer("value")
+          .build()
+      )
+      .apply {
+        mergedVariants.forEachIndexed { index, variant ->
+          addEnumConstant(
+            variant.name.toPascalCase(),
+            TypeSpec.anonymousClassBuilder()
+              .addSuperclassConstructorParameter("${index}u")
+              .build()
+          )
+        }
+      }
+      .build()
+  }
+
+  private fun generateAbstractMethod(instruction: InstructionNode): FunSpec {
+    val functionName = instruction.name.toCamelCase()
+    val nonDiscriminatorArgs = instruction.arguments.filter { arg ->
+      instruction.discriminators.none { it.name == arg.name }
+    }
+
+    return FunSpec.builder(functionName)
+      .addModifiers(KModifier.PUBLIC, KModifier.ABSTRACT)
+      .apply {
+        // Add account parameters (non-default ones first, then defaulted ones)
+        instruction.accounts.filter { !it.hasPublicKeyDefault() }.forEach { account ->
+          addParameter(
+            account.name.toCamelCase(),
+            ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+          )
+        }
+
+        // Add data arguments
+        nonDiscriminatorArgs.forEach { arg ->
+          val paramName =
+            if (arg.name.toCamelCase() == "programId") "targetProgramId"
+            else arg.name.toCamelCase()
+          addParameter(paramName, mapTypeNodeToKotlinType(arg.type))
+        }
+
+        // Add defaulted account parameters (no default value in abstract)
+        instruction.accounts.filter { it.hasPublicKeyDefault() }.forEach { account ->
+          addParameter(
+            account.name.toCamelCase(),
+            ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+          )
+        }
+      }
+      .returns(ClassName("net.avianlabs.solana.domain.core", "TransactionInstruction"))
       .build()
   }
 
@@ -497,13 +657,18 @@ class ProgramGenerator(private val program: ProgramNode) {
         val definedType = program.definedTypes.find { it.name == typeName }
         when (definedType?.type?.kind) {
           "enumTypeNode" -> {
-            val hasComplexVariants = definedType.type.variants?.any { 
-              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+            val hasComplexVariants = definedType.type.variants?.any {
+              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode"
             } ?: false
             if (hasComplexVariants) {
               addStatement("buffer.write(%L.serialize())", paramName)
             } else {
-              addStatement("buffer.writeByte(%L.value.toInt())", paramName)
+              val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
+              when (sizeFormat) {
+                "u16" -> addStatement("buffer.writeShortLe(%L.value.toInt())", paramName)
+                "u32" -> addStatement("buffer.writeIntLe(%L.value.toInt())", paramName)
+                else -> addStatement("buffer.writeByte(%L.value.toInt())", paramName)
+              }
             }
           }
           "fixedSizeTypeNode" -> addStatement("buffer.write(%L.bytes)", paramName)
@@ -660,19 +825,23 @@ class ProgramGenerator(private val program: ProgramNode) {
       instruction.discriminators.none { it.name == arg.name }
     }
 
-    val isTokenProgram = program.publicKey == "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+    val isBaseProgram = sharedConfig?.isBaseProgram(program.publicKey) == true
+    val isOverride = sharedConfig?.isSharedInstruction(instruction.name) == true
 
     return FunSpec.builder(functionName)
       .addModifiers(KModifier.PUBLIC)
       .apply {
+        if (isOverride) {
+          addModifiers(KModifier.OVERRIDE)
+        }
         if (instruction.docs.isNotEmpty()) {
           addKdoc(instruction.docs.joinToString("\n"))
         }
       }
-      .instructionParameters(instruction, nonDiscriminatorArgs)
+      .instructionParameters(instruction, nonDiscriminatorArgs, isOverride = isOverride)
       .returns(ClassName("net.avianlabs.solana.domain.core", "TransactionInstruction"))
       .apply {
-        if (isTokenProgram) {
+        if (isBaseProgram) {
           addCode(generateDelegationToInternal(instruction, nonDiscriminatorArgs))
         } else {
           addCode(generateInstructionBody(instruction, nonDiscriminatorArgs))
@@ -707,7 +876,8 @@ class ProgramGenerator(private val program: ProgramNode) {
 
   private fun FunSpec.Builder.instructionParameters(
     instruction: InstructionNode,
-    nonDiscriminatorArgs: List<InstructionArgumentNode>
+    nonDiscriminatorArgs: List<InstructionArgumentNode>,
+    isOverride: Boolean = false,
   ) = apply {
     instruction.accounts.filter { !it.hasPublicKeyDefault() }.forEach { account ->
       addParameter(
@@ -720,13 +890,21 @@ class ProgramGenerator(private val program: ProgramNode) {
       addParameter(paramName, mapTypeNodeToKotlinType(arg.type))
     }
     instruction.accounts.filter { it.hasPublicKeyDefault() }.forEach { account ->
-      val defaultExpr = getDefaultExpression(account)
-      addParameter(
-        ParameterSpec.builder(
+      if (isOverride) {
+        // Kotlin does not allow default values on override parameters
+        addParameter(
           account.name.toCamelCase(),
           ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
-        ).defaultValue(defaultExpr).build()
-      )
+        )
+      } else {
+        val defaultExpr = getDefaultExpression(account)
+        addParameter(
+          ParameterSpec.builder(
+            account.name.toCamelCase(),
+            ClassName("net.avianlabs.solana.tweetnacl.ed25519", "PublicKey")
+          ).defaultValue(defaultExpr).build()
+        )
+      }
     }
   }
 
@@ -882,14 +1060,14 @@ class ProgramGenerator(private val program: ProgramNode) {
 
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: error("optionTypeNode missing item")
-        val prefixFormat = getPrefixFormat(typeNode.prefix) ?: "u32"
+        val prefixFormat = getPrefixFormat(typeNode.prefix) ?: "u8"
         add(".apply {\n")
         add("  if (%L != null) {\n", paramName)
         when (prefixFormat) {
           "u8" -> add("    writeByte(1)\n")
           "u16" -> add("    writeShortLe(1)\n")
           "u32" -> add("    writeIntLe(1)\n")
-          else -> add("    writeIntLe(1)\n")
+          else -> add("    writeByte(1)\n")
         }
         add("    ").addSerializationCode(paramName, innerType)
         add("  } else {\n")
@@ -897,7 +1075,7 @@ class ProgramGenerator(private val program: ProgramNode) {
           "u8" -> add("    writeByte(0)\n")
           "u16" -> add("    writeShortLe(0)\n")
           "u32" -> add("    writeIntLe(0)\n")
-          else -> add("    writeIntLe(0)\n")
+          else -> add("    writeByte(0)\n")
         }
         add("  }\n")
         add("}\n")
@@ -996,13 +1174,18 @@ class ProgramGenerator(private val program: ProgramNode) {
         val definedType = program.definedTypes.find { it.name == typeName }
         when (definedType?.type?.kind) {
           "enumTypeNode" -> {
-            val hasComplexVariants = definedType.type.variants?.any { 
-              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+            val hasComplexVariants = definedType.type.variants?.any {
+              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode"
             } ?: false
             if (hasComplexVariants) {
               add(".write(%L.serialize())\n", paramName)
             } else {
-              add(".writeByte(%L.value.toInt())\n", paramName)
+              val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
+              when (sizeFormat) {
+                "u16" -> add(".writeShortLe(%L.value.toInt())\n", paramName)
+                "u32" -> add(".writeIntLe(%L.value.toInt())\n", paramName)
+                else -> add(".writeByte(%L.value.toInt())\n", paramName)
+              }
             }
           }
           "fixedSizeTypeNode" -> add(".write(%L.bytes)\n", paramName)
@@ -1054,13 +1237,18 @@ class ProgramGenerator(private val program: ProgramNode) {
         val definedType = program.definedTypes.find { it.name == typeName }
         when (definedType?.type?.kind) {
           "enumTypeNode" -> {
-            val hasComplexVariants = definedType.type.variants?.any { 
-              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode" 
+            val hasComplexVariants = definedType.type.variants?.any {
+              it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode"
             } ?: false
             if (hasComplexVariants) {
               add("${indent}write(%L.serialize())\n", paramName)
             } else {
-              add("${indent}writeByte(%L.value.toInt())\n", paramName)
+              val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
+              when (sizeFormat) {
+                "u16" -> add("${indent}writeShortLe(%L.value.toInt())\n", paramName)
+                "u32" -> add("${indent}writeIntLe(%L.value.toInt())\n", paramName)
+                else -> add("${indent}writeByte(%L.value.toInt())\n", paramName)
+              }
             }
           }
           "fixedSizeTypeNode" -> add("${indent}write(%L.bytes)\n", paramName)
@@ -1155,7 +1343,12 @@ class ProgramGenerator(private val program: ProgramNode) {
 
       "definedTypeLinkNode" -> {
         val typeName = typeNode.name ?: error("definedTypeLinkNode missing name")
-        ClassName(packageName, program.name.toPascalCase() + "Program", typeName.toPascalCase())
+        if (sharedConfig?.isSharedDefinedType(typeName) == true) {
+          // Shared types live on the sealed class (e.g., TokenProgram.AuthorityType)
+          ClassName(packageName, sharedConfig.sealedClassName, typeName.toPascalCase())
+        } else {
+          ClassName(packageName, program.name.toPascalCase() + "Program", typeName.toPascalCase())
+        }
       }
 
       "hiddenPrefixTypeNode", "preOffsetTypeNode" -> {
@@ -1210,6 +1403,7 @@ class ProgramGenerator(private val program: ProgramNode) {
       else -> null
     }
   }
+
 
   private fun getSizeTypeFromJson(size: JsonElement?): TypeName? {
     if (size == null) return null

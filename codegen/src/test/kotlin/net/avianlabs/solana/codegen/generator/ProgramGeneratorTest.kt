@@ -10,9 +10,9 @@ import kotlin.test.assertTrue
 
 class ProgramGeneratorTest {
 
-  private fun parseAndGenerate(idlJson: String): String {
+  private fun parseAndGenerate(idlJson: String, sharedConfig: SharedInterfaceConfig? = null): String {
     val rootNode = json.decodeFromString<RootNode>(idlJson)
-    val generator = ProgramGenerator(rootNode.program)
+    val generator = ProgramGenerator(rootNode.program, sharedConfig)
     val fileSpec = generator.generate()
     val sb = StringBuilder()
     fileSpec.writeTo(sb)
@@ -319,14 +319,15 @@ class ProgramGeneratorTest {
   }
 
   @Test
-  fun `token program generates delegating public methods and internal methods`() {
+  fun `token program generates sealed class with delegating companion and internal methods`() {
+    val tokenProgramKey = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
     val idl = """
       {
         "kind": "rootNode", "standard": "codama", "version": "1.0.0",
         "program": {
           "kind": "programNode",
           "name": "splToken",
-          "publicKey": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+          "publicKey": "$tokenProgramKey",
           "instructions": [
             {
               "kind": "instructionNode", "name": "transfer",
@@ -354,10 +355,27 @@ class ProgramGeneratorTest {
       }
     """.trimIndent()
 
-    val code = parseAndGenerate(idl)
+    val sharedConfig = SharedInterfaceConfig(
+      sealedClassName = "SplTokenProgram",
+      sharedInstructionNames = setOf("transfer"),
+      sharedDefinedTypeNames = emptySet(),
+      baseProgramKey = tokenProgramKey,
+      mergedDefinedTypes = emptyMap(),
+    )
+
+    val code = parseAndGenerate(idl, sharedConfig)
+
+    // Generates a sealed class, not an object
+    assertContains(code, "sealed class SplTokenProgram : Program")
+
+    // Abstract method on the sealed class
+    assertContains(code, "public abstract fun transfer(")
+
+    // Companion object with implementation
+    assertContains(code, "companion object : SplTokenProgram()")
 
     // Public method delegates to internal
-    assertContains(code, "public fun transfer(")
+    assertContains(code, "public override fun transfer(")
     assertContains(code, "createTransferInstruction(")
     assertContains(code, "programId = programId)")
 

@@ -7,7 +7,11 @@ object DeprecationMapper {
     val newName: String,
     val paramMapping: Map<String, String>,
     // Extra params in old signature that don't exist in new (name to default value expression)
-    val extraOldParams: List<ExtraParam> = emptyList()
+    val extraOldParams: List<ExtraParam> = emptyList(),
+    // Default values for account params in the deprecated shim (account camelCase name -> default expression)
+    val accountDefaults: Map<String, String> = emptyMap(),
+    // When true, keeps unsigned types (UInt, ULong, etc.) instead of mapping to signed counterparts
+    val keepUnsignedTypes: Boolean = false,
   )
 
   data class ExtraParam(
@@ -58,6 +62,9 @@ object DeprecationMapper {
       newName = "advanceNonceAccount",
       paramMapping = mapOf(
         "nonceAuthority" to "authorized"
+      ),
+      accountDefaults = mapOf(
+        "recentBlockhashesSysvar" to "RECENT_BLOCKHASHES_SYSVAR"
       )
     ),
     DeprecatedFunction(
@@ -68,13 +75,9 @@ object DeprecationMapper {
       )
     ),
     // ComputeBudgetProgram
-    DeprecatedFunction(
-      oldName = "setComputeUnitLimit",
-      newName = "setComputeUnitLimit",
-      paramMapping = mapOf(
-        "units" to "maxUnits"
-      )
-    ),
+    // Note: No shim for setComputeUnitLimit. A UInt→UInt shim would conflict
+    // with the new setComputeUnitLimit(units: UInt) signature. Callers just
+    // need to rename maxUnits= to units=.
     // AssociatedTokenProgram
     DeprecatedFunction(
       oldName = "createAssociatedTokenAccountInstruction",
@@ -85,6 +88,9 @@ object DeprecationMapper {
       ),
       extraOldParams = listOf(
         ExtraParam("associatedProgramId", ParamType.PUBLIC_KEY, "this.programId")
+      ),
+      accountDefaults = mapOf(
+        "systemProgram" to "SystemProgram.programId"
       )
     ),
     DeprecatedFunction(
@@ -96,11 +102,14 @@ object DeprecationMapper {
       ),
       extraOldParams = listOf(
         ExtraParam("associatedProgramId", ParamType.PUBLIC_KEY, "this.programId")
+      ),
+      accountDefaults = mapOf(
+        "systemProgram" to "SystemProgram.programId"
       )
     ),
   )
 
-  fun getDeprecationForInstruction(instructionName: String): DeprecatedFunction? {
-    return deprecatedFunctions.find { it.newName == instructionName }
+  fun getDeprecationsForInstruction(instructionName: String): List<DeprecatedFunction> {
+    return deprecatedFunctions.filter { it.newName == instructionName }
   }
 }

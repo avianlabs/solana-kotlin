@@ -56,8 +56,8 @@ public object AssociatedTokenProgram : Program {
     associatedAccount: PublicKey,
     owner: PublicKey,
     mint: PublicKey,
-    systemProgram: PublicKey,
     programId: PublicKey,
+    systemProgram: PublicKey = SystemProgram.programId,
   ): TransactionInstruction = createAssociatedToken(payer = payer, ata = associatedAccount, owner =
       owner, mint = mint, systemProgram = systemProgram, tokenProgram = programId)
 
@@ -99,8 +99,8 @@ public object AssociatedTokenProgram : Program {
     associatedAccount: PublicKey,
     owner: PublicKey,
     mint: PublicKey,
-    systemProgram: PublicKey,
     programId: PublicKey,
+    systemProgram: PublicKey = SystemProgram.programId,
   ): TransactionInstruction = createAssociatedTokenIdempotent(payer = payer, ata =
       associatedAccount, owner = owner, mint = mint, systemProgram = systemProgram, tokenProgram =
       programId)

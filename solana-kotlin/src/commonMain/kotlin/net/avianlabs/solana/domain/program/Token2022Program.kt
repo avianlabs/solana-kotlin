@@ -26,7 +26,7 @@ import net.avianlabs.solana.domain.program.Program.Companion.createTransactionIn
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import okio.Buffer
 
-public object Token2022Program : Program {
+public object Token2022Program : TokenProgram() {
   public override val programId: PublicKey =
       PublicKey.fromBase58("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb")
 
@@ -46,12 +46,12 @@ public object Token2022Program : Program {
    * `CreateAccount` instruction that creates the account being initialized.
    * Otherwise another party can acquire ownership of the uninitialized account.
    */
-  public fun initializeMint(
+  public override fun initializeMint(
     mint: PublicKey,
     decimals: UByte,
     mintAuthority: PublicKey,
     freezeAuthority: PublicKey?,
-    rent: PublicKey = RENT,
+    rent: PublicKey,
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -85,11 +85,11 @@ public object Token2022Program : Program {
    * `CreateAccount` instruction that creates the account being initialized.
    * Otherwise another party can acquire ownership of the uninitialized account.
    */
-  public fun initializeAccount(
+  public override fun initializeAccount(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    rent: PublicKey = RENT,
+    rent: PublicKey,
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -116,10 +116,10 @@ public object Token2022Program : Program {
    * `CreateAccount` instruction that creates the account being initialized.
    * Otherwise another party can acquire ownership of the uninitialized account.
    */
-  public fun initializeMultisig(
+  public override fun initializeMultisig(
     multisig: PublicKey,
     m: UByte,
-    rent: PublicKey = RENT,
+    rent: PublicKey,
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -137,7 +137,7 @@ public object Token2022Program : Program {
    * If this account is associated with the native mint then equal amounts
    * of SOL and Tokens will be transferred to the destination account.
    */
-  public fun transfer(
+  public override fun transfer(
     source: PublicKey,
     destination: PublicKey,
     authority: PublicKey,
@@ -159,7 +159,7 @@ public object Token2022Program : Program {
    * Approves a delegate. A delegate is given the authority over tokens on
    * behalf of the source account's owner.
    */
-  public fun approve(
+  public override fun approve(
     source: PublicKey,
     `delegate`: PublicKey,
     owner: PublicKey,
@@ -180,7 +180,7 @@ public object Token2022Program : Program {
   /**
    * Revokes the delegate's authority.
    */
-  public fun revoke(source: PublicKey, owner: PublicKey): TransactionInstruction =
+  public override fun revoke(source: PublicKey, owner: PublicKey): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -195,10 +195,10 @@ public object Token2022Program : Program {
   /**
    * Sets a new authority of a mint or account.
    */
-  public fun setAuthority(
+  public override fun setAuthority(
     owned: PublicKey,
     owner: PublicKey,
-    authorityType: AuthorityType,
+    authorityType: TokenProgram.AuthorityType,
     newAuthority: PublicKey?,
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
@@ -223,7 +223,7 @@ public object Token2022Program : Program {
   /**
    * Mints new tokens to an account. The native mint does not support minting.
    */
-  public fun mintTo(
+  public override fun mintTo(
     mint: PublicKey,
     token: PublicKey,
     mintAuthority: PublicKey,
@@ -245,7 +245,7 @@ public object Token2022Program : Program {
    * Burns tokens by removing them from an account. `Burn` does not support
    * accounts associated with the native mint, use `CloseAccount` instead.
    */
-  public fun burn(
+  public override fun burn(
     account: PublicKey,
     mint: PublicKey,
     authority: PublicKey,
@@ -267,7 +267,7 @@ public object Token2022Program : Program {
    * Close an account by transferring all its SOL to the destination account.
    * Non-native accounts may only be closed if its token amount is zero.
    */
-  public fun closeAccount(
+  public override fun closeAccount(
     account: PublicKey,
     destination: PublicKey,
     owner: PublicKey,
@@ -286,7 +286,7 @@ public object Token2022Program : Program {
   /**
    * Freeze an Initialized account using the Mint's freeze_authority (if set).
    */
-  public fun freezeAccount(
+  public override fun freezeAccount(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
@@ -305,7 +305,7 @@ public object Token2022Program : Program {
   /**
    * Thaw a Frozen account using the Mint's freeze_authority (if set).
    */
-  public fun thawAccount(
+  public override fun thawAccount(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
@@ -330,7 +330,7 @@ public object Token2022Program : Program {
    * decimals value is checked by the caller. This may be useful when
    * creating transactions offline or within a hardware wallet.
    */
-  public fun transferChecked(
+  public override fun transferChecked(
     source: PublicKey,
     mint: PublicKey,
     destination: PublicKey,
@@ -360,7 +360,7 @@ public object Token2022Program : Program {
    * decimals value is checked by the caller. This may be useful when
    * creating transactions offline or within a hardware wallet.
    */
-  public fun approveChecked(
+  public override fun approveChecked(
     source: PublicKey,
     mint: PublicKey,
     `delegate`: PublicKey,
@@ -389,7 +389,7 @@ public object Token2022Program : Program {
    * checked by the caller. This may be useful when creating transactions
    * offline or within a hardware wallet.
    */
-  public fun mintToChecked(
+  public override fun mintToChecked(
     mint: PublicKey,
     token: PublicKey,
     mintAuthority: PublicKey,
@@ -417,7 +417,7 @@ public object Token2022Program : Program {
    * by the caller. This may be useful when creating transactions offline or
    * within a hardware wallet.
    */
-  public fun burnChecked(
+  public override fun burnChecked(
     account: PublicKey,
     mint: PublicKey,
     authority: PublicKey,
@@ -443,11 +443,11 @@ public object Token2022Program : Program {
    * when using Cross Program Invocation from an instruction that does
    * not need the owner's `AccountInfo` otherwise.
    */
-  public fun initializeAccount2(
+  public override fun initializeAccount2(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
-    rent: PublicKey = RENT,
+    rent: PublicKey,
   ): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -468,7 +468,8 @@ public object Token2022Program : Program {
    * `system_instruction::transfer` to move lamports to a wrapped token
    * account, and needs to have its token `amount` field updated.
    */
-  public fun syncNative(account: PublicKey): TransactionInstruction = createTransactionInstruction(
+  public override fun syncNative(account: PublicKey): TransactionInstruction =
+      createTransactionInstruction(
     programId = programId,
     keys = listOf(
       AccountMeta(account, isSigner = false, isWritable = true),
@@ -481,7 +482,7 @@ public object Token2022Program : Program {
   /**
    * Like InitializeAccount2, but does not require the Rent sysvar to be provided.
    */
-  public fun initializeAccount3(
+  public override fun initializeAccount3(
     account: PublicKey,
     mint: PublicKey,
     owner: PublicKey,
@@ -500,7 +501,7 @@ public object Token2022Program : Program {
   /**
    * Like InitializeMultisig, but does not require the Rent sysvar to be provided.
    */
-  public fun initializeMultisig2(multisig: PublicKey, m: UByte): TransactionInstruction =
+  public override fun initializeMultisig2(multisig: PublicKey, m: UByte): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -515,7 +516,7 @@ public object Token2022Program : Program {
   /**
    * Like [`InitializeMint`], but does not require the Rent sysvar to be provided.
    */
-  public fun initializeMint2(
+  public override fun initializeMint2(
     mint: PublicKey,
     decimals: UByte,
     mintAuthority: PublicKey,
@@ -547,7 +548,7 @@ public object Token2022Program : Program {
    * Return data can be fetched using `sol_get_return_data` and deserializing
    * the return data as a little-endian `u64`.
    */
-  public fun getAccountDataSize(mint: PublicKey): TransactionInstruction =
+  public override fun getAccountDataSize(mint: PublicKey): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -567,7 +568,7 @@ public object Token2022Program : Program {
    * No-ops in this version of the program, but is included for compatibility
    * with the Associated Token Account program.
    */
-  public fun initializeImmutableOwner(account: PublicKey): TransactionInstruction =
+  public override fun initializeImmutableOwner(account: PublicKey): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -588,7 +589,7 @@ public object Token2022Program : Program {
    * Return data can be fetched using `sol_get_return_data` and deserialized
    * with `String::from_utf8`.
    */
-  public fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction =
+  public override fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -608,7 +609,7 @@ public object Token2022Program : Program {
    * Return data can be fetched using `sol_get_return_data` and deserializing
    * the return data as a little-endian `u64`.
    */
-  public fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction =
+  public override fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction =
       createTransactionInstruction(
     programId = programId,
     keys = listOf(
@@ -670,7 +671,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeTransferFeeConfig.index.toInt())
-      .writeByte(0) // TransferFee sub-discriminator
+      .writeByte(0)
       .apply {
         if (transferFeeConfigAuthority != null) {
           writeByte(1)
@@ -717,7 +718,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.TransferCheckedWithFee.index.toInt())
-      .writeByte(1) // TransferFee sub-discriminator
+      .writeByte(1)
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .writeLongLe(fee.toLong())
@@ -741,7 +742,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromMint.index.toInt())
-      .writeByte(2) // TransferFee sub-discriminator
+      .writeByte(2)
       .readByteArray(),
   )
 
@@ -763,7 +764,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromAccounts.index.toInt())
-      .writeByte(3) // TransferFee sub-discriminator
+      .writeByte(3)
       .writeByte(numTokenAccounts.toInt())
       .readByteArray(),
   )
@@ -784,7 +785,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.HarvestWithheldTokensToMint.index.toInt())
-      .writeByte(4) // TransferFee sub-discriminator
+      .writeByte(4)
       .readByteArray(),
   )
 
@@ -805,7 +806,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.SetTransferFee.index.toInt())
-      .writeByte(5) // TransferFee sub-discriminator
+      .writeByte(5)
       .writeShortLe(transferFeeBasisPoints.toInt())
       .writeLongLe(maximumFee.toLong())
       .readByteArray(),
@@ -834,7 +835,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeConfidentialTransferMint.index.toInt())
-      .writeByte(0) // ConfidentialTransfer sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -872,7 +873,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateConfidentialTransferMint.index.toInt())
-      .writeByte(1) // ConfidentialTransfer sub-discriminator
+      .writeByte(1)
       .writeByte(if (autoApproveNewAccounts) 1 else 0)
       .apply {
         if (auditorElgamalPubkey != null) {
@@ -923,7 +924,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfigureConfidentialTransferAccount.index.toInt())
-      .writeByte(2) // ConfidentialTransfer sub-discriminator
+      .writeByte(2)
       .write(decryptableZeroBalance.bytes)
       .writeLongLe(maximumPendingBalanceCreditCounter.toLong())
       .writeByte(proofInstructionOffset.toInt())
@@ -952,7 +953,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ApproveConfidentialTransferAccount.index.toInt())
-      .writeByte(3) // ConfidentialTransfer sub-discriminator
+      .writeByte(3)
       .readByteArray(),
   )
 
@@ -993,7 +994,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EmptyConfidentialTransferAccount.index.toInt())
-      .writeByte(4) // ConfidentialTransfer sub-discriminator
+      .writeByte(4)
       .writeByte(proofInstructionOffset.toInt())
       .readByteArray(),
   )
@@ -1024,7 +1025,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialDeposit.index.toInt())
-      .writeByte(5) // ConfidentialTransfer sub-discriminator
+      .writeByte(5)
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .readByteArray(),
@@ -1070,7 +1071,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialWithdraw.index.toInt())
-      .writeByte(6) // ConfidentialTransfer sub-discriminator
+      .writeByte(6)
       .writeLongLe(amount.toLong())
       .writeByte(decimals.toInt())
       .write(newDecryptableAvailableBalance.bytes)
@@ -1121,7 +1122,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialTransfer.index.toInt())
-      .writeByte(7) // ConfidentialTransfer sub-discriminator
+      .writeByte(7)
       .write(newSourceDecryptableAvailableBalance.bytes)
       .writeByte(equalityProofInstructionOffset.toInt())
       .writeByte(ciphertextValidityProofInstructionOffset.toInt())
@@ -1155,7 +1156,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ApplyConfidentialPendingBalance.index.toInt())
-      .writeByte(8) // ConfidentialTransfer sub-discriminator
+      .writeByte(8)
       .writeLongLe(expectedPendingBalanceCreditCounter.toLong())
       .write(newDecryptableAvailableBalance.bytes)
       .readByteArray(),
@@ -1174,7 +1175,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableConfidentialCredits.index.toInt())
-      .writeByte(9) // ConfidentialTransfer sub-discriminator
+      .writeByte(9)
       .readByteArray(),
   )
 
@@ -1197,7 +1198,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableConfidentialCredits.index.toInt())
-      .writeByte(10) // ConfidentialTransfer sub-discriminator
+      .writeByte(10)
       .readByteArray(),
   )
 
@@ -1214,7 +1215,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableNonConfidentialCredits.index.toInt())
-      .writeByte(11) // ConfidentialTransfer sub-discriminator
+      .writeByte(11)
       .readByteArray(),
   )
 
@@ -1234,7 +1235,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableNonConfidentialCredits.index.toInt())
-      .writeByte(12) // ConfidentialTransfer sub-discriminator
+      .writeByte(12)
       .readByteArray(),
   )
 
@@ -1291,7 +1292,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.ConfidentialTransferWithFee.index.toInt())
-      .writeByte(13) // ConfidentialTransfer sub-discriminator
+      .writeByte(13)
       .write(newSourceDecryptableAvailableBalance.bytes)
       .writeByte(equalityProofInstructionOffset.toInt())
       .writeByte(transferAmountCiphertextValidityProofInstructionOffset.toInt())
@@ -1319,7 +1320,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeDefaultAccountState.index.toInt())
-      .writeByte(0) // DefaultAccountState sub-discriminator
+      .writeByte(0)
       .writeByte(state.value.toInt())
       .readByteArray(),
   )
@@ -1340,7 +1341,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateDefaultAccountState.index.toInt())
-      .writeByte(1) // DefaultAccountState sub-discriminator
+      .writeByte(1)
       .writeByte(state.value.toInt())
       .readByteArray(),
   )
@@ -1387,7 +1388,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableMemoTransfers.index.toInt())
-      .writeByte(0) // MemoTransfers sub-discriminator
+      .writeByte(0)
       .readByteArray(),
   )
 
@@ -1406,7 +1407,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableMemoTransfers.index.toInt())
-      .writeByte(1) // MemoTransfers sub-discriminator
+      .writeByte(1)
       .readByteArray(),
   )
 
@@ -1470,7 +1471,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeInterestBearingMint.index.toInt())
-      .writeByte(0) // InterestBearingMint sub-discriminator
+      .writeByte(0)
       .apply {
         if (rateAuthority != null) {
           write(rateAuthority.bytes)
@@ -1498,7 +1499,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateRateInterestBearingMint.index.toInt())
-      .writeByte(1) // InterestBearingMint sub-discriminator
+      .writeByte(1)
       .writeShortLe(rate.toInt())
       .readByteArray(),
   )
@@ -1521,7 +1522,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableCpiGuard.index.toInt())
-      .writeByte(0) // CpiGuard sub-discriminator
+      .writeByte(0)
       .readByteArray(),
   )
 
@@ -1539,7 +1540,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableCpiGuard.index.toInt())
-      .writeByte(1) // CpiGuard sub-discriminator
+      .writeByte(1)
       .readByteArray(),
   )
 
@@ -1584,7 +1585,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeTransferHook.index.toInt())
-      .writeByte(0) // TransferHook sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1623,7 +1624,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateTransferHook.index.toInt())
-      .writeByte(1) // TransferHook sub-discriminator
+      .writeByte(1)
       .apply {
         if (targetProgramId != null) {
           write(targetProgramId.bytes)
@@ -1654,7 +1655,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeConfidentialTransferFee.index.toInt())
-      .writeByte(0) // ConfidentialTransferFee sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1702,7 +1703,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromMintForConfidentialTransferFee.index.toInt())
-      .writeByte(1) // ConfidentialTransferFee sub-discriminator
+      .writeByte(1)
       .writeByte(proofInstructionOffset.toInt())
       .write(newDecryptableAvailableBalance.bytes)
       .readByteArray(),
@@ -1735,7 +1736,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.WithdrawWithheldTokensFromAccountsForConfidentialTransferFee.index.toInt())
-      .writeByte(2) // ConfidentialTransferFee sub-discriminator
+      .writeByte(2)
       .writeByte(numTokenAccounts.toInt())
       .writeByte(proofInstructionOffset.toInt())
       .write(newDecryptableAvailableBalance.bytes)
@@ -1758,7 +1759,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.HarvestWithheldTokensToMintForConfidentialTransferFee.index.toInt())
-      .writeByte(3) // ConfidentialTransferFee sub-discriminator
+      .writeByte(3)
       .readByteArray(),
   )
 
@@ -1774,7 +1775,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.EnableHarvestToMint.index.toInt())
-      .writeByte(4) // ConfidentialTransferFee sub-discriminator
+      .writeByte(4)
       .readByteArray(),
   )
 
@@ -1790,7 +1791,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.DisableHarvestToMint.index.toInt())
-      .writeByte(5) // ConfidentialTransferFee sub-discriminator
+      .writeByte(5)
       .readByteArray(),
   )
 
@@ -1836,7 +1837,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeMetadataPointer.index.toInt())
-      .writeByte(0) // MetadataPointer sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1870,7 +1871,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateMetadataPointer.index.toInt())
-      .writeByte(1) // MetadataPointer sub-discriminator
+      .writeByte(1)
       .apply {
         if (metadataAddress != null) {
           write(metadataAddress.bytes)
@@ -1902,7 +1903,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeGroupPointer.index.toInt())
-      .writeByte(0) // GroupPointer sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -1936,7 +1937,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateGroupPointer.index.toInt())
-      .writeByte(1) // GroupPointer sub-discriminator
+      .writeByte(1)
       .apply {
         if (groupAddress != null) {
           write(groupAddress.bytes)
@@ -1968,7 +1969,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeGroupMemberPointer.index.toInt())
-      .writeByte(0) // GroupMemberPointer sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -2002,7 +2003,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateGroupMemberPointer.index.toInt())
-      .writeByte(1) // GroupMemberPointer sub-discriminator
+      .writeByte(1)
       .apply {
         if (memberAddress != null) {
           write(memberAddress.bytes)
@@ -2033,7 +2034,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializeScaledUiAmountMint.index.toInt())
-      .writeByte(0) // ScaledUiAmountMint sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -2063,7 +2064,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.UpdateMultiplierScaledUiMint.index.toInt())
-      .writeByte(1) // ScaledUiAmountMint sub-discriminator
+      .writeByte(1)
       .writeLongLe(multiplier.toRawBits())
       .writeLongLe(effectiveTimestamp)
       .readByteArray(),
@@ -2082,7 +2083,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.InitializePausableConfig.index.toInt())
-      .writeByte(0) // Pausable sub-discriminator
+      .writeByte(0)
       .apply {
         if (authority != null) {
           write(authority.bytes)
@@ -2107,7 +2108,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.Pause.index.toInt())
-      .writeByte(1) // Pausable sub-discriminator
+      .writeByte(1)
       .readByteArray(),
   )
 
@@ -2125,7 +2126,7 @@ public object Token2022Program : Program {
     ),
     data = Buffer()
       .writeByte(Instruction.Resume.index.toInt())
-      .writeByte(2) // Pausable sub-discriminator
+      .writeByte(2)
       .readByteArray(),
   )
 
@@ -2511,7 +2512,11 @@ public object Token2022Program : Program {
     public abstract fun serialize(): ByteArray
 
     public object Uninitialized : Extension() {
-      public override fun serialize(): ByteArray = byteArrayOf(0.toByte())
+      public override fun serialize(): ByteArray {
+        val buffer = Buffer()
+        buffer.writeShortLe(0)
+        return buffer.readByteArray()
+      }
     }
 
     public data class TransferFeeConfig(
@@ -2523,7 +2528,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(1)
+        buffer.writeShortLe(1)
         buffer.write(transferFeeConfigAuthority.bytes)
         buffer.write(withdrawWithheldAuthority.bytes)
         buffer.writeLongLe(withheldAmount.toLong())
@@ -2538,7 +2543,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(2)
+        buffer.writeShortLe(2)
         buffer.writeLongLe(withheldAmount.toLong())
         return buffer.readByteArray()
       }
@@ -2549,7 +2554,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(3)
+        buffer.writeShortLe(3)
         buffer.write(closeAuthority.bytes)
         return buffer.readByteArray()
       }
@@ -2562,12 +2567,18 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(4)
-        if (authority != null) { buffer.write(authority.bytes) } else { buffer.write(ByteArray(32))
-            }
+        buffer.writeShortLe(4)
+        if (authority != null) {
+          buffer.write(authority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         buffer.writeByte(if (autoApproveNewAccounts) 1 else 0)
-        if (auditorElgamalPubkey != null) { buffer.write(auditorElgamalPubkey.bytes) } else {
-            buffer.write(ByteArray(32)) }
+        if (auditorElgamalPubkey != null) {
+          buffer.write(auditorElgamalPubkey.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         return buffer.readByteArray()
       }
     }
@@ -2588,7 +2599,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(5)
+        buffer.writeShortLe(5)
         buffer.writeByte(if (approved) 1 else 0)
         buffer.write(elgamalPubkey.bytes)
         buffer.write(pendingBalanceLow.bytes)
@@ -2610,14 +2621,18 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(6)
+        buffer.writeShortLe(6)
         buffer.writeByte(state.value.toInt())
         return buffer.readByteArray()
       }
     }
 
     public object ImmutableOwner : Extension() {
-      public override fun serialize(): ByteArray = byteArrayOf(7.toByte())
+      public override fun serialize(): ByteArray {
+        val buffer = Buffer()
+        buffer.writeShortLe(7)
+        return buffer.readByteArray()
+      }
     }
 
     public data class MemoTransfer(
@@ -2625,14 +2640,18 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(8)
+        buffer.writeShortLe(8)
         buffer.writeByte(if (requireIncomingTransferMemos) 1 else 0)
         return buffer.readByteArray()
       }
     }
 
     public object NonTransferable : Extension() {
-      public override fun serialize(): ByteArray = byteArrayOf(9.toByte())
+      public override fun serialize(): ByteArray {
+        val buffer = Buffer()
+        buffer.writeShortLe(9)
+        return buffer.readByteArray()
+      }
     }
 
     public data class InterestBearingConfig(
@@ -2644,7 +2663,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(10)
+        buffer.writeShortLe(10)
         buffer.write(rateAuthority.bytes)
         buffer.writeLongLe(initializationTimestamp.toLong())
         buffer.writeShortLe(preUpdateAverageRate.toInt())
@@ -2659,7 +2678,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(11)
+        buffer.writeShortLe(11)
         buffer.writeByte(if (lockCpi) 1 else 0)
         return buffer.readByteArray()
       }
@@ -2670,14 +2689,18 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(12)
+        buffer.writeShortLe(12)
         buffer.write(delegate.bytes)
         return buffer.readByteArray()
       }
     }
 
     public object NonTransferableAccount : Extension() {
-      public override fun serialize(): ByteArray = byteArrayOf(13.toByte())
+      public override fun serialize(): ByteArray {
+        val buffer = Buffer()
+        buffer.writeShortLe(13)
+        return buffer.readByteArray()
+      }
     }
 
     public data class TransferHook(
@@ -2686,7 +2709,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(14)
+        buffer.writeShortLe(14)
         buffer.write(authority.bytes)
         buffer.write(programId.bytes)
         return buffer.readByteArray()
@@ -2698,7 +2721,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(15)
+        buffer.writeShortLe(15)
         buffer.writeByte(if (transferring) 1 else 0)
         return buffer.readByteArray()
       }
@@ -2712,9 +2735,12 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(16)
-        if (authority != null) { buffer.write(authority.bytes) } else { buffer.write(ByteArray(32))
-            }
+        buffer.writeShortLe(16)
+        if (authority != null) {
+          buffer.write(authority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         buffer.write(elgamalPubkey.bytes)
         buffer.writeByte(if (harvestToMintEnabled) 1 else 0)
         buffer.write(withheldAmount.bytes)
@@ -2727,7 +2753,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(17)
+        buffer.writeShortLe(17)
         buffer.write(withheldAmount.bytes)
         return buffer.readByteArray()
       }
@@ -2739,11 +2765,17 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(18)
-        if (authority != null) { buffer.write(authority.bytes) } else { buffer.write(ByteArray(32))
-            }
-        if (metadataAddress != null) { buffer.write(metadataAddress.bytes) } else {
-            buffer.write(ByteArray(32)) }
+        buffer.writeShortLe(18)
+        if (authority != null) {
+          buffer.write(authority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
+        if (metadataAddress != null) {
+          buffer.write(metadataAddress.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         return buffer.readByteArray()
       }
     }
@@ -2758,9 +2790,12 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(19)
-        if (updateAuthority != null) { buffer.write(updateAuthority.bytes) } else {
-            buffer.write(ByteArray(32)) }
+        buffer.writeShortLe(19)
+        if (updateAuthority != null) {
+          buffer.write(updateAuthority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         buffer.write(mint.bytes)
         val nameBytes = name.encodeToByteArray()
         buffer.writeIntLe(nameBytes.size)
@@ -2771,14 +2806,7 @@ public object Token2022Program : Program {
         val uriBytes = uri.encodeToByteArray()
         buffer.writeIntLe(uriBytes.size)
         buffer.write(uriBytes)
-        additionalMetadata.forEach { (key, value) ->
-          val keyBytes = key.encodeToByteArray()
-          buffer.writeIntLe(keyBytes.size)
-          buffer.write(keyBytes)
-          val valueBytes = value.encodeToByteArray()
-          buffer.writeIntLe(valueBytes.size)
-          buffer.write(valueBytes)
-        }
+        // TODO: unsupported type mapTypeNode for field additionalMetadata
         return buffer.readByteArray()
       }
     }
@@ -2789,11 +2817,17 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(20)
-        if (authority != null) { buffer.write(authority.bytes) } else { buffer.write(ByteArray(32))
-            }
-        if (groupAddress != null) { buffer.write(groupAddress.bytes) } else {
-            buffer.write(ByteArray(32)) }
+        buffer.writeShortLe(20)
+        if (authority != null) {
+          buffer.write(authority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
+        if (groupAddress != null) {
+          buffer.write(groupAddress.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         return buffer.readByteArray()
       }
     }
@@ -2806,9 +2840,12 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(21)
-        if (updateAuthority != null) { buffer.write(updateAuthority.bytes) } else {
-            buffer.write(ByteArray(32)) }
+        buffer.writeShortLe(21)
+        if (updateAuthority != null) {
+          buffer.write(updateAuthority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         buffer.write(mint.bytes)
         buffer.writeLongLe(size.toLong())
         buffer.writeLongLe(maxSize.toLong())
@@ -2822,11 +2859,17 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(22)
-        if (authority != null) { buffer.write(authority.bytes) } else { buffer.write(ByteArray(32))
-            }
-        if (memberAddress != null) { buffer.write(memberAddress.bytes) } else {
-            buffer.write(ByteArray(32)) }
+        buffer.writeShortLe(22)
+        if (authority != null) {
+          buffer.write(authority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
+        if (memberAddress != null) {
+          buffer.write(memberAddress.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         return buffer.readByteArray()
       }
     }
@@ -2838,7 +2881,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(23)
+        buffer.writeShortLe(23)
         buffer.write(mint.bytes)
         buffer.write(group.bytes)
         buffer.writeLongLe(memberNumber.toLong())
@@ -2847,7 +2890,11 @@ public object Token2022Program : Program {
     }
 
     public object ConfidentialMintBurn : Extension() {
-      public override fun serialize(): ByteArray = byteArrayOf(24.toByte())
+      public override fun serialize(): ByteArray {
+        val buffer = Buffer()
+        buffer.writeShortLe(24)
+        return buffer.readByteArray()
+      }
     }
 
     public data class ScaledUiAmountConfig(
@@ -2858,7 +2905,7 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(25)
+        buffer.writeShortLe(25)
         buffer.write(authority.bytes)
         buffer.writeLongLe(multiplier.toRawBits())
         buffer.writeLongLe(newMultiplierEffectiveTimestamp.toLong())
@@ -2873,16 +2920,23 @@ public object Token2022Program : Program {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(26)
-        if (authority != null) { buffer.write(authority.bytes) } else { buffer.write(ByteArray(32))
-            }
+        buffer.writeShortLe(26)
+        if (authority != null) {
+          buffer.write(authority.bytes)
+        } else {
+          buffer.write(ByteArray(32))
+        }
         buffer.writeByte(if (paused) 1 else 0)
         return buffer.readByteArray()
       }
     }
 
     public object PausableAccount : Extension() {
-      public override fun serialize(): ByteArray = byteArrayOf(27.toByte())
+      public override fun serialize(): ByteArray {
+        val buffer = Buffer()
+        buffer.writeShortLe(27)
+        return buffer.readByteArray()
+      }
     }
   }
 

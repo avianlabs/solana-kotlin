@@ -3,14 +3,15 @@ package net.avianlabs.solana.codegen.generator
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class DeprecationMapperTest {
 
   @Test
-  fun `getDeprecationForInstruction returns mapping for transferSol`() {
-    val deprecation = DeprecationMapper.getDeprecationForInstruction("transferSol")
-    assertNotNull(deprecation)
+  fun `getDeprecationsForInstruction returns mapping for transferSol`() {
+    val deprecations = DeprecationMapper.getDeprecationsForInstruction("transferSol")
+    assertEquals(1, deprecations.size)
+    val deprecation = deprecations.first()
     assertEquals("transfer", deprecation.oldName)
     assertEquals("transferSol", deprecation.newName)
     assertEquals("fromPublicKey", deprecation.paramMapping["source"])
@@ -19,29 +20,32 @@ class DeprecationMapperTest {
   }
 
   @Test
-  fun `getDeprecationForInstruction returns mapping for advanceNonceAccount`() {
-    val deprecation = DeprecationMapper.getDeprecationForInstruction("advanceNonceAccount")
-    assertNotNull(deprecation)
+  fun `getDeprecationsForInstruction returns mapping for advanceNonceAccount`() {
+    val deprecations = DeprecationMapper.getDeprecationsForInstruction("advanceNonceAccount")
+    assertEquals(1, deprecations.size)
+    val deprecation = deprecations.first()
     assertEquals("nonceAdvance", deprecation.oldName)
     assertEquals("authorized", deprecation.paramMapping["nonceAuthority"])
+    assertEquals("RECENT_BLOCKHASHES_SYSVAR", deprecation.accountDefaults["recentBlockhashesSysvar"])
   }
 
   @Test
-  fun `getDeprecationForInstruction returns mapping for initializeNonceAccount`() {
-    val deprecation = DeprecationMapper.getDeprecationForInstruction("initializeNonceAccount")
-    assertNotNull(deprecation)
-    assertEquals("nonceInitialize", deprecation.oldName)
+  fun `getDeprecationsForInstruction returns mapping for initializeNonceAccount`() {
+    val deprecations = DeprecationMapper.getDeprecationsForInstruction("initializeNonceAccount")
+    assertEquals(1, deprecations.size)
+    assertEquals("nonceInitialize", deprecations.first().oldName)
   }
 
   @Test
-  fun `getDeprecationForInstruction returns null for unknown instruction`() {
-    assertNull(DeprecationMapper.getDeprecationForInstruction("unknownInstruction"))
+  fun `getDeprecationsForInstruction returns empty for unknown instruction`() {
+    assertTrue(DeprecationMapper.getDeprecationsForInstruction("unknownInstruction").isEmpty())
   }
 
   @Test
-  fun `getDeprecationForInstruction returns mapping for createAssociatedToken`() {
-    val deprecation = DeprecationMapper.getDeprecationForInstruction("createAssociatedToken")
-    assertNotNull(deprecation)
+  fun `getDeprecationsForInstruction returns mapping for createAssociatedToken`() {
+    val deprecations = DeprecationMapper.getDeprecationsForInstruction("createAssociatedToken")
+    assertEquals(1, deprecations.size)
+    val deprecation = deprecations.first()
     assertEquals("createAssociatedTokenAccountInstruction", deprecation.oldName)
     assertEquals("associatedAccount", deprecation.paramMapping["ata"])
     assertEquals("programId", deprecation.paramMapping["tokenProgram"])
@@ -51,10 +55,17 @@ class DeprecationMapperTest {
   }
 
   @Test
-  fun `getDeprecationForInstruction returns mapping for createAssociatedTokenIdempotent`() {
-    val deprecation = DeprecationMapper.getDeprecationForInstruction("createAssociatedTokenIdempotent")
-    assertNotNull(deprecation)
-    assertEquals("createAssociatedTokenAccountInstructionIdempotent", deprecation.oldName)
+  fun `getDeprecationsForInstruction returns mapping for createAssociatedTokenIdempotent`() {
+    val deprecations = DeprecationMapper.getDeprecationsForInstruction("createAssociatedTokenIdempotent")
+    assertEquals(1, deprecations.size)
+    assertEquals("createAssociatedTokenAccountInstructionIdempotent", deprecations.first().oldName)
+  }
+
+  @Test
+  fun `getDeprecationsForInstruction returns no mapping for setComputeUnitLimit`() {
+    // No shim for setComputeUnitLimit — a UInt→UInt shim would conflict with the new signature
+    val deprecations = DeprecationMapper.getDeprecationsForInstruction("setComputeUnitLimit")
+    assertEquals(0, deprecations.size)
   }
 
   @Test

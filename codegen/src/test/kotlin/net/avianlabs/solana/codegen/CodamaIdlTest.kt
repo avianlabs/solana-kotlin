@@ -1,6 +1,8 @@
 package net.avianlabs.solana.codegen
 
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import net.avianlabs.solana.codegen.idl.RootNode
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -185,7 +187,7 @@ class CodamaIdlTest {
     assertEquals("optionTypeNode", arg.type.kind)
     val prefix = arg.type.prefix
     assertNotNull(prefix)
-    assertEquals("u8", prefix.format)
+    assertEquals("u8", prefix.jsonObject["format"]?.jsonPrimitive?.content)
     val item = arg.type.item
     assertNotNull(item)
     assertEquals("u64", item.format)
