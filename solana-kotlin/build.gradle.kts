@@ -50,6 +50,7 @@ kotlin {
     val jvmTest by getting
 
     val commonMain by getting {
+      kotlin.srcDir("src/commonMain/generated")
       dependencies {
         api(project(":tweetnacl-multiplatform"))
         implementation(libs.coroutinesCore)
