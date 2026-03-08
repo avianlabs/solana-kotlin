@@ -18,7 +18,7 @@ permissions:
 jobs:
   dependency-review:
     name: Review dependency graph
-    runs-on: macos-14
+    runs-on: macos-15
     if: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -46,7 +46,7 @@ jobs:
   build:
     if: ${{ !github.event.pull_request.draft }}
     name: Build Project
-    runs-on: macos-14
+    runs-on: macos-15
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
