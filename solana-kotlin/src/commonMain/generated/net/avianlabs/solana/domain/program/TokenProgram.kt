@@ -7,10 +7,12 @@
 
 package net.avianlabs.solana.domain.program
 
+import kotlin.Any
 import kotlin.Long
 import kotlin.String
 import kotlin.UByte
 import kotlin.ULong
+import kotlin.collections.List
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
@@ -135,7 +137,7 @@ public sealed class TokenProgram : Program {
     rent: PublicKey,
   ): TransactionInstruction
 
-  public abstract fun syncNative(account: PublicKey): TransactionInstruction
+  public abstract fun syncNative(account: PublicKey, rent: PublicKey): TransactionInstruction
 
   public abstract fun initializeAccount3(
     account: PublicKey,
@@ -159,6 +161,21 @@ public sealed class TokenProgram : Program {
   public abstract fun amountToUiAmount(mint: PublicKey, amount: ULong): TransactionInstruction
 
   public abstract fun uiAmountToAmount(mint: PublicKey, uiAmount: String): TransactionInstruction
+
+  public abstract fun withdrawExcessLamports(
+    source: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
+  ): TransactionInstruction
+
+  public abstract fun unwrapLamports(
+    source: PublicKey,
+    destination: PublicKey,
+    authority: PublicKey,
+    amount: ULong?,
+  ): TransactionInstruction
+
+  public abstract fun batch(`data`: List<Any>): TransactionInstruction
 
   public enum class AuthorityType(
     public val `value`: UByte,
@@ -220,6 +237,9 @@ public sealed class TokenProgram : Program {
     InitializeImmutableOwner(22u),
     AmountToUiAmount(23u),
     UiAmountToAmount(24u),
+    WithdrawExcessLamports(38u),
+    UnwrapLamports(45u),
+    Batch(255u),
     ;
   }
 
@@ -822,14 +842,18 @@ public sealed class TokenProgram : Program {
      * `system_instruction::transfer` to move lamports to a wrapped token
      * account, and needs to have its token `amount` field updated.
      */
-    public override fun syncNative(account: PublicKey): TransactionInstruction =
-        createSyncNativeInstruction(account = account, programId = programId)
+    public override fun syncNative(account: PublicKey, rent: PublicKey): TransactionInstruction =
+        createSyncNativeInstruction(account = account, rent = rent, programId = programId)
 
-    internal fun createSyncNativeInstruction(account: PublicKey, programId: PublicKey):
-        TransactionInstruction = createTransactionInstruction(
+    internal fun createSyncNativeInstruction(
+      account: PublicKey,
+      rent: PublicKey = RENT,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
       programId = programId,
       keys = listOf(
         AccountMeta(account, isSigner = false, isWritable = true),
+        AccountMeta(rent, isSigner = false, isWritable = false),
       ),
       data = Buffer()
         .writeByte(Instruction.SyncNative.index.toInt())
@@ -1016,6 +1040,94 @@ public sealed class TokenProgram : Program {
       data = Buffer()
         .writeByte(Instruction.UiAmountToAmount.index.toInt())
         .writeUtf8(uiAmount)
+        .readByteArray(),
+    )
+
+    /**
+     * Rescue SOL sent to any TokenProgram-owned account
+     * by sending them to any other account, leaving behind only
+     * lamports for rent exemption.
+     */
+    public override fun withdrawExcessLamports(
+      source: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+    ): TransactionInstruction = createWithdrawExcessLamportsInstruction(source = source, destination
+        = destination, authority = authority, programId = programId)
+
+    internal fun createWithdrawExcessLamportsInstruction(
+      source: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(destination, isSigner = false, isWritable = true),
+        AccountMeta(authority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.WithdrawExcessLamports.index.toInt())
+        .readByteArray(),
+    )
+
+    /**
+     * Transfer lamports from a native SOL account to a destination account.
+     */
+    public override fun unwrapLamports(
+      source: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      amount: ULong?,
+    ): TransactionInstruction = createUnwrapLamportsInstruction(source = source, destination =
+        destination, authority = authority, amount = amount, programId = programId)
+
+    internal fun createUnwrapLamportsInstruction(
+      source: PublicKey,
+      destination: PublicKey,
+      authority: PublicKey,
+      amount: ULong?,
+      programId: PublicKey,
+    ): TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+        AccountMeta(source, isSigner = false, isWritable = true),
+        AccountMeta(destination, isSigner = false, isWritable = true),
+        AccountMeta(authority, isSigner = true, isWritable = false),
+      ),
+      data = Buffer()
+        .writeByte(Instruction.UnwrapLamports.index.toInt())
+        .apply {
+          if (amount != null) {
+            writeByte(1)
+            .writeLongLe(amount.toLong())
+          } else {
+            writeByte(0)
+          }
+        }
+        .readByteArray(),
+    )
+
+    /**
+     * Executes a batch of instructions. The instructions to be executed are
+     * specified in sequence on the instruction data.
+     */
+    public override fun batch(`data`: List<Any>): TransactionInstruction =
+        createBatchInstruction(data = data, programId = programId)
+
+    internal fun createBatchInstruction(`data`: List<Any>, programId: PublicKey):
+        TransactionInstruction = createTransactionInstruction(
+      programId = programId,
+      keys = listOf(
+      ),
+      data = Buffer()
+        .writeByte(Instruction.Batch.index.toInt())
+        .apply {
+          data.forEach { item ->
+            write(item.serialize())
+          }
+        }
         .readByteArray(),
     )
   }
