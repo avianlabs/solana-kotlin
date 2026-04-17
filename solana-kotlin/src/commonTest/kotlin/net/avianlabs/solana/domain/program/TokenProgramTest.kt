@@ -7,36 +7,41 @@ import kotlin.test.assertEquals
 class TokenProgramTest {
 
   @Test
-  fun testTokenProgramIds() {
-    val tokenTransfer = TokenProgram.transferChecked(
-      source = PublicKey(ByteArray(32)),
-      destination = PublicKey(ByteArray(32)),
-      owner = PublicKey(ByteArray(32)),
-      amount = 0u,
-      decimals = 0u,
-      mint = PublicKey(ByteArray(32)),
-    )
+  fun polymorphicTransferChecked() {
+    fun buildTransfer(program: TokenProgram) =
+      program.transferChecked(
+        source = PublicKey(ByteArray(32)),
+        mint = PublicKey(ByteArray(32)),
+        destination = PublicKey(ByteArray(32)),
+        authority = PublicKey(ByteArray(32)),
+        amount = 100UL,
+        decimals = 9u.toUByte(),
+      )
 
-    assertEquals(
-      tokenTransfer.programId,
-      TokenProgram.programId,
-    )
+    val tokenIx = buildTransfer(TokenProgram)
+    val token2022Ix = buildTransfer(Token2022Program)
+    assertEquals(TokenProgram.programId, tokenIx.programId)
+    assertEquals(Token2022Program.programId, token2022Ix.programId)
   }
 
   @Test
-  fun testToken2022ProgramIds() {
-    val token2022Transfer = Token2022Program.transferChecked(
-      source = PublicKey(ByteArray(32)),
-      destination = PublicKey(ByteArray(32)),
+  fun polymorphicSetAuthority() {
+    fun buildSetAuthority(
+      program: TokenProgram,
+      authorityType: TokenProgram.AuthorityType,
+    ) = program.setAuthority(
+      owned = PublicKey(ByteArray(32)),
       owner = PublicKey(ByteArray(32)),
-      amount = 0u,
-      decimals = 0u,
-      mint = PublicKey(ByteArray(32)),
+      authorityType = authorityType,
+      newAuthority = null,
     )
 
-    assertEquals(
-      token2022Transfer.programId,
-      Token2022Program.programId,
+    val tokenIx = buildSetAuthority(TokenProgram, TokenProgram.AuthorityType.MintTokens)
+    val token2022Ix = buildSetAuthority(
+      Token2022Program,
+      TokenProgram.AuthorityType.TransferFeeConfig,
     )
+    assertEquals(TokenProgram.programId, tokenIx.programId)
+    assertEquals(Token2022Program.programId, token2022Ix.programId)
   }
 }

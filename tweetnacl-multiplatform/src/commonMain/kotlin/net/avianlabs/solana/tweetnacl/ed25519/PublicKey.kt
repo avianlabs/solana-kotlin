@@ -1,11 +1,14 @@
 package net.avianlabs.solana.tweetnacl.ed25519
 
+import co.touchlab.skie.configuration.annotations.SkieVisibility
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.TweetNaCl.Signature.Companion.PUBLIC_KEY_BYTES
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 
-public data class PublicKey(public val bytes: ByteArray) {
+public data class PublicKey(
+  @property:SkieVisibility.PublicButReplaced public val bytes: ByteArray,
+) {
 
   init {
     require(bytes.size == PUBLIC_KEY_BYTES) { "Invalid public key input size ${bytes.size} (must be $PUBLIC_KEY_BYTES)" }

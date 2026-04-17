@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package net.avianlabs.solana.methods
 
 import io.ktor.util.*
@@ -7,7 +9,9 @@ import net.avianlabs.solana.SolanaClient
 import net.avianlabs.solana.client.Response
 import net.avianlabs.solana.client.Response.RPC
 import net.avianlabs.solana.domain.core.Commitment
+import net.avianlabs.solana.domain.core.SignedTransaction
 import net.avianlabs.solana.domain.core.Transaction
+import net.avianlabs.solana.domain.core.VersionedTransaction
 
 /**
  * Simulate a transaction and return the result
@@ -25,6 +29,13 @@ import net.avianlabs.solana.domain.core.Transaction
  *
  * @return Simulated transaction result
  */
+@Deprecated(
+  message = "Use the VersionedTransaction overload instead",
+  replaceWith = ReplaceWith(
+    "simulateTransaction(transaction, commitment, sigVerify, " +
+      "replaceRecentBlockhash, minContextSlot, innerInstructions, accounts)"
+  ),
+)
 public suspend fun SolanaClient.simulateTransaction(
   transaction: Transaction,
   commitment: Commitment? = null,
@@ -52,6 +63,112 @@ public suspend fun SolanaClient.simulateTransaction(
           put("encoding", "base58")
         }
       }
+    }
+  }
+)
+
+/**
+ * Simulate a versioned transaction and return the result
+ *
+ * @param transaction VersionedTransaction to simulate
+ * @param commitment Commitment level to simulate the transaction at
+ * @param sigVerify if true the transaction signatures will be verified (conflicts with
+ * replaceRecentBlockhash)
+ * @param replaceRecentBlockhash if true the transaction recent blockhash will be replaced with the
+ * most recent blockhash. (conflicts with sigVerify)
+ * @param minContextSlot the minimum slot that the request can be evaluated at
+ * @param innerInstructions If true the response will include inner instructions. These inner
+ * instructions will be jsonParsed where possible, otherwise json.
+ * @param accounts Accounts configuration object
+ * @param maxSupportedTransactionVersion the maximum transaction version to return in responses
+ *
+ * @return Simulated transaction result
+ */
+public suspend fun SolanaClient.simulateTransaction(
+  transaction: VersionedTransaction,
+  commitment: Commitment? = null,
+  sigVerify: Boolean? = null,
+  replaceRecentBlockhash: Boolean? = null,
+  minContextSlot: ULong? = null,
+  innerInstructions: Boolean? = null,
+  accounts: List<String>? = null,
+  maxSupportedTransactionVersion: Int? = null,
+): Response<RPC<SimulateTransactionResponse>> = invoke(
+  method = "simulateTransaction",
+  params = buildJsonArray {
+    add(transaction.serialize().toByteArray().encodeBase64())
+    addJsonObject {
+      put("encoding", "base64")
+      commitment?.let { put("commitment", it.value) }
+      sigVerify?.let { put("sigVerify", it) }
+      replaceRecentBlockhash?.let { put("replaceRecentBlockhash", it) }
+      minContextSlot?.let { put("minContextSlot", it.toString()) }
+      innerInstructions?.let { put("innerInstructions", it) }
+      accounts?.let {
+        putJsonObject("accounts") {
+          putJsonArray("addresses") {
+            it.forEach { add(it) }
+          }
+          put("encoding", "base58")
+        }
+      }
+      maxSupportedTransactionVersion?.let { put("maxSupportedTransactionVersion", it) }
+    }
+  }
+)
+
+/**
+ * Simulate a signed transaction and return the result
+ *
+ * @param transaction Signed transaction to simulate
+ * @param commitment Commitment level to simulate the transaction at
+ * @param sigVerify if true the transaction signatures will be verified (conflicts with
+ * replaceRecentBlockhash)
+ * @param replaceRecentBlockhash if true the transaction recent blockhash will be replaced with the
+ * most recent blockhash. (conflicts with sigVerify)
+ * @param minContextSlot the minimum slot that the request can be evaluated at
+ * @param innerInstructions If true the response will include inner instructions. These inner
+ * instructions will be jsonParsed where possible, otherwise json.
+ * @param accounts Accounts configuration object
+ *
+ * @return Simulated transaction result
+ */
+@Deprecated(
+  message = "Use the VersionedTransaction overload instead",
+  replaceWith = ReplaceWith(
+    "simulateTransaction(transaction, commitment, sigVerify, " +
+      "replaceRecentBlockhash, minContextSlot, innerInstructions, accounts)"
+  ),
+)
+public suspend fun SolanaClient.simulateTransaction(
+  transaction: SignedTransaction,
+  commitment: Commitment? = null,
+  sigVerify: Boolean? = null,
+  replaceRecentBlockhash: Boolean? = null,
+  minContextSlot: ULong? = null,
+  innerInstructions: Boolean? = null,
+  accounts: List<String>? = null,
+  maxSupportedTransactionVersion: Int? = null,
+): Response<RPC<SimulateTransactionResponse>> = invoke(
+  method = "simulateTransaction",
+  params = buildJsonArray {
+    add(transaction.serialize().toByteArray().encodeBase64())
+    addJsonObject {
+      put("encoding", "base64")
+      commitment?.let { put("commitment", it.value) }
+      sigVerify?.let { put("sigVerify", it) }
+      replaceRecentBlockhash?.let { put("replaceRecentBlockhash", it) }
+      minContextSlot?.let { put("minContextSlot", it.toString()) }
+      innerInstructions?.let { put("innerInstructions", it) }
+      accounts?.let {
+        putJsonObject("accounts") {
+          putJsonArray("addresses") {
+            it.forEach { add(it) }
+          }
+          put("encoding", "base58")
+        }
+      }
+      maxSupportedTransactionVersion?.let { put("maxSupportedTransactionVersion", it) }
     }
   }
 )

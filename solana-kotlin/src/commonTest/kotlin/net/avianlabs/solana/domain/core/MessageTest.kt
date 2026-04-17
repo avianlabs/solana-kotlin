@@ -16,14 +16,14 @@ class MessageTest {
           source = PublicKey.fromBase58("9JGhZqi4MbnVz424uJ6vqk9a1u359xg3nJekdjzzL4d5"),
           mint = PublicKey.fromBase58("G8iheDY9bGix5qCXEitCExLcgZzZrEemngk9cbTR3CQs"),
           destination = PublicKey.fromBase58("3RfWpJnpr4DHxMDWfhqZRQ4acnQwM1HQXSvmgzzpz2K2"),
-          owner = PublicKey.fromBase58("EtDXsqZ9Cgod7Z6j8cqu8fNMF7fu9txu2puHnxVY1wBk"),
-          amount = 1u,
-          decimals = 1u,
+          authority = PublicKey.fromBase58("EtDXsqZ9Cgod7Z6j8cqu8fNMF7fu9txu2puHnxVY1wBk"),
+          amount = 1UL,
+          decimals = 1u.toUByte(),
         )
       )
       .addInstruction(
         ComputeBudgetProgram.setComputeUnitPrice(
-          microLamports = 1u,
+          microLamports = 1UL,
         )
       )
       .build()

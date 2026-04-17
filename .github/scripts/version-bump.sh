@@ -33,32 +33,10 @@ function bump {
 
 OLD_VERSION=$($DIR/get-version.sh)
 
-BUMP_MODE="none"
+BUMP_MODE="${1:-auto}"
 NEW_VERSION="-"
-if git log -1 | grep -q "#major"; then
-    BUMP_MODE="major"
-elif git log -1 | grep -q "#minor"; then
-    BUMP_MODE="minor"
-elif git log -1 | grep -q "#patch"; then
-    BUMP_MODE="patch"
-else
-    BUMP_MODE="auto"
-fi
 
-if [ -f gradle.properties ] && grep -E -q "version=${CURRENT_VERSION}" gradle.properties; then
-    BUILD_FILE=./gradle.properties
-elif [ -f ./build.gradle ]; then
-    BUILD_FILE=./build.gradle
-elif [ -f ./build.gradle.kts ]; then
-    BUILD_FILE=./build.gradle.kts
-fi
-
-if [[ "${BUMP_MODE}" == "none" ]]; then
-    echo "No matching commit tags found.
-    Version will remain at" $OLD_VERSION
-else
-    echo $BUMP_MODE "version bump detected"
-    bump $BUMP_MODE $OLD_VERSION
-    echo "version will be bumped from" $OLD_VERSION "to" $NEW_VERSION
-    sed -i "s/\(version *= *['\"]*\)${OLD_VERSION}\(['\"]*\)/\1${NEW_VERSION}\2/" ${BUILD_FILE}
-fi
+echo "$BUMP_MODE version bump detected"
+bump $BUMP_MODE $OLD_VERSION
+echo "version will be bumped from $OLD_VERSION to $NEW_VERSION"
+sed -i "s/\(version *= *['\"]*\)${OLD_VERSION}\(['\"]*\)/\1${NEW_VERSION}\2/" gradle.properties

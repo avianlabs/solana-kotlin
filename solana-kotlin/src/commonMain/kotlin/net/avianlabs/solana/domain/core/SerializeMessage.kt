@@ -7,9 +7,9 @@ import net.avianlabs.solana.vendor.ShortVecEncoding
 import net.avianlabs.solana.vendor.ShortVecLength
 import okio.Buffer
 
-private const val RECENT_BLOCK_HASH_LENGTH = 32
+internal const val RECENT_BLOCK_HASH_LENGTH = 32
 
-private class Header private constructor(
+internal class Header private constructor(
   val numRequiredSignatures: Byte,
   val numReadonlySignedAccounts: Byte,
   val numReadonlyUnsignedAccounts: Byte,
@@ -43,7 +43,7 @@ private class Header private constructor(
   }
 }
 
-private class CompiledInstruction(
+internal class CompiledInstruction(
   val programIdIndex: Byte,
   val keyIndicesLength: ShortVecLength,
   val keyIndices: ByteArray,
@@ -57,7 +57,7 @@ private class CompiledInstruction(
           keyIndicesLength.size + keyIndices.size + dataLength.size + data.size
 }
 
-private fun List<AccountMeta>.findAccountIndex(key: PublicKey): Int =
+internal fun List<AccountMeta>.findAccountIndex(key: PublicKey): Int =
   indexOfFirst { it.publicKey == key }
     .takeIf { it != -1 } ?: error("Account $key not found")
 

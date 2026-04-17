@@ -1,15 +1,18 @@
 package net.avianlabs.solana.domain.core
 
-import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 
-public open class Transaction internal constructor(
+@Deprecated(
+  message = "Use VersionedTransaction instead",
+  replaceWith = ReplaceWith("VersionedTransaction"),
+)
+public class Transaction internal constructor(
   public val message: Message,
 ) {
 
   public fun sign(signer: Signer): SignedTransaction = sign(listOf(signer))
 
-  public open fun sign(signers: List<Signer>): SignedTransaction {
+  public fun sign(signers: List<Signer>): SignedTransaction {
     val message = when (message.feePayer) {
       // fee payer is the first signer by default
       null -> message.newBuilder()
@@ -19,19 +22,7 @@ public open class Transaction internal constructor(
       else -> message
     }
 
-    val serializedMessage = message
-      .serialize()
-
-    val signatures = signers.associate { signer ->
-      signer.publicKey to
-        TweetNaCl.Signature.sign(serializedMessage, signer.secretKey)
-    }
-
-    return SignedTransaction(
-      originalMessage = message,
-      signedMessage = serializedMessage,
-      signatures = signatures,
-    )
+    return SignedTransaction.sign(VersionedMessage.Legacy(message), signers)
   }
 
   override fun equals(other: Any?): Boolean {
