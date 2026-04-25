@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.androidKotlinMultiplatformLib)
   alias(libs.plugins.cklib)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
@@ -21,6 +22,15 @@ kotlin {
 
   jvm()
 
+  @Suppress("DEPRECATION") // AGP 9.x: 'android' overload is ambiguous with KGP's; androidLibrary still works
+  androidLibrary {
+    namespace = "net.avianlabs.solana.tweetnacl"
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    minSdk = libs.versions.androidMinSdk.get().toInt()
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    withHostTestBuilder { }
+  }
+
   listOf(
     iosArm64(),
     iosSimulatorArm64(),
@@ -37,34 +47,26 @@ kotlin {
   linuxX64()
 
   sourceSets {
-    val jvmMain by getting {
+    val jvmAndroidMain by creating {
+      dependsOn(commonMain.get())
       dependencies {
         implementation(libs.tweetNaClJava)
         implementation(libs.bouncyCastle)
       }
     }
-    val jvmTest by getting
+    jvmMain { dependsOn(jvmAndroidMain) }
+    androidMain { dependsOn(jvmAndroidMain) }
 
-    val commonMain by getting {
+    commonMain {
       dependencies {
         implementation(libs.skie.configurationAnnotations)
       }
     }
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(libs.kotlinTest)
         implementation(libs.coroutinesTest)
       }
-    }
-
-    val iosMain by getting {
-      dependencies {
-      }
-    }
-    val iosTest by getting {
-    }
-
-    val nativeMain by getting {
     }
 
     targets.withType<KotlinNativeTarget> {

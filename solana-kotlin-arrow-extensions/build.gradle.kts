@@ -1,5 +1,6 @@
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.androidKotlinMultiplatformLib)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
@@ -17,15 +18,20 @@ kotlin {
 
   jvm()
 
+  @Suppress("DEPRECATION") // AGP 9.x: 'android' overload is ambiguous with KGP's; androidLibrary still works
+  androidLibrary {
+    namespace = "net.avianlabs.solana.arrow"
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    minSdk = libs.versions.androidMinSdk.get().toInt()
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    withHostTestBuilder { }
+  }
+
   mingwX64()
   linuxX64()
 
   sourceSets {
-    val jvmMain by getting
-
-    val jvmTest by getting
-
-    val commonMain by getting {
+    commonMain {
       dependencies {
         api(project(":solana-kotlin"))
         implementation(libs.coroutinesCore)
@@ -33,18 +39,12 @@ kotlin {
         implementation(libs.arrow.core)
       }
     }
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(libs.kotlinTest)
         implementation(libs.coroutinesTest)
       }
     }
-
-    val nativeMain by getting
-
-    val linuxMain by getting
-
-    val mingwMain by getting
   }
 }
 
