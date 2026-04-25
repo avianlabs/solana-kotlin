@@ -17,7 +17,7 @@ version = properties["version"] as String
 kotlin {
   applyDefaultHierarchyTemplate()
   explicitApi()
-  jvmToolchain(17)
+  jvmToolchain(21)
 
   jvm()
 
@@ -26,7 +26,7 @@ kotlin {
     namespace = "net.avianlabs.solana.tweetnacl"
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
     minSdk = libs.versions.androidMinSdk.get().toInt()
-    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
     withHostTestBuilder { }
   }
 
