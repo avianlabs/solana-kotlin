@@ -1,0 +1,98 @@
+public final class net/avianlabs/solana/arrow/EitherKt {
+	public static final fun toEither (Lnet/avianlabs/solana/client/Response;)Larrow/core/Either;
+}
+
+public abstract interface class net/avianlabs/solana/arrow/SolanaKotlinError {
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$MalformedResponse : net/avianlabs/solana/arrow/SolanaKotlinError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$MalformedResponse;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$MalformedResponse;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$MalformedResponse;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError : net/avianlabs/solana/arrow/SolanaKotlinError {
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InternalError : net/avianlabs/solana/arrow/SolanaKotlinError$RpcError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InternalError;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InternalError;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InternalError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidParams : net/avianlabs/solana/arrow/SolanaKotlinError$RpcError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidParams;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidParams;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidParams;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidRequest : net/avianlabs/solana/arrow/SolanaKotlinError$RpcError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidRequest;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidRequest;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$InvalidRequest;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError$MethodNotFound : net/avianlabs/solana/arrow/SolanaKotlinError$RpcError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$MethodNotFound;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$MethodNotFound;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$MethodNotFound;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ParseError : net/avianlabs/solana/arrow/SolanaKotlinError$RpcError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ParseError;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ParseError;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ParseError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ServerError : net/avianlabs/solana/arrow/SolanaKotlinError$RpcError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ServerError;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ServerError;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$RpcError$ServerError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/arrow/SolanaKotlinError$UnknownError : net/avianlabs/solana/arrow/SolanaKotlinError {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$UnknownError;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/arrow/SolanaKotlinError$UnknownError;Ljava/lang/String;ILjava/lang/Object;)Lnet/avianlabs/solana/arrow/SolanaKotlinError$UnknownError;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMessage ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+

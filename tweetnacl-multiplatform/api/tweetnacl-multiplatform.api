@@ -1,0 +1,96 @@
+public final class net/avianlabs/solana/tweetnacl/SecureRandom_jvmKt {
+	public static final fun secureRandomBytes (I)[B
+}
+
+public abstract interface class net/avianlabs/solana/tweetnacl/TweetNaCl {
+}
+
+public abstract interface class net/avianlabs/solana/tweetnacl/TweetNaCl$SecretBox {
+	public static final field Companion Lnet/avianlabs/solana/tweetnacl/TweetNaCl$SecretBox$Companion;
+	public static final field KEY_BYTES I
+	public static final field NONCE_BYTES I
+	public abstract fun box ([B[B)[B
+	public abstract fun open ([B[B)[B
+}
+
+public final class net/avianlabs/solana/tweetnacl/TweetNaCl$SecretBox$Companion {
+	public static final field KEY_BYTES I
+	public static final field NONCE_BYTES I
+	public final fun invoke ([B)Lnet/avianlabs/solana/tweetnacl/TweetNaCl$SecretBox;
+}
+
+public abstract interface class net/avianlabs/solana/tweetnacl/TweetNaCl$Signature {
+	public static final field Companion Lnet/avianlabs/solana/tweetnacl/TweetNaCl$Signature$Companion;
+	public static final field PUBLIC_KEY_BYTES I
+	public static final field SECRET_KEY_BYTES I
+	public static final field SEED_BYTES I
+	public static final field SIGNATURE_BYTES I
+	public abstract fun generateKey ([B)Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+	public abstract fun isOnCurve ([B)Z
+	public abstract fun sign ([B[B)[B
+}
+
+public final class net/avianlabs/solana/tweetnacl/TweetNaCl$Signature$Companion : net/avianlabs/solana/tweetnacl/TweetNaCl$Signature {
+	public static final field PUBLIC_KEY_BYTES I
+	public static final field SECRET_KEY_BYTES I
+	public static final field SEED_BYTES I
+	public static final field SIGNATURE_BYTES I
+	public fun generateKey ([B)Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+	public fun isOnCurve ([B)Z
+	public fun sign ([B[B)[B
+}
+
+public final class net/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair {
+	public static final field Companion Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair$Companion;
+	public fun <init> (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;[B)V
+	public final fun component1 ()Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;
+	public final fun component2 ()[B
+	public final fun copy (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;[B)Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;[BILjava/lang/Object;)Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPublicKey ()Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;
+	public final fun getSecretKey ()[B
+	public fun hashCode ()I
+	public final fun sign ([B)[B
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair$Companion {
+	public final fun fromBase58 (Ljava/lang/String;)Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+	public final fun fromSecretKeyBytes ([B)Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+	public final fun generate ()Lnet/avianlabs/solana/tweetnacl/ed25519/Ed25519Keypair;
+}
+
+public final class net/avianlabs/solana/tweetnacl/ed25519/PublicKey {
+	public static final field Companion Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey$Companion;
+	public fun <init> ([B)V
+	public final fun component1 ()[B
+	public final fun copy ([B)Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;
+	public static synthetic fun copy$default (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;[BILjava/lang/Object;)Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBytes ()[B
+	public fun hashCode ()I
+	public final fun isOnCurve ()Z
+	public final fun toBase58 ()Ljava/lang/String;
+	public final fun toByteArray ()[B
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class net/avianlabs/solana/tweetnacl/ed25519/PublicKey$Companion {
+	public final fun fromBase58 (Ljava/lang/String;)Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;
+}
+
+public final class net/avianlabs/solana/tweetnacl/vendor/Base58Kt {
+	public static final fun decodeBase58 (Ljava/lang/String;)[B
+	public static final fun decodeBase58WithChecksum (Ljava/lang/String;)[B
+	public static final fun encodeToBase58String ([B)Ljava/lang/String;
+	public static final fun encodeToBase58WithChecksum ([B)Ljava/lang/String;
+	public static final fun sha256 (Ljava/lang/String;)[B
+	public static final fun sha256 ([B)[B
+}
+
+public final class net/avianlabs/solana/tweetnacl/vendor/Sha256 {
+	public static final field INSTANCE Lnet/avianlabs/solana/tweetnacl/vendor/Sha256;
+	public final fun digest ([B)[B
+}
+

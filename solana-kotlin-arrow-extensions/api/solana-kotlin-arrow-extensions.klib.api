@@ -1,0 +1,117 @@
+// Klib ABI Dump
+// Targets: [linuxX64, mingwX64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <net.avianlabs.solana:solana-kotlin-arrow-extensions>
+sealed interface net.avianlabs.solana.arrow/SolanaKotlinError { // net.avianlabs.solana.arrow/SolanaKotlinError|null[0]
+    sealed interface RpcError : net.avianlabs.solana.arrow/SolanaKotlinError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError|null[0]
+        final class InternalError : net.avianlabs.solana.arrow/SolanaKotlinError.RpcError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError|null[0]
+            constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.<init>|<init>(kotlin.String){}[0]
+
+            final val message // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.message|{}message[0]
+                final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.message.<get-message>|<get-message>(){}[0]
+
+            final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InternalError.toString|toString(){}[0]
+        }
+
+        final class InvalidParams : net.avianlabs.solana.arrow/SolanaKotlinError.RpcError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams|null[0]
+            constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.<init>|<init>(kotlin.String){}[0]
+
+            final val message // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.message|{}message[0]
+                final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.message.<get-message>|<get-message>(){}[0]
+
+            final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidParams.toString|toString(){}[0]
+        }
+
+        final class InvalidRequest : net.avianlabs.solana.arrow/SolanaKotlinError.RpcError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest|null[0]
+            constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.<init>|<init>(kotlin.String){}[0]
+
+            final val message // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.message|{}message[0]
+                final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.message.<get-message>|<get-message>(){}[0]
+
+            final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.InvalidRequest.toString|toString(){}[0]
+        }
+
+        final class MethodNotFound : net.avianlabs.solana.arrow/SolanaKotlinError.RpcError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound|null[0]
+            constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.<init>|<init>(kotlin.String){}[0]
+
+            final val message // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.message|{}message[0]
+                final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.message.<get-message>|<get-message>(){}[0]
+
+            final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.MethodNotFound.toString|toString(){}[0]
+        }
+
+        final class ParseError : net.avianlabs.solana.arrow/SolanaKotlinError.RpcError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError|null[0]
+            constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.<init>|<init>(kotlin.String){}[0]
+
+            final val message // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.message|{}message[0]
+                final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.message.<get-message>|<get-message>(){}[0]
+
+            final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ParseError.toString|toString(){}[0]
+        }
+
+        final class ServerError : net.avianlabs.solana.arrow/SolanaKotlinError.RpcError { // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError|null[0]
+            constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.<init>|<init>(kotlin.String){}[0]
+
+            final val message // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.message|{}message[0]
+                final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.message.<get-message>|<get-message>(){}[0]
+
+            final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.component1|component1(){}[0]
+            final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.copy|copy(kotlin.String){}[0]
+            final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.equals|equals(kotlin.Any?){}[0]
+            final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.hashCode|hashCode(){}[0]
+            final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.RpcError.ServerError.toString|toString(){}[0]
+        }
+    }
+
+    final class MalformedResponse : net.avianlabs.solana.arrow/SolanaKotlinError { // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse|null[0]
+        constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.<init>|<init>(kotlin.String){}[0]
+
+        final val message // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.message|{}message[0]
+            final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.message.<get-message>|<get-message>(){}[0]
+
+        final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.MalformedResponse.toString|toString(){}[0]
+    }
+
+    final class UnknownError : net.avianlabs.solana.arrow/SolanaKotlinError { // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError|null[0]
+        constructor <init>(kotlin/String) // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.<init>|<init>(kotlin.String){}[0]
+
+        final val message // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.message|{}message[0]
+            final fun <get-message>(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.message.<get-message>|<get-message>(){}[0]
+
+        final fun component1(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.component1|component1(){}[0]
+        final fun copy(kotlin/String = ...): net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.copy|copy(kotlin.String){}[0]
+        final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.equals|equals(kotlin.Any?){}[0]
+        final fun hashCode(): kotlin/Int // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.hashCode|hashCode(){}[0]
+        final fun toString(): kotlin/String // net.avianlabs.solana.arrow/SolanaKotlinError.UnknownError.toString|toString(){}[0]
+    }
+}
+
+final fun <#A: kotlin/Any?> (net.avianlabs.solana.client/Response<#A>).net.avianlabs.solana.arrow/toEither(): arrow.core/Either<net.avianlabs.solana.arrow/SolanaKotlinError, #A> // net.avianlabs.solana.arrow/toEither|toEither@net.avianlabs.solana.client.Response<0:0>(){0§<kotlin.Any?>}[0]
