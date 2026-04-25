@@ -13,12 +13,9 @@ version = properties["version"] as String
 kotlin {
   applyDefaultHierarchyTemplate()
   explicitApi()
+  jvmToolchain(17)
 
-  jvm {
-    compilerOptions {
-      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-  }
+  jvm()
 
   mingwX64()
   linuxX64()
@@ -48,12 +45,6 @@ kotlin {
     val linuxMain by getting
 
     val mingwMain by getting
-  }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
   }
 }
 
