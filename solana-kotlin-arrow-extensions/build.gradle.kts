@@ -48,6 +48,13 @@ kotlin {
   }
 }
 
+dokka {
+  dokkaSourceSets.configureEach {
+    documentedVisibilities.set(setOf(org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier.Public))
+    skipEmptyPackages.set(true)
+  }
+}
+
 signing {
   useGpgCmd()
 }
