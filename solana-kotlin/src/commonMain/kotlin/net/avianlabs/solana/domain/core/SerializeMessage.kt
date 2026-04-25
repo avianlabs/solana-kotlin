@@ -1,11 +1,12 @@
 package net.avianlabs.solana.domain.core
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.vendor.ShortVecEncoding
 import net.avianlabs.solana.vendor.ShortVecLength
-import okio.Buffer
 
 internal const val RECENT_BLOCK_HASH_LENGTH = 32
 
@@ -108,12 +109,12 @@ public fun Message.serialize(): ByteArray {
     write(recentBlockHash.decodeBase58())
     write(instructionsLength)
     for (compiledInstruction in compiledInstructions) {
-      writeByte(compiledInstruction.programIdIndex.toInt())
+      writeByte(compiledInstruction.programIdIndex)
       write(compiledInstruction.keyIndicesLength)
       write(compiledInstruction.keyIndices)
       write(compiledInstruction.dataLength)
       write(compiledInstruction.data)
     }
   }
-  return buffer.readByteArray(bufferSize.toLong())
+  return buffer.readByteArray(bufferSize)
 }

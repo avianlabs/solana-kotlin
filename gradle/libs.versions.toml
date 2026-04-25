@@ -20,9 +20,9 @@ junit5 = "6.0.2"
 junitPioneer = "2.3.0"
 kermit = "2.0.6"
 kotlinxCoroutines = "1.10.2"
+kotlinxIo = "0.9.0"
 kotlinLogging = "7.0.14"
 ktor = "3.2.0"
-okio = "3.16.4"
 serialization = "1.10.0"
 
 [libraries]
@@ -35,7 +35,9 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 kotlinLogging = { module = "io.github.oshai:kotlin-logging", version.ref = "kotlinLogging" }
 kotlinPoet = { module = "com.squareup:kotlinpoet", version = "1.18.1" }
+kotlinxIo = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinxIo" }
 ktorClientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+
 ktorClientCio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
 ktorClientCore = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktorClientDarwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
@@ -44,7 +46,6 @@ ktorClientOkHttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor"
 ktorClientWinHttp = { module = "io.ktor:ktor-client-winhttp", version.ref = "ktor" }
 ktorSerializationKotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 ktorUtils = { module = "io.ktor:ktor-utils", version.ref = "ktor" }
-okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 serializationCore = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "serialization" }
 serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 skie-configurationAnnotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }

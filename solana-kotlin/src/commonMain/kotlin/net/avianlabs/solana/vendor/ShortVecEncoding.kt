@@ -1,7 +1,8 @@
 package net.avianlabs.solana.vendor
 
-import okio.Buffer
-import okio.BufferedSource
+import kotlinx.io.Buffer
+import kotlinx.io.Source
+import kotlinx.io.readByteArray
 import kotlin.experimental.and
 
 internal typealias ShortVecLength = ByteArray
@@ -14,10 +15,10 @@ internal object ShortVecEncoding {
       val elem = length and 0x7f
       length = length ushr 7
       if (length == 0) {
-        buffer.writeByte(elem)
+        buffer.writeByte(elem.toByte())
         break
       } else {
-        buffer.writeByte(elem or 0x80)
+        buffer.writeByte((elem or 0x80).toByte())
       }
     }
     return buffer.readByteArray()
@@ -37,7 +38,7 @@ internal object ShortVecEncoding {
     return len
   }
 
-  internal fun decodeLength(source: BufferedSource): Int {
+  internal fun decodeLength(source: Source): Int {
     var len = 0
     var shift = 0
     while (true) {

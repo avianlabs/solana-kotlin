@@ -1,10 +1,11 @@
 package net.avianlabs.solana.domain.program
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.Sha256
-import okio.Buffer
 
 public interface Program {
 
@@ -46,15 +47,11 @@ public interface Program {
         }
       }
 
-      val bytes = Buffer()
-        .apply {
-          seeds.forEach { seed ->
-            write(seed)
-          }
-        }
-        .write(programId.bytes)
-        .write("ProgramDerivedAddress".encodeToByteArray())
-        .readByteArray()
+      val bytes = Buffer().apply {
+        seeds.forEach { seed -> write(seed) }
+        write(programId.bytes)
+        write("ProgramDerivedAddress".encodeToByteArray())
+      }.readByteArray()
 
       val hash = Sha256.digest(bytes)
 

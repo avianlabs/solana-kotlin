@@ -4,7 +4,8 @@ import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -38,10 +39,10 @@ class DeserializeVersionedMessageTest {
     val recipientKey = PublicKey(ByteArray(32) { 0x42 })
 
     val messageBuffer = Buffer().apply {
-      writeByte(0x80) // V0 prefix
-      writeByte(1)    // numRequiredSignatures
-      writeByte(0)    // numReadonlySignedAccounts
-      writeByte(1)    // numReadonlyUnsignedAccounts (program)
+      writeByte(0x80.toByte()) // V0 prefix
+      writeByte(1.toByte())    // numRequiredSignatures
+      writeByte(0.toByte())    // numReadonlySignedAccounts
+      writeByte(1.toByte())    // numReadonlyUnsignedAccounts (program)
       write(ShortVecEncoding.encodeLength(3))
       write(keypair.publicKey.toByteArray())
       write(recipientKey.toByteArray())
@@ -49,10 +50,10 @@ class DeserializeVersionedMessageTest {
       write(ByteArray(32) { 0xAA.toByte() }) // blockhash
       // 1 instruction referencing static keys only
       write(ShortVecEncoding.encodeLength(1))
-      writeByte(2) // programIdIndex
+      writeByte(2.toByte()) // programIdIndex
       write(ShortVecEncoding.encodeLength(2))
-      writeByte(0) // account index 0
-      writeByte(1) // account index 1
+      writeByte(0.toByte()) // account index 0
+      writeByte(1.toByte()) // account index 1
       write(ShortVecEncoding.encodeLength(0)) // no data
       // 0 ALT lookups
       write(ShortVecEncoding.encodeLength(0))
@@ -124,10 +125,10 @@ class DeserializeVersionedMessageTest {
     val recipientKey = PublicKey(ByteArray(32) { 0x42 })
 
     val messageBuffer = Buffer().apply {
-      writeByte(0x80) // V0 prefix
-      writeByte(1)    // numRequiredSignatures
-      writeByte(0)    // numReadonlySignedAccounts
-      writeByte(1)    // numReadonlyUnsignedAccounts (program)
+      writeByte(0x80.toByte()) // V0 prefix
+      writeByte(1.toByte())    // numRequiredSignatures
+      writeByte(0.toByte())    // numReadonlySignedAccounts
+      writeByte(1.toByte())    // numReadonlyUnsignedAccounts (program)
       write(ShortVecEncoding.encodeLength(3))
       write(keypair.publicKey.toByteArray())
       write(recipientKey.toByteArray())
@@ -135,19 +136,19 @@ class DeserializeVersionedMessageTest {
       write(ByteArray(32) { 0xAA.toByte() }) // blockhash
       // 1 instruction
       write(ShortVecEncoding.encodeLength(1))
-      writeByte(2)
+      writeByte(2.toByte())
       write(ShortVecEncoding.encodeLength(2))
-      writeByte(0)
-      writeByte(1)
+      writeByte(0.toByte())
+      writeByte(1.toByte())
       write(ShortVecEncoding.encodeLength(0))
       // 1 ALT lookup
       write(ShortVecEncoding.encodeLength(1))
       write(altKey.toByteArray())
       write(ShortVecEncoding.encodeLength(2))
-      writeByte(3)
-      writeByte(5)
+      writeByte(3.toByte())
+      writeByte(5.toByte())
       write(ShortVecEncoding.encodeLength(1))
-      writeByte(7)
+      writeByte(7.toByte())
     }
     val bytes = messageBuffer.readByteArray()
 
@@ -164,10 +165,10 @@ class DeserializeVersionedMessageTest {
   @Test
   fun unsupportedVersion_throws() {
     val messageBuffer = Buffer().apply {
-      writeByte(0x81) // version 1
-      writeByte(1)
-      writeByte(0)
-      writeByte(0)
+      writeByte(0x81.toByte()) // version 1
+      writeByte(1.toByte())
+      writeByte(0.toByte())
+      writeByte(0.toByte())
       write(ShortVecEncoding.encodeLength(1))
       write(keypair.publicKey.toByteArray())
       write(ByteArray(32))

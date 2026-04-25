@@ -12,11 +12,16 @@ import kotlin.Long
 import kotlin.String
 import kotlin.UInt
 import kotlin.ULong
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import kotlinx.io.writeIntLe
+import kotlinx.io.writeLongLe
+import kotlinx.io.writeShortLe
+import kotlinx.io.writeString
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.Buffer
 
 public object SystemProgram : Program {
   public override val programId: PublicKey =
@@ -63,12 +68,12 @@ public object SystemProgram : Program {
       AccountMeta(payer, isSigner = true, isWritable = true),
       AccountMeta(newAccount, isSigner = true, isWritable = true),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.CreateAccount.index.toInt())
-      .writeLongLe(lamports.toLong())
-      .writeLongLe(space.toLong())
-      .write(programAddress.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.CreateAccount.index.toInt())
+      writeLongLe(lamports.toLong())
+      writeLongLe(space.toLong())
+      write(programAddress.bytes)
+    }.readByteArray(),
   )
 
   public fun assign(account: PublicKey, programAddress: PublicKey): TransactionInstruction =
@@ -77,10 +82,10 @@ public object SystemProgram : Program {
     keys = listOf(
       AccountMeta(account, isSigner = true, isWritable = true),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.Assign.index.toInt())
-      .write(programAddress.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.Assign.index.toInt())
+      write(programAddress.bytes)
+    }.readByteArray(),
   )
 
   public fun transferSol(
@@ -93,10 +98,10 @@ public object SystemProgram : Program {
       AccountMeta(source, isSigner = true, isWritable = true),
       AccountMeta(destination, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.TransferSol.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.TransferSol.index.toInt())
+      writeLongLe(amount.toLong())
+    }.readByteArray(),
   )
 
   @Deprecated(
@@ -127,18 +132,16 @@ public object SystemProgram : Program {
       AccountMeta(newAccount, isSigner = false, isWritable = true),
       AccountMeta(baseAccount, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.CreateAccountWithSeed.index.toInt())
-      .write(base.bytes)
-      .apply {
-        val bytes = seed.encodeToByteArray()
-        writeLongLe(bytes.size.toLong())
-        write(bytes)
-      }
-      .writeLongLe(amount.toLong())
-      .writeLongLe(space.toLong())
-      .write(programAddress.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.CreateAccountWithSeed.index.toInt())
+      write(base.bytes)
+      val seedBytes = seed.encodeToByteArray()
+      writeLongLe(seedBytes.size.toLong())
+      write(seedBytes)
+      writeLongLe(amount.toLong())
+      writeLongLe(space.toLong())
+      write(programAddress.bytes)
+    }.readByteArray(),
   )
 
   public fun advanceNonceAccount(
@@ -152,9 +155,9 @@ public object SystemProgram : Program {
       AccountMeta(recentBlockhashesSysvar, isSigner = false, isWritable = false),
       AccountMeta(nonceAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.AdvanceNonceAccount.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.AdvanceNonceAccount.index.toInt())
+    }.readByteArray(),
   )
 
   @Deprecated(
@@ -185,10 +188,10 @@ public object SystemProgram : Program {
       AccountMeta(rentSysvar, isSigner = false, isWritable = false),
       AccountMeta(nonceAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.WithdrawNonceAccount.index.toInt())
-      .writeLongLe(withdrawAmount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.WithdrawNonceAccount.index.toInt())
+      writeLongLe(withdrawAmount.toLong())
+    }.readByteArray(),
   )
 
   public fun initializeNonceAccount(
@@ -203,10 +206,10 @@ public object SystemProgram : Program {
       AccountMeta(recentBlockhashesSysvar, isSigner = false, isWritable = false),
       AccountMeta(rentSysvar, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.InitializeNonceAccount.index.toInt())
-      .write(nonceAuthority.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.InitializeNonceAccount.index.toInt())
+      write(nonceAuthority.bytes)
+    }.readByteArray(),
   )
 
   @Deprecated(
@@ -233,10 +236,10 @@ public object SystemProgram : Program {
       AccountMeta(nonceAccount, isSigner = false, isWritable = true),
       AccountMeta(nonceAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.AuthorizeNonceAccount.index.toInt())
-      .write(newNonceAuthority.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.AuthorizeNonceAccount.index.toInt())
+      write(newNonceAuthority.bytes)
+    }.readByteArray(),
   )
 
   public fun allocate(newAccount: PublicKey, space: ULong): TransactionInstruction =
@@ -245,10 +248,10 @@ public object SystemProgram : Program {
     keys = listOf(
       AccountMeta(newAccount, isSigner = true, isWritable = true),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.Allocate.index.toInt())
-      .writeLongLe(space.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.Allocate.index.toInt())
+      writeLongLe(space.toLong())
+    }.readByteArray(),
   )
 
   public fun allocateWithSeed(
@@ -264,17 +267,15 @@ public object SystemProgram : Program {
       AccountMeta(newAccount, isSigner = false, isWritable = true),
       AccountMeta(baseAccount, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.AllocateWithSeed.index.toInt())
-      .write(base.bytes)
-      .apply {
-        val bytes = seed.encodeToByteArray()
-        writeLongLe(bytes.size.toLong())
-        write(bytes)
-      }
-      .writeLongLe(space.toLong())
-      .write(programAddress.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.AllocateWithSeed.index.toInt())
+      write(base.bytes)
+      val seedBytes = seed.encodeToByteArray()
+      writeLongLe(seedBytes.size.toLong())
+      write(seedBytes)
+      writeLongLe(space.toLong())
+      write(programAddress.bytes)
+    }.readByteArray(),
   )
 
   public fun assignWithSeed(
@@ -289,16 +290,14 @@ public object SystemProgram : Program {
       AccountMeta(account, isSigner = false, isWritable = true),
       AccountMeta(baseAccount, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.AssignWithSeed.index.toInt())
-      .write(base.bytes)
-      .apply {
-        val bytes = seed.encodeToByteArray()
-        writeLongLe(bytes.size.toLong())
-        write(bytes)
-      }
-      .write(programAddress.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.AssignWithSeed.index.toInt())
+      write(base.bytes)
+      val seedBytes = seed.encodeToByteArray()
+      writeLongLe(seedBytes.size.toLong())
+      write(seedBytes)
+      write(programAddress.bytes)
+    }.readByteArray(),
   )
 
   public fun transferSolWithSeed(
@@ -315,16 +314,14 @@ public object SystemProgram : Program {
       AccountMeta(baseAccount, isSigner = true, isWritable = false),
       AccountMeta(destination, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.TransferSolWithSeed.index.toInt())
-      .writeLongLe(amount.toLong())
-      .apply {
-        val bytes = fromSeed.encodeToByteArray()
-        writeLongLe(bytes.size.toLong())
-        write(bytes)
-      }
-      .write(fromOwner.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.TransferSolWithSeed.index.toInt())
+      writeLongLe(amount.toLong())
+      val fromSeedBytes = fromSeed.encodeToByteArray()
+      writeLongLe(fromSeedBytes.size.toLong())
+      write(fromSeedBytes)
+      write(fromOwner.bytes)
+    }.readByteArray(),
   )
 
   public fun upgradeNonceAccount(nonceAccount: PublicKey): TransactionInstruction =
@@ -333,9 +330,9 @@ public object SystemProgram : Program {
     keys = listOf(
       AccountMeta(nonceAccount, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeIntLe(Instruction.UpgradeNonceAccount.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeIntLe(Instruction.UpgradeNonceAccount.index.toInt())
+    }.readByteArray(),
   )
 
   public enum class NonceVersion(

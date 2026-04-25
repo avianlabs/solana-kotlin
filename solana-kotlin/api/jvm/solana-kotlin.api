@@ -458,7 +458,6 @@ public final synthetic class net/avianlabs/solana/domain/core/FeeCalculator$$ser
 }
 
 public final class net/avianlabs/solana/domain/core/FeeCalculator$Companion {
-	public final fun read (Lokio/BufferedSource;)Lnet/avianlabs/solana/domain/core/FeeCalculator;
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
@@ -521,11 +520,6 @@ public final class net/avianlabs/solana/domain/core/NonceAccountData {
 }
 
 public final class net/avianlabs/solana/domain/core/NonceAccountData$Companion {
-	public final fun read (Lokio/BufferedSource;)Lnet/avianlabs/solana/domain/core/NonceAccountData;
-}
-
-public final class net/avianlabs/solana/domain/core/PublicKeyKt {
-	public static final fun read (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey$Companion;Lokio/BufferedSource;)Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;
 }
 
 public final class net/avianlabs/solana/domain/core/SerializeMessageKt {

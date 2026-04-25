@@ -37,7 +37,15 @@ class ProgramGenerator(
         "net.avianlabs.solana.domain.program.Program.Companion",
         "createTransactionInstruction"
       )
-      .addImport("okio", "Buffer")
+      .addImport(
+        "kotlinx.io",
+        "Buffer",
+        "readByteArray",
+        "writeIntLe",
+        "writeLongLe",
+        "writeShortLe",
+        "writeString",
+      )
       .addType(generateProgramObject())
       .build()
   }
@@ -394,9 +402,9 @@ class ProgramGenerator(
 
   private fun addDiscriminatorWrite(builder: CodeBlock.Builder, format: String, discriminator: Int) {
     when (format) {
-      "u16" -> builder.addStatement("buffer.writeShortLe(%L)", discriminator)
+      "u16" -> builder.addStatement("buffer.writeShortLe(%L.toShort())", discriminator)
       "u32" -> builder.addStatement("buffer.writeIntLe(%L)", discriminator)
-      else -> builder.addStatement("buffer.writeByte(%L)", discriminator)
+      else -> builder.addStatement("buffer.writeByte(%L.toByte())", discriminator)
     }
   }
 
@@ -600,16 +608,16 @@ class ProgramGenerator(
       "numberTypeNode" -> when (typeNode.format) {
         "u64" -> addStatement("buffer.writeLongLe(%L.toLong())", paramName)
         "i64" -> addStatement("buffer.writeLongLe(%L)", paramName)
-        "u8" -> addStatement("buffer.writeByte(%L.toInt())", paramName)
-        "i8" -> addStatement("buffer.writeByte(%L.toInt())", paramName)
+        "u8" -> addStatement("buffer.writeByte(%L.toByte())", paramName)
+        "i8" -> addStatement("buffer.writeByte(%L)", paramName)
         "u32" -> addStatement("buffer.writeIntLe(%L.toInt())", paramName)
         "i32" -> addStatement("buffer.writeIntLe(%L)", paramName)
-        "u16", "shortU16" -> addStatement("buffer.writeShortLe(%L.toInt())", paramName)
-        "i16" -> addStatement("buffer.writeShortLe(%L.toInt())", paramName)
+        "u16", "shortU16" -> addStatement("buffer.writeShortLe(%L.toShort())", paramName)
+        "i16" -> addStatement("buffer.writeShortLe(%L)", paramName)
         "f32" -> addStatement("buffer.writeIntLe(%L.toRawBits())", paramName)
         "f64" -> addStatement("buffer.writeLongLe(%L.toRawBits())", paramName)
       }
-      "booleanTypeNode" -> addStatement("buffer.writeByte(if (%L) 1 else 0)", paramName)
+      "booleanTypeNode" -> addStatement("buffer.writeByte((if (%L) 1 else 0).toByte())", paramName)
       "bytesTypeNode" -> addStatement("buffer.write(%L)", paramName)
       "stringTypeNode" -> {
         addStatement("val %LBytes = %L.encodeToByteArray()", paramName, paramName)
@@ -646,10 +654,10 @@ class ProgramGenerator(
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: return
         beginControlFlow("if (%L != null)", paramName)
-        addStatement("buffer.writeByte(1)")
+        addStatement("buffer.writeByte(1.toByte())")
         addStructFieldSerialization(paramName, innerType)
         nextControlFlow("else")
-        addStatement("buffer.writeByte(0)")
+        addStatement("buffer.writeByte(0.toByte())")
         endControlFlow()
       }
       "definedTypeLinkNode" -> {
@@ -665,15 +673,15 @@ class ProgramGenerator(
             } else {
               val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
               when (sizeFormat) {
-                "u16" -> addStatement("buffer.writeShortLe(%L.value.toInt())", paramName)
+                "u16" -> addStatement("buffer.writeShortLe(%L.value.toShort())", paramName)
                 "u32" -> addStatement("buffer.writeIntLe(%L.value.toInt())", paramName)
-                else -> addStatement("buffer.writeByte(%L.value.toInt())", paramName)
+                else -> addStatement("buffer.writeByte(%L.value.toByte())", paramName)
               }
             }
           }
           "fixedSizeTypeNode" -> addStatement("buffer.write(%L.bytes)", paramName)
           "structTypeNode" -> addStatement("buffer.write(%L.serialize())", paramName)
-          else -> addStatement("buffer.writeByte(%L.value.toInt())", paramName)
+          else -> addStatement("buffer.writeByte(%L.value.toByte())", paramName)
         }
       }
       "amountTypeNode" -> {
@@ -960,10 +968,11 @@ class ProgramGenerator(
     }
     .unindent()
     .add("),\n")
-    .add("data = Buffer()\n")
+    .add("data = Buffer().apply {\n")
     .indent()
     .writeInstructions(instruction, args)
     .unindent()
+    .add("}.readByteArray(),\n")
     .unindent()
     .add(")\n")
     .build()
@@ -982,17 +991,17 @@ class ProgramGenerator(
         val hexData = defaultValue?.get("data")?.jsonPrimitive?.content
         if (hexData != null) {
           val byteArrayLiteral = hexToByteArrayLiteral(hexData)
-          add(".write($byteArrayLiteral)\n")
+          add("write($byteArrayLiteral)\n")
         }
       }
       "numberTypeNode" -> {
         when (discriminatorArg.type.format) {
-          "u8" -> add(".writeByte(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
-          "u32" -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
-          else -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+          "u8" -> add("writeByte(Instruction.%L.index.toByte())\n", instruction.name.toPascalCase())
+          "u32" -> add("writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+          else -> add("writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
         }
       }
-      else -> add(".writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
+      else -> add("writeIntLe(Instruction.%L.index.toInt())\n", instruction.name.toPascalCase())
     }
 
     // Write default values for omitted sub-discriminator arguments
@@ -1004,15 +1013,15 @@ class ProgramGenerator(
             when (arg.type.format) {
               "u64" -> {
                 val number = defaultValue["number"]?.jsonPrimitive?.long ?: return@forEach
-                add(".writeLongLe(%LL)\n", number)
+                add("writeLongLe(%LL)\n", number)
               }
               else -> {
                 val number = defaultValue["number"]?.jsonPrimitive?.int ?: return@forEach
                 when (arg.type.format) {
-                  "u8" -> add(".writeByte(%L)\n", number)
-                  "u16" -> add(".writeShortLe(%L)\n", number)
-                  "u32" -> add(".writeIntLe(%L)\n", number)
-                  else -> add(".writeByte(%L)\n", number)
+                  "u8" -> add("writeByte(%L.toByte())\n", number)
+                  "u16" -> add("writeShortLe(%L.toShort())\n", number)
+                  "u32" -> add("writeIntLe(%L)\n", number)
+                  else -> add("writeByte(%L.toByte())\n", number)
                 }
               }
             }
@@ -1020,7 +1029,7 @@ class ProgramGenerator(
           "bytesValueNode" -> {
             val hexData = defaultValue["data"]?.jsonPrimitive?.content ?: return@forEach
             val byteArrayLiteral = hexToByteArrayLiteral(hexData)
-            add(".write($byteArrayLiteral)\n")
+            add("write($byteArrayLiteral)\n")
           }
         }
       }
@@ -1030,7 +1039,6 @@ class ProgramGenerator(
       val paramName = if (arg.name.toCamelCase() == "programId") "targetProgramId" else arg.name.toCamelCase()
       addSerializationCode(paramName, arg.type)
     }
-    add(".readByteArray(),\n")
   }
 
   private fun hexToByteArrayLiteral(hex: String): String {
@@ -1041,64 +1049,58 @@ class ProgramGenerator(
   private fun CodeBlock.Builder.addSerializationCode(paramName: String, typeNode: TypeNode) {
     when (typeNode.kind) {
       "numberTypeNode" -> when (typeNode.format) {
-        "u64" -> add(".writeLongLe(%L.toLong())\n", paramName)
-        "i64" -> add(".writeLongLe(%L)\n", paramName)
-        "u8" -> add(".writeByte(%L.toInt())\n", paramName)
-        "i8" -> add(".writeByte(%L.toInt())\n", paramName)
-        "u32" -> add(".writeIntLe(%L.toInt())\n", paramName)
-        "i32" -> add(".writeIntLe(%L)\n", paramName)
-        "u16", "shortU16" -> add(".writeShortLe(%L.toInt())\n", paramName)
-        "i16" -> add(".writeShortLe(%L.toInt())\n", paramName)
-        "f32" -> add(".writeIntLe(%L.toRawBits())\n", paramName)
-        "f64" -> add(".writeLongLe(%L.toRawBits())\n", paramName)
+        "u64" -> add("writeLongLe(%L.toLong())\n", paramName)
+        "i64" -> add("writeLongLe(%L)\n", paramName)
+        "u8" -> add("writeByte(%L.toByte())\n", paramName)
+        "i8" -> add("writeByte(%L)\n", paramName)
+        "u32" -> add("writeIntLe(%L.toInt())\n", paramName)
+        "i32" -> add("writeIntLe(%L)\n", paramName)
+        "u16", "shortU16" -> add("writeShortLe(%L.toShort())\n", paramName)
+        "i16" -> add("writeShortLe(%L)\n", paramName)
+        "f32" -> add("writeIntLe(%L.toRawBits())\n", paramName)
+        "f64" -> add("writeLongLe(%L.toRawBits())\n", paramName)
       }
 
-      "publicKeyTypeNode" -> add(".write(%L.bytes)\n", paramName)
-      "stringTypeNode" -> add(".writeUtf8(%L)\n", paramName)
-      "booleanTypeNode" -> add(".writeByte(if (%L) 1 else 0)\n", paramName)
-      "bytesTypeNode" -> add(".write(%L)\n", paramName)
+      "publicKeyTypeNode" -> add("write(%L.bytes)\n", paramName)
+      "stringTypeNode" -> add("writeString(%L)\n", paramName)
+      "booleanTypeNode" -> add("writeByte((if (%L) 1 else 0).toByte())\n", paramName)
+      "bytesTypeNode" -> add("write(%L)\n", paramName)
 
       "optionTypeNode" -> {
         val innerType = typeNode.item ?: error("optionTypeNode missing item")
         val prefixFormat = getPrefixFormat(typeNode.prefix) ?: "u8"
-        add(".apply {\n")
-        add("  if (%L != null) {\n", paramName)
+        add("if (%L != null) {\n", paramName)
         when (prefixFormat) {
-          "u8" -> add("    writeByte(1)\n")
-          "u16" -> add("    writeShortLe(1)\n")
-          "u32" -> add("    writeIntLe(1)\n")
-          else -> add("    writeByte(1)\n")
+          "u8" -> add("  writeByte(1.toByte())\n")
+          "u16" -> add("  writeShortLe(1.toShort())\n")
+          "u32" -> add("  writeIntLe(1)\n")
+          else -> add("  writeByte(1.toByte())\n")
         }
-        add("    ").addSerializationCode(paramName, innerType)
-        add("  } else {\n")
+        add("  ").addSerializationCode(paramName, innerType)
+        add("} else {\n")
         when (prefixFormat) {
-          "u8" -> add("    writeByte(0)\n")
-          "u16" -> add("    writeShortLe(0)\n")
-          "u32" -> add("    writeIntLe(0)\n")
-          else -> add("    writeByte(0)\n")
+          "u8" -> add("  writeByte(0.toByte())\n")
+          "u16" -> add("  writeShortLe(0.toShort())\n")
+          "u32" -> add("  writeIntLe(0)\n")
+          else -> add("  writeByte(0.toByte())\n")
         }
-        add("  }\n")
         add("}\n")
       }
 
       "zeroableOptionTypeNode" -> {
         val innerType = typeNode.item ?: error("zeroableOptionTypeNode missing item")
         val zeroSize = getTypeSize(innerType)
-        add(".apply {\n")
-        add("  if (%L != null) {\n", paramName)
-        addSerializationCodeWithoutPrefix(paramName, innerType, "    ")
-        add("  } else {\n")
-        add("    write(ByteArray(%L))\n", zeroSize)
-        add("  }\n")
+        add("if (%L != null) {\n", paramName)
+        addSerializationCodeWithoutPrefix(paramName, innerType, "  ")
+        add("} else {\n")
+        add("  write(ByteArray(%L))\n", zeroSize)
         add("}\n")
       }
 
       "remainderOptionTypeNode" -> {
         val innerType = typeNode.item ?: error("remainderOptionTypeNode missing item")
-        add(".apply {\n")
-        add("  if (%L != null) {\n", paramName)
-        add("    ").addSerializationCode(paramName, innerType)
-        add("  }\n")
+        add("if (%L != null) {\n", paramName)
+        add("  ").addSerializationCode(paramName, innerType)
         add("}\n")
       }
 
@@ -1106,17 +1108,16 @@ class ProgramGenerator(
         val innerType = typeNode.type ?: error("sizePrefixTypeNode missing type")
         val prefixFormat = getPrefixFormat(typeNode.prefix) ?: "u64"
         if (innerType.kind == "stringTypeNode") {
-          add(".apply {\n")
-          add("  val bytes = %L.encodeToByteArray()\n", paramName)
+          val bytesVar = "${paramName}Bytes"
+          add("val %L = %L.encodeToByteArray()\n", bytesVar, paramName)
           when (prefixFormat) {
-            "u8" -> add("  writeByte(bytes.size)\n")
-            "u16" -> add("  writeShortLe(bytes.size)\n")
-            "u32" -> add("  writeIntLe(bytes.size)\n")
-            "u64" -> add("  writeLongLe(bytes.size.toLong())\n")
-            else -> add("  writeLongLe(bytes.size.toLong())\n")
+            "u8" -> add("writeByte(%L.size.toByte())\n", bytesVar)
+            "u16" -> add("writeShortLe(%L.size.toShort())\n", bytesVar)
+            "u32" -> add("writeIntLe(%L.size)\n", bytesVar)
+            "u64" -> add("writeLongLe(%L.size.toLong())\n", bytesVar)
+            else -> add("writeLongLe(%L.size.toLong())\n", bytesVar)
           }
-          add("  write(bytes)\n")
-          add("}\n")
+          add("write(%L)\n", bytesVar)
         } else {
           addSerializationCode(paramName, innerType)
         }
@@ -1151,21 +1152,17 @@ class ProgramGenerator(
       "mapTypeNode" -> {
         val keyType = typeNode.key ?: error("mapTypeNode missing key")
         val valueType = typeNode.value ?: error("mapTypeNode missing value")
-        add(".apply {\n")
-        add("  writeIntLe(%L.size)\n", paramName)
-        add("  %L.forEach { (k, v) ->\n", paramName)
-        add("    ").addSerializationCode("k", keyType)
-        add("    ").addSerializationCode("v", valueType)
-        add("  }\n")
+        add("writeIntLe(%L.size)\n", paramName)
+        add("%L.forEach { (k, v) ->\n", paramName)
+        add("  ").addSerializationCode("k", keyType)
+        add("  ").addSerializationCode("v", valueType)
         add("}\n")
       }
 
       "arrayTypeNode" -> {
         val itemType = typeNode.item ?: error("arrayTypeNode missing item")
-        add(".apply {\n")
-        add("  %L.forEach { item ->\n", paramName)
-        addSerializationCodeWithoutPrefix("item", itemType, "    ")
-        add("  }\n")
+        add("%L.forEach { item ->\n", paramName)
+        addSerializationCodeWithoutPrefix("item", itemType, "  ")
         add("}\n")
       }
 
@@ -1178,20 +1175,20 @@ class ProgramGenerator(
               it.kind == "enumStructVariantTypeNode" || it.kind == "enumTupleVariantTypeNode"
             } ?: false
             if (hasComplexVariants) {
-              add(".write(%L.serialize())\n", paramName)
+              add("write(%L.serialize())\n", paramName)
             } else {
               val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
               when (sizeFormat) {
-                "u8" -> add(".writeByte(%L.value.toInt())\n", paramName)
-                "u16" -> add(".writeShortLe(%L.value.toInt())\n", paramName)
-                "u32" -> add(".writeIntLe(%L.value.toInt())\n", paramName)
-                else -> add(".writeByte(%L.value.toInt())\n", paramName)
+                "u8" -> add("writeByte(%L.value.toByte())\n", paramName)
+                "u16" -> add("writeShortLe(%L.value.toShort())\n", paramName)
+                "u32" -> add("writeIntLe(%L.value.toInt())\n", paramName)
+                else -> add("writeByte(%L.value.toByte())\n", paramName)
               }
             }
           }
-          "fixedSizeTypeNode" -> add(".write(%L.bytes)\n", paramName)
-          "structTypeNode" -> add(".write(%L.serialize())\n", paramName)
-          else -> add(".writeByte(%L.value.toInt())\n", paramName)
+          "fixedSizeTypeNode" -> add("write(%L.bytes)\n", paramName)
+          "structTypeNode" -> add("write(%L.serialize())\n", paramName)
+          else -> add("writeByte(%L.value.toByte())\n", paramName)
         }
       }
 
@@ -1223,12 +1220,12 @@ class ProgramGenerator(
       "numberTypeNode" -> when (typeNode.format) {
         "u64" -> add("${indent}writeLongLe(%L.toLong())\n", paramName)
         "i64" -> add("${indent}writeLongLe(%L)\n", paramName)
-        "u8" -> add("${indent}writeByte(%L.toInt())\n", paramName)
-        "i8" -> add("${indent}writeByte(%L.toInt())\n", paramName)
+        "u8" -> add("${indent}writeByte(%L.toByte())\n", paramName)
+        "i8" -> add("${indent}writeByte(%L)\n", paramName)
         "u32" -> add("${indent}writeIntLe(%L.toInt())\n", paramName)
         "i32" -> add("${indent}writeIntLe(%L)\n", paramName)
-        "u16", "shortU16" -> add("${indent}writeShortLe(%L.toInt())\n", paramName)
-        "i16" -> add("${indent}writeShortLe(%L.toInt())\n", paramName)
+        "u16", "shortU16" -> add("${indent}writeShortLe(%L.toShort())\n", paramName)
+        "i16" -> add("${indent}writeShortLe(%L)\n", paramName)
         "f32" -> add("${indent}writeIntLe(%L.toRawBits())\n", paramName)
         "f64" -> add("${indent}writeLongLe(%L.toRawBits())\n", paramName)
       }
@@ -1246,14 +1243,14 @@ class ProgramGenerator(
             } else {
               val sizeFormat = getPrefixFormat(definedType.type.size) ?: "u8"
               when (sizeFormat) {
-                "u16" -> add("${indent}writeShortLe(%L.value.toInt())\n", paramName)
+                "u16" -> add("${indent}writeShortLe(%L.value.toShort())\n", paramName)
                 "u32" -> add("${indent}writeIntLe(%L.value.toInt())\n", paramName)
-                else -> add("${indent}writeByte(%L.value.toInt())\n", paramName)
+                else -> add("${indent}writeByte(%L.value.toByte())\n", paramName)
               }
             }
           }
           "fixedSizeTypeNode" -> add("${indent}write(%L.bytes)\n", paramName)
-          else -> add("${indent}writeByte(%L.value.toInt())\n", paramName)
+          else -> add("${indent}writeByte(%L.value.toByte())\n", paramName)
         }
       }
       else -> add("${indent}write(%L.serialize())\n", paramName)

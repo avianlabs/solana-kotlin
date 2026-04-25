@@ -1,10 +1,11 @@
 package net.avianlabs.solana.domain.core
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
 
 /**
  * A transaction that supports both legacy and V0 (versioned) message formats.
@@ -107,7 +108,7 @@ public class VersionedTransaction internal constructor(
     out.write(signaturesLength)
     orderedSigs.forEach(out::write)
     out.write(msgBytes)
-    return SerializedTransaction(out.readByteArray(bufferSize.toLong()))
+    return SerializedTransaction(out.readByteArray(bufferSize))
   }
 
   private fun rebuildWithFeePayer(feePayer: PublicKey): VersionedMessage =
@@ -161,7 +162,7 @@ public class VersionedTransaction internal constructor(
 
       val numSignatures = ShortVecEncoding.decodeLength(source)
       val existingSignatures = Array(numSignatures) {
-        source.readByteArray(TweetNaCl.Signature.SIGNATURE_BYTES.toLong())
+        source.readByteArray(TweetNaCl.Signature.SIGNATURE_BYTES)
       }
       val messageBytes = source.readByteArray()
 

@@ -1,10 +1,11 @@
 package net.avianlabs.solana.domain.core
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
 
 /**
  * Deserializes a [VersionedMessage] from its binary wire format.
@@ -65,7 +66,7 @@ private fun deserializeV0(source: Buffer): VersionedMessage.V0 {
 }
 
 private fun readHeader(source: Buffer): Header {
-  val headerBytes = source.readByteArray(Header.HEADER_LENGTH.toLong())
+  val headerBytes = source.readByteArray(Header.HEADER_LENGTH)
   return Header.fromByteArray(headerBytes)
 }
 
@@ -76,7 +77,7 @@ private fun readAccountKeys(source: Buffer, header: Header): List<AccountMeta> {
   val numReadonlyUnsignedAccounts = header.numReadonlyUnsignedAccounts.toInt() and 0xFF
 
   return List(numAccounts) { index ->
-    val key = PublicKey(source.readByteArray(TweetNaCl.Signature.PUBLIC_KEY_BYTES.toLong()))
+    val key = PublicKey(source.readByteArray(TweetNaCl.Signature.PUBLIC_KEY_BYTES))
     val isSigner = index < numRequiredSignatures
     val isWritable = if (isSigner) {
       index < numRequiredSignatures - numReadonlySignedAccounts
@@ -88,7 +89,7 @@ private fun readAccountKeys(source: Buffer, header: Header): List<AccountMeta> {
 }
 
 private fun readBlockHash(source: Buffer): String =
-  source.readByteArray(RECENT_BLOCK_HASH_LENGTH.toLong()).encodeToBase58String()
+  source.readByteArray(RECENT_BLOCK_HASH_LENGTH).encodeToBase58String()
 
 private fun readInstructions(
   source: Buffer,
@@ -98,9 +99,9 @@ private fun readInstructions(
   return List(numInstructions) {
     val programIdIndex = source.readByte().toInt() and 0xFF
     val numKeyIndices = ShortVecEncoding.decodeLength(source)
-    val keyIndices = source.readByteArray(numKeyIndices.toLong())
+    val keyIndices = source.readByteArray(numKeyIndices)
     val dataLength = ShortVecEncoding.decodeLength(source)
-    val data = source.readByteArray(dataLength.toLong())
+    val data = source.readByteArray(dataLength)
 
     val programId = accountKeys.getOrPlaceholder(programIdIndex).publicKey
     val keys = keyIndices.map { index ->
@@ -118,7 +119,7 @@ private fun readInstructions(
 private fun readAddressTableLookups(source: Buffer): List<MessageAddressTableLookup> {
   val numLookups = ShortVecEncoding.decodeLength(source)
   return List(numLookups) {
-    val accountKey = PublicKey(source.readByteArray(TweetNaCl.Signature.PUBLIC_KEY_BYTES.toLong()))
+    val accountKey = PublicKey(source.readByteArray(TweetNaCl.Signature.PUBLIC_KEY_BYTES))
     val numWritable = ShortVecEncoding.decodeLength(source)
     val writableIndexes = List(numWritable) { source.readByte().toUByte() }
     val numReadonly = ShortVecEncoding.decodeLength(source)

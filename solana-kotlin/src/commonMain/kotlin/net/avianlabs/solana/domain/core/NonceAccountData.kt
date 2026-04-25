@@ -1,7 +1,8 @@
 package net.avianlabs.solana.domain.core
 
+import kotlinx.io.Source
+import kotlinx.io.readIntLe
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.BufferedSource
 
 public data class NonceAccountData(
   val version: UInt,
@@ -11,7 +12,7 @@ public data class NonceAccountData(
   val feeCalculator: FeeCalculator,
 ) {
   public companion object {
-    public fun read(data: BufferedSource): NonceAccountData {
+    internal fun read(data: Source): NonceAccountData {
       val version = data.readIntLe().toUInt()
       val state = data.readIntLe().toUInt()
       val authorizedPubkey = PublicKey.read(data)

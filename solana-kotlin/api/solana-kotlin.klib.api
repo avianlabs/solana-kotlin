@@ -314,7 +314,6 @@ final class net.avianlabs.solana.domain.core/FeeCalculator { // net.avianlabs.so
     }
 
     final object Companion { // net.avianlabs.solana.domain.core/FeeCalculator.Companion|null[0]
-        final fun read(okio/BufferedSource): net.avianlabs.solana.domain.core/FeeCalculator // net.avianlabs.solana.domain.core/FeeCalculator.Companion.read|read(okio.BufferedSource){}[0]
         final fun serializer(): kotlinx.serialization/KSerializer<net.avianlabs.solana.domain.core/FeeCalculator> // net.avianlabs.solana.domain.core/FeeCalculator.Companion.serializer|serializer(){}[0]
     }
 }
@@ -391,9 +390,7 @@ final class net.avianlabs.solana.domain.core/NonceAccountData { // net.avianlabs
     final fun hashCode(): kotlin/Int // net.avianlabs.solana.domain.core/NonceAccountData.hashCode|hashCode(){}[0]
     final fun toString(): kotlin/String // net.avianlabs.solana.domain.core/NonceAccountData.toString|toString(){}[0]
 
-    final object Companion { // net.avianlabs.solana.domain.core/NonceAccountData.Companion|null[0]
-        final fun read(okio/BufferedSource): net.avianlabs.solana.domain.core/NonceAccountData // net.avianlabs.solana.domain.core/NonceAccountData.Companion.read|read(okio.BufferedSource){}[0]
-    }
+    final object Companion // net.avianlabs.solana.domain.core/NonceAccountData.Companion|null[0]
 }
 
 final class net.avianlabs.solana.domain.core/SignaturePubkeyPair { // net.avianlabs.solana.domain.core/SignaturePubkeyPair|null[0]
@@ -2608,7 +2605,6 @@ final fun (net.avianlabs.solana.domain.core/VersionedMessage).net.avianlabs.sola
 final fun (net.avianlabs.solana.domain.core/VersionedMessage.Companion).net.avianlabs.solana.domain.core/deserialize(kotlin/ByteArray): net.avianlabs.solana.domain.core/VersionedMessage // net.avianlabs.solana.domain.core/deserialize|deserialize@net.avianlabs.solana.domain.core.VersionedMessage.Companion(kotlin.ByteArray){}[0]
 final fun (net.avianlabs.solana.methods/TransactionResponse).net.avianlabs.solana.domain.core/decode(): net.avianlabs.solana.domain.core/DecodedTransaction? // net.avianlabs.solana.domain.core/decode|decode@net.avianlabs.solana.methods.TransactionResponse(){}[0]
 final fun (net.avianlabs.solana.tweetnacl.ed25519/PublicKey).net.avianlabs.solana.domain.program/associatedTokenAddress(net.avianlabs.solana.tweetnacl.ed25519/PublicKey, net.avianlabs.solana.tweetnacl.ed25519/PublicKey = ...): net.avianlabs.solana.domain.program/ProgramDerivedAddress // net.avianlabs.solana.domain.program/associatedTokenAddress|associatedTokenAddress@net.avianlabs.solana.tweetnacl.ed25519.PublicKey(net.avianlabs.solana.tweetnacl.ed25519.PublicKey;net.avianlabs.solana.tweetnacl.ed25519.PublicKey){}[0]
-final fun (net.avianlabs.solana.tweetnacl.ed25519/PublicKey.Companion).net.avianlabs.solana.domain.core/read(okio/BufferedSource): net.avianlabs.solana.tweetnacl.ed25519/PublicKey // net.avianlabs.solana.domain.core/read|read@net.avianlabs.solana.tweetnacl.ed25519.PublicKey.Companion(okio.BufferedSource){}[0]
 final suspend fun (net.avianlabs.solana/SolanaClient).net.avianlabs.solana.methods/getAccountInfo(net.avianlabs.solana.tweetnacl.ed25519/PublicKey, net.avianlabs.solana.domain.core/Commitment? = ...): net.avianlabs.solana.client/Response<net.avianlabs.solana.client/Response.RPC<net.avianlabs.solana.methods/AccountInfo?>> // net.avianlabs.solana.methods/getAccountInfo|getAccountInfo@net.avianlabs.solana.SolanaClient(net.avianlabs.solana.tweetnacl.ed25519.PublicKey;net.avianlabs.solana.domain.core.Commitment?){}[0]
 final suspend fun (net.avianlabs.solana/SolanaClient).net.avianlabs.solana.methods/getBalance(net.avianlabs.solana.tweetnacl.ed25519/PublicKey, net.avianlabs.solana.domain.core/Commitment? = ...): net.avianlabs.solana.client/Response<net.avianlabs.solana.client/Response.RPC<kotlin/Long>> // net.avianlabs.solana.methods/getBalance|getBalance@net.avianlabs.solana.SolanaClient(net.avianlabs.solana.tweetnacl.ed25519.PublicKey;net.avianlabs.solana.domain.core.Commitment?){}[0]
 final suspend fun (net.avianlabs.solana/SolanaClient).net.avianlabs.solana.methods/getFeeForMessage(kotlin/ByteArray, net.avianlabs.solana.domain.core/Commitment? = ...): net.avianlabs.solana.client/Response<net.avianlabs.solana.client/Response.RPC<kotlin/Long?>> // net.avianlabs.solana.methods/getFeeForMessage|getFeeForMessage@net.avianlabs.solana.SolanaClient(kotlin.ByteArray;net.avianlabs.solana.domain.core.Commitment?){}[0]

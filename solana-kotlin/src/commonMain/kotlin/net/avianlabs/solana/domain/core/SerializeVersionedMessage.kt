@@ -1,10 +1,11 @@
 package net.avianlabs.solana.domain.core
 
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
 
 /**
  * Serializes a [VersionedMessage] to its binary wire format.
@@ -52,7 +53,7 @@ private fun VersionedMessage.V0.serializeV0(): ByteArray {
 
   val buffer = Buffer().apply {
     // V0 version prefix
-    writeByte(0x80)
+    writeByte(0x80.toByte())
     // Header (3 bytes)
     write(messageHeader.toByteArray())
     // Static account keys
@@ -63,7 +64,7 @@ private fun VersionedMessage.V0.serializeV0(): ByteArray {
     // Instructions
     write(instructionsLength)
     for (compiledInstruction in compiledInstructions) {
-      writeByte(compiledInstruction.programIdIndex.toInt())
+      writeByte(compiledInstruction.programIdIndex)
       write(compiledInstruction.keyIndicesLength)
       write(compiledInstruction.keyIndices)
       write(compiledInstruction.dataLength)
@@ -75,11 +76,11 @@ private fun VersionedMessage.V0.serializeV0(): ByteArray {
       write(lookup.accountKey.toByteArray())
       write(ShortVecEncoding.encodeLength(lookup.writableIndexes.size))
       for (index in lookup.writableIndexes) {
-        writeByte(index.toInt())
+        writeByte(index.toByte())
       }
       write(ShortVecEncoding.encodeLength(lookup.readonlyIndexes.size))
       for (index in lookup.readonlyIndexes) {
-        writeByte(index.toInt())
+        writeByte(index.toByte())
       }
     }
   }

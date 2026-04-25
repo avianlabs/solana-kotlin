@@ -3,9 +3,10 @@
 package net.avianlabs.solana.domain.core
 
 import io.ktor.util.*
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
 import kotlin.jvm.JvmInline
 
 @JvmInline
@@ -36,7 +37,7 @@ public value class SerializedTransaction(private val bytes: ByteArray) {
 
     val numSignatures = ShortVecEncoding.decodeLength(source)
     val existingSignatures = Array(numSignatures) {
-      source.readByteArray(TweetNaCl.Signature.SIGNATURE_BYTES.toLong())
+      source.readByteArray(TweetNaCl.Signature.SIGNATURE_BYTES)
     }
     val messageBytes = source.readByteArray()
 
