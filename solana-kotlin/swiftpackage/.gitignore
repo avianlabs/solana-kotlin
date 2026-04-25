@@ -1,4 +1,5 @@
-# Ignore everything in this directory
+# Ignore everything in this directory by default — generated outputs land here
 *
-# Except this file
+# Except this file and the checked-in template that drives the generator
 !.gitignore
+!Package.swift.template
