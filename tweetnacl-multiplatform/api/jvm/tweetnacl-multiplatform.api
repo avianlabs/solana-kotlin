@@ -1,4 +1,4 @@
-public final class net/avianlabs/solana/tweetnacl/SecureRandom_jvmKt {
+public final class net/avianlabs/solana/tweetnacl/SecureRandomKt {
 	public static final fun secureRandomBytes (I)[B
 }
 
