@@ -1,10 +1,10 @@
 # ai agent documentation
 
-cursor rules files for better llm understanding of the solana-kotlin codebase
+rules files for better llm understanding of the solana-kotlin codebase
 
 ## rules files
 
-### [.cursor/rules/solana-kotlin.mdc](.cursor/rules/solana-kotlin.mdc)
+### [.claude/rules/solana-kotlin.md](.claude/rules/solana-kotlin.md)
 
 main codebase overview - start here
 
@@ -14,7 +14,7 @@ main codebase overview - start here
 - build system and dependencies
 - coding conventions (explicit api, builder pattern, etc)
 
-### [.cursor/rules/rpc-client.mdc](.cursor/rules/rpc-client.mdc)
+### [.claude/rules/rpc-client.md](.claude/rules/rpc-client.md)
 
 rpc client patterns and usage
 
@@ -24,7 +24,7 @@ rpc client patterns and usage
 - response handling and error types
 - adding new methods
 
-### [.cursor/rules/transactions.mdc](.cursor/rules/transactions.mdc)
+### [.claude/rules/transactions.md](.claude/rules/transactions.md)
 
 transaction building and signing
 
@@ -35,7 +35,7 @@ transaction building and signing
 - account meta handling
 - common transaction patterns
 
-### [.cursor/rules/programs.mdc](.cursor/rules/programs.mdc)
+### [.claude/rules/programs.md](.claude/rules/programs.md)
 
 solana program integrations
 
@@ -47,7 +47,7 @@ solana program integrations
 - pda derivation
 - instruction encoding patterns
 
-### [.cursor/rules/crypto.mdc](.cursor/rules/crypto.mdc)
+### [.claude/rules/crypto.md](.claude/rules/crypto.md)
 
 cryptographic primitives via tweetnacl
 
