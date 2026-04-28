@@ -6,6 +6,10 @@ pluginManagement {
   }
 }
 
+plugins {
+  id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 dependencyResolutionManagement {
 //  repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
   repositories {
@@ -31,11 +35,3 @@ include(":solana-kotlin")
 include(":solana-kotlin-arrow-extensions")
 include(":tweetnacl-multiplatform")
 include(":codegen")
-
-dependencyResolutionManagement {
-  versionCatalogs {
-    create("libs") {
-      from(files("libs.versions.toml"))
-    }
-  }
-}

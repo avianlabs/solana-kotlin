@@ -17,12 +17,9 @@ version = properties["version"] as String
 kotlin {
   applyDefaultHierarchyTemplate()
   explicitApi()
+  jvmToolchain(17)
 
-  jvm {
-    compilerOptions {
-      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-  }
+  jvm()
 
   listOf(
     iosArm64(),
@@ -108,12 +105,6 @@ multiplatformSwiftPackage {
   }
   packageName("TweetNaClMultiplatform")
   distributionMode { local() }
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-  compilerOptions {
-    jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-  }
 }
 
 signing {
