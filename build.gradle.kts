@@ -2,6 +2,7 @@ plugins {
   alias(libs.plugins.kotlinMultiplatform).apply(false)
   alias(libs.plugins.androidKotlinMultiplatformLib).apply(false)
   alias(libs.plugins.binaryCompatibilityValidator)
+  alias(libs.plugins.dokka)
   alias(libs.plugins.nmcp)
 }
 
@@ -17,6 +18,19 @@ apiValidation {
   klib {
     enabled = true
   }
+}
+
+dokka {
+  dokkaPublications.html {
+    moduleName.set(rootProject.name)
+    outputDirectory.set(layout.buildDirectory.dir("docs/html"))
+  }
+}
+
+dependencies {
+  dokka(project(":solana-kotlin"))
+  dokka(project(":tweetnacl-multiplatform"))
+  dokka(project(":solana-kotlin-arrow-extensions"))
 }
 
 nmcp {
