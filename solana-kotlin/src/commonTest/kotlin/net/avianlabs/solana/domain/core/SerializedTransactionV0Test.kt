@@ -4,7 +4,8 @@ import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertTrue
@@ -36,11 +37,11 @@ class SerializedTransactionV0Test {
     // Build V0 message bytes
     val messageBuffer = Buffer().apply {
       // Version prefix (V0)
-      writeByte(0x80)
+      writeByte(0x80.toByte())
       // Header: 1 required signature, 0 readonly signed, 1 readonly unsigned (program)
-      writeByte(numSignatures) // numRequiredSignatures
-      writeByte(0)             // numReadonlySignedAccounts
-      writeByte(1)             // numReadonlyUnsignedAccounts
+      writeByte(numSignatures.toByte()) // numRequiredSignatures
+      writeByte(0.toByte())             // numReadonlySignedAccounts
+      writeByte(1.toByte())             // numReadonlyUnsignedAccounts
       // Account count: signer + recipient + program = 3
       write(ShortVecEncoding.encodeLength(3))
       // Account keys (order: signer first, then writable, then readonly)
@@ -52,10 +53,10 @@ class SerializedTransactionV0Test {
       // Instructions: 1 instruction
       write(ShortVecEncoding.encodeLength(1))
       // Instruction: programIdIndex=2, 2 account indices [0, 1], no data
-      writeByte(2)
+      writeByte(2.toByte())
       write(ShortVecEncoding.encodeLength(2))
-      writeByte(0)
-      writeByte(1)
+      writeByte(0.toByte())
+      writeByte(1.toByte())
       write(ShortVecEncoding.encodeLength(0))
       // Address table lookups: none
       write(ShortVecEncoding.encodeLength(0))
@@ -155,10 +156,10 @@ class SerializedTransactionV0Test {
   fun toVersionedTransaction_unsupportedVersion_throws() {
     // Build a transaction with version 1 prefix (0x81)
     val messageBuffer = Buffer().apply {
-      writeByte(0x81) // version 1
-      writeByte(1)
-      writeByte(0)
-      writeByte(0)
+      writeByte(0x81.toByte()) // version 1
+      writeByte(1.toByte())
+      writeByte(0.toByte())
+      writeByte(0.toByte())
       write(ShortVecEncoding.encodeLength(1))
       write(keypair.publicKey.toByteArray())
       write(ByteArray(32))
@@ -188,10 +189,10 @@ class SerializedTransactionV0Test {
     val blockhash = ByteArray(32) { 0xAA.toByte() }
 
     val messageBuffer = Buffer().apply {
-      writeByte(0x80) // V0 prefix
-      writeByte(1)    // numRequiredSignatures
-      writeByte(0)    // numReadonlySignedAccounts
-      writeByte(1)    // numReadonlyUnsignedAccounts
+      writeByte(0x80.toByte()) // V0 prefix
+      writeByte(1.toByte())    // numRequiredSignatures
+      writeByte(0.toByte())    // numReadonlySignedAccounts
+      writeByte(1.toByte())    // numReadonlyUnsignedAccounts
       // 3 static account keys
       write(ShortVecEncoding.encodeLength(3))
       write(keypair.publicKey.toByteArray())
@@ -200,17 +201,17 @@ class SerializedTransactionV0Test {
       write(blockhash)
       // 1 instruction
       write(ShortVecEncoding.encodeLength(1))
-      writeByte(2)
+      writeByte(2.toByte())
       write(ShortVecEncoding.encodeLength(2))
-      writeByte(0)
-      writeByte(1)
+      writeByte(0.toByte())
+      writeByte(1.toByte())
       write(ShortVecEncoding.encodeLength(0))
       // 1 address table lookup
       write(ShortVecEncoding.encodeLength(1))
       write(altKey.toByteArray())
       // 1 writable index
       write(ShortVecEncoding.encodeLength(1))
-      writeByte(3)
+      writeByte(3.toByte())
       // 0 readonly indices
       write(ShortVecEncoding.encodeLength(0))
     }

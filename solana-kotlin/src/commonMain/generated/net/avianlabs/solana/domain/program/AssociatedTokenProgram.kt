@@ -9,11 +9,16 @@ package net.avianlabs.solana.domain.program
 
 import kotlin.Deprecated
 import kotlin.UByte
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import kotlinx.io.writeIntLe
+import kotlinx.io.writeLongLe
+import kotlinx.io.writeShortLe
+import kotlinx.io.writeString
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.Buffer
 
 public object AssociatedTokenProgram : Program {
   public override val programId: PublicKey =
@@ -40,9 +45,9 @@ public object AssociatedTokenProgram : Program {
       AccountMeta(systemProgram, isSigner = false, isWritable = false),
       AccountMeta(tokenProgram, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.CreateAssociatedToken.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.CreateAssociatedToken.index.toByte())
+    }.readByteArray(),
   )
 
   @Deprecated(
@@ -83,9 +88,9 @@ public object AssociatedTokenProgram : Program {
       AccountMeta(systemProgram, isSigner = false, isWritable = false),
       AccountMeta(tokenProgram, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.CreateAssociatedTokenIdempotent.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.CreateAssociatedTokenIdempotent.index.toByte())
+    }.readByteArray(),
   )
 
   @Deprecated(
@@ -136,9 +141,9 @@ public object AssociatedTokenProgram : Program {
       AccountMeta(walletAddress, isSigner = true, isWritable = true),
       AccountMeta(tokenProgram, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.RecoverNestedAssociatedToken.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.RecoverNestedAssociatedToken.index.toByte())
+    }.readByteArray(),
   )
 
   public enum class Instruction(

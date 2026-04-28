@@ -5,7 +5,7 @@ import net.avianlabs.solana.domain.core.Commitment
 import net.avianlabs.solana.domain.core.FeeCalculator
 import net.avianlabs.solana.domain.core.NonceAccountData
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.Buffer
+import kotlinx.io.Buffer
 
 public suspend fun SolanaClient.getNonce(
   publicKey: PublicKey,
@@ -15,7 +15,7 @@ public suspend fun SolanaClient.getNonce(
   ?.value
   ?.dataBytes
   ?.let { data ->
-    val decoded = NonceAccountData.read(Buffer().write(data))
+    val decoded = NonceAccountData.read(Buffer().apply { write(data) })
     NonceAccount(
       authorizedPubkey = decoded.authorizedPubkey,
       nonce = decoded.nonce,

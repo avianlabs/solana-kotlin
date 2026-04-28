@@ -168,8 +168,8 @@ class ProgramGeneratorTest {
 
     val code = parseAndGenerate(idl)
     // u8 prefix means writeByte for the option discriminator
-    assertContains(code, "writeByte(1)")
-    assertContains(code, "writeByte(0)")
+    assertContains(code, "writeByte(1.toByte())")
+    assertContains(code, "writeByte(0.toByte())")
     // Should NOT contain writeIntLe for the option prefix
     assertFalse(code.contains("writeIntLe(1)"), "Should not use writeIntLe for u8 default option prefix")
   }
@@ -221,7 +221,7 @@ class ProgramGeneratorTest {
     """.trimIndent()
 
     val code = parseAndGenerate(idl)
-    assertContains(code, ".writeByte(enumValue.value.toInt())")
+    assertContains(code, "writeByte(enumValue.value.toByte())")
   }
 
   @Test
@@ -270,7 +270,7 @@ class ProgramGeneratorTest {
     """.trimIndent()
 
     val code = parseAndGenerate(idl)
-    assertContains(code, ".writeShortLe(enumValue.value.toInt())")
+    assertContains(code, "writeShortLe(enumValue.value.toShort())")
   }
 
   @Test

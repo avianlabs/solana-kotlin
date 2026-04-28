@@ -3,9 +3,10 @@ package net.avianlabs.solana.domain.core
 import co.touchlab.skie.configuration.annotations.SkieVisibility
 import net.avianlabs.solana.tweetnacl.TweetNaCl
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
 import net.avianlabs.solana.vendor.ShortVecEncoding
-import okio.Buffer
 
 @Deprecated(
   message = "Use VersionedTransaction instead",
@@ -87,6 +88,6 @@ public data class SignedTransaction(
     out.write(signaturesLength)
     orderedSigs.forEach(out::write)
     out.write(serializedMessage)
-    return SerializedTransaction(out.readByteArray(bufferSize.toLong()))
+    return SerializedTransaction(out.readByteArray(bufferSize))
   }
 }

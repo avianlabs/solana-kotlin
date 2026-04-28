@@ -69,7 +69,7 @@ kotlin {
         implementation(libs.ktorClientContentNegotiation)
         implementation(libs.ktorSerializationKotlinxJson)
         implementation(libs.kermit)
-        implementation(libs.okio)
+        implementation(libs.kotlinxIo)
         implementation(libs.skie.configurationAnnotations)
         implementation(libs.kotlinLogging)
       }

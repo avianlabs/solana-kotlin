@@ -20,11 +20,16 @@ import kotlin.UShort
 import kotlin.collections.List
 import kotlin.collections.Map
 import kotlin.jvm.JvmInline
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import kotlinx.io.writeIntLe
+import kotlinx.io.writeLongLe
+import kotlinx.io.writeShortLe
+import kotlinx.io.writeString
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.Buffer
 
 public object Token2022Program : TokenProgram() {
   public override val programId: PublicKey =
@@ -58,19 +63,17 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(rent, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMint.index.toInt())
-      .writeByte(decimals.toInt())
-      .write(mintAuthority.bytes)
-      .apply {
-        if (freezeAuthority != null) {
-          writeByte(1)
-          .write(freezeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeMint.index.toByte())
+      writeByte(decimals.toByte())
+      write(mintAuthority.bytes)
+      if (freezeAuthority != null) {
+        writeByte(1.toByte())
+        write(freezeAuthority.bytes)
+      } else {
+        writeByte(0.toByte())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -98,9 +101,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(owner, isSigner = false, isWritable = false),
       AccountMeta(rent, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeAccount.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -126,10 +129,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(multisig, isSigner = false, isWritable = true),
       AccountMeta(rent, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMultisig.index.toInt())
-      .writeByte(m.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeMultisig.index.toByte())
+      writeByte(m.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -149,10 +152,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(destination, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Transfer.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.Transfer.index.toByte())
+      writeLongLe(amount.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -171,10 +174,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(delegate, isSigner = false, isWritable = false),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Approve.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.Approve.index.toByte())
+      writeLongLe(amount.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -187,9 +190,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(source, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Revoke.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.Revoke.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -206,18 +209,16 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(owned, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.SetAuthority.index.toInt())
-      .writeByte(authorityType.value.toInt())
-      .apply {
-        if (newAuthority != null) {
-          writeByte(1)
-          .write(newAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.SetAuthority.index.toByte())
+      writeByte(authorityType.value.toByte())
+      if (newAuthority != null) {
+        writeByte(1.toByte())
+        write(newAuthority.bytes)
+      } else {
+        writeByte(0.toByte())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -235,10 +236,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(mintAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.MintTo.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.MintTo.index.toByte())
+      writeLongLe(amount.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -257,10 +258,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Burn.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.Burn.index.toByte())
+      writeLongLe(amount.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -278,9 +279,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(destination, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.CloseAccount.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.CloseAccount.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -297,9 +298,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.FreezeAccount.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.FreezeAccount.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -316,9 +317,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ThawAccount.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ThawAccount.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -345,11 +346,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(destination, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.TransferChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.TransferChecked.index.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -375,11 +376,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(delegate, isSigner = false, isWritable = false),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ApproveChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ApproveChecked.index.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -402,11 +403,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(mintAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.MintToChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.MintToChecked.index.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -430,11 +431,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.BurnChecked.index.toInt())
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.BurnChecked.index.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -455,10 +456,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(rent, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount2.index.toInt())
-      .write(owner.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeAccount2.index.toByte())
+      write(owner.bytes)
+    }.readByteArray(),
   )
 
   /**
@@ -474,9 +475,9 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(account, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.SyncNative.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.SyncNative.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -492,10 +493,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(account, isSigner = false, isWritable = true),
       AccountMeta(mint, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeAccount3.index.toInt())
-      .write(owner.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeAccount3.index.toByte())
+      write(owner.bytes)
+    }.readByteArray(),
   )
 
   /**
@@ -507,10 +508,10 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(multisig, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMultisig2.index.toInt())
-      .writeByte(m.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeMultisig2.index.toByte())
+      writeByte(m.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -526,19 +527,17 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMint2.index.toInt())
-      .writeByte(decimals.toInt())
-      .write(mintAuthority.bytes)
-      .apply {
-        if (freezeAuthority != null) {
-          writeByte(1)
-          .write(freezeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeMint2.index.toByte())
+      writeByte(decimals.toByte())
+      write(mintAuthority.bytes)
+      if (freezeAuthority != null) {
+        writeByte(1.toByte())
+        write(freezeAuthority.bytes)
+      } else {
+        writeByte(0.toByte())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -554,9 +553,9 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.GetAccountDataSize.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.GetAccountDataSize.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -574,9 +573,9 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(account, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeImmutableOwner.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeImmutableOwner.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -595,10 +594,10 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.AmountToUiAmount.index.toInt())
-      .writeLongLe(amount.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.AmountToUiAmount.index.toByte())
+      writeLongLe(amount.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -615,10 +614,10 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UiAmountToAmount.index.toInt())
-      .writeUtf8(uiAmount)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.UiAmountToAmount.index.toByte())
+      writeString(uiAmount)
+    }.readByteArray(),
   )
 
   /**
@@ -636,17 +635,15 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMintCloseAuthority.index.toInt())
-      .apply {
-        if (closeAuthority != null) {
-          writeByte(1)
-          .write(closeAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeMintCloseAuthority.index.toByte())
+      if (closeAuthority != null) {
+        writeByte(1.toByte())
+        write(closeAuthority.bytes)
+      } else {
+        writeByte(0.toByte())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -669,28 +666,24 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeTransferFeeConfig.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (transferFeeConfigAuthority != null) {
-          writeByte(1)
-          .write(transferFeeConfigAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeTransferFeeConfig.index.toByte())
+      writeByte(0.toByte())
+      if (transferFeeConfigAuthority != null) {
+        writeByte(1.toByte())
+        write(transferFeeConfigAuthority.bytes)
+      } else {
+        writeByte(0.toByte())
       }
-      .apply {
-        if (withdrawWithheldAuthority != null) {
-          writeByte(1)
-          .write(withdrawWithheldAuthority.bytes)
-        } else {
-          writeByte(0)
-        }
+      if (withdrawWithheldAuthority != null) {
+        writeByte(1.toByte())
+        write(withdrawWithheldAuthority.bytes)
+      } else {
+        writeByte(0.toByte())
       }
-      .writeShortLe(transferFeeBasisPoints.toInt())
-      .writeLongLe(maximumFee.toLong())
-      .readByteArray(),
+      writeShortLe(transferFeeBasisPoints.toShort())
+      writeLongLe(maximumFee.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -716,13 +709,13 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(destination, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.TransferCheckedWithFee.index.toInt())
-      .writeByte(1)
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .writeLongLe(fee.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.TransferCheckedWithFee.index.toByte())
+      writeByte(1.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+      writeLongLe(fee.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -740,10 +733,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(feeReceiver, isSigner = false, isWritable = true),
       AccountMeta(withdrawWithheldAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.WithdrawWithheldTokensFromMint.index.toInt())
-      .writeByte(2)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.WithdrawWithheldTokensFromMint.index.toByte())
+      writeByte(2.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -762,11 +755,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(feeReceiver, isSigner = false, isWritable = true),
       AccountMeta(withdrawWithheldAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.WithdrawWithheldTokensFromAccounts.index.toInt())
-      .writeByte(3)
-      .writeByte(numTokenAccounts.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.WithdrawWithheldTokensFromAccounts.index.toByte())
+      writeByte(3.toByte())
+      writeByte(numTokenAccounts.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -783,10 +776,10 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.HarvestWithheldTokensToMint.index.toInt())
-      .writeByte(4)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.HarvestWithheldTokensToMint.index.toByte())
+      writeByte(4.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -804,12 +797,12 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(transferFeeConfigAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.SetTransferFee.index.toInt())
-      .writeByte(5)
-      .writeShortLe(transferFeeBasisPoints.toInt())
-      .writeLongLe(maximumFee.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.SetTransferFee.index.toByte())
+      writeByte(5.toByte())
+      writeShortLe(transferFeeBasisPoints.toShort())
+      writeLongLe(maximumFee.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -833,25 +826,21 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeConfidentialTransferMint.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeConfidentialTransferMint.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .writeByte(if (autoApproveNewAccounts) 1 else 0)
-      .apply {
-        if (auditorElgamalPubkey != null) {
-          write(auditorElgamalPubkey.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      writeByte((if (autoApproveNewAccounts) 1 else 0).toByte())
+      if (auditorElgamalPubkey != null) {
+        write(auditorElgamalPubkey.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -871,18 +860,16 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateConfidentialTransferMint.index.toInt())
-      .writeByte(1)
-      .writeByte(if (autoApproveNewAccounts) 1 else 0)
-      .apply {
-        if (auditorElgamalPubkey != null) {
-          write(auditorElgamalPubkey.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateConfidentialTransferMint.index.toByte())
+      writeByte(1.toByte())
+      writeByte((if (autoApproveNewAccounts) 1 else 0).toByte())
+      if (auditorElgamalPubkey != null) {
+        write(auditorElgamalPubkey.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -922,13 +909,13 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(record, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ConfigureConfidentialTransferAccount.index.toInt())
-      .writeByte(2)
-      .write(decryptableZeroBalance.bytes)
-      .writeLongLe(maximumPendingBalanceCreditCounter.toLong())
-      .writeByte(proofInstructionOffset.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ConfigureConfidentialTransferAccount.index.toByte())
+      writeByte(2.toByte())
+      write(decryptableZeroBalance.bytes)
+      writeLongLe(maximumPendingBalanceCreditCounter.toLong())
+      writeByte(proofInstructionOffset)
+    }.readByteArray(),
   )
 
   /**
@@ -951,10 +938,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ApproveConfidentialTransferAccount.index.toInt())
-      .writeByte(3)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ApproveConfidentialTransferAccount.index.toByte())
+      writeByte(3.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -992,11 +979,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(record, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.EmptyConfidentialTransferAccount.index.toInt())
-      .writeByte(4)
-      .writeByte(proofInstructionOffset.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.EmptyConfidentialTransferAccount.index.toByte())
+      writeByte(4.toByte())
+      writeByte(proofInstructionOffset)
+    }.readByteArray(),
   )
 
   /**
@@ -1023,12 +1010,12 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ConfidentialDeposit.index.toInt())
-      .writeByte(5)
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ConfidentialDeposit.index.toByte())
+      writeByte(5.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1069,15 +1056,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(rangeRecord, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ConfidentialWithdraw.index.toInt())
-      .writeByte(6)
-      .writeLongLe(amount.toLong())
-      .writeByte(decimals.toInt())
-      .write(newDecryptableAvailableBalance.bytes)
-      .writeByte(equalityProofInstructionOffset.toInt())
-      .writeByte(rangeProofInstructionOffset.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ConfidentialWithdraw.index.toByte())
+      writeByte(6.toByte())
+      writeLongLe(amount.toLong())
+      writeByte(decimals.toByte())
+      write(newDecryptableAvailableBalance.bytes)
+      writeByte(equalityProofInstructionOffset)
+      writeByte(rangeProofInstructionOffset)
+    }.readByteArray(),
   )
 
   /**
@@ -1120,14 +1107,14 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(rangeRecord, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ConfidentialTransfer.index.toInt())
-      .writeByte(7)
-      .write(newSourceDecryptableAvailableBalance.bytes)
-      .writeByte(equalityProofInstructionOffset.toInt())
-      .writeByte(ciphertextValidityProofInstructionOffset.toInt())
-      .writeByte(rangeProofInstructionOffset.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ConfidentialTransfer.index.toByte())
+      writeByte(7.toByte())
+      write(newSourceDecryptableAvailableBalance.bytes)
+      writeByte(equalityProofInstructionOffset)
+      writeByte(ciphertextValidityProofInstructionOffset)
+      writeByte(rangeProofInstructionOffset)
+    }.readByteArray(),
   )
 
   /**
@@ -1154,12 +1141,12 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ApplyConfidentialPendingBalance.index.toInt())
-      .writeByte(8)
-      .writeLongLe(expectedPendingBalanceCreditCounter.toLong())
-      .write(newDecryptableAvailableBalance.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ApplyConfidentialPendingBalance.index.toByte())
+      writeByte(8.toByte())
+      writeLongLe(expectedPendingBalanceCreditCounter.toLong())
+      write(newDecryptableAvailableBalance.bytes)
+    }.readByteArray(),
   )
 
   /**
@@ -1173,10 +1160,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.EnableConfidentialCredits.index.toInt())
-      .writeByte(9)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.EnableConfidentialCredits.index.toByte())
+      writeByte(9.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1196,10 +1183,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.DisableConfidentialCredits.index.toInt())
-      .writeByte(10)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.DisableConfidentialCredits.index.toByte())
+      writeByte(10.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1213,10 +1200,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.EnableNonConfidentialCredits.index.toInt())
-      .writeByte(11)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.EnableNonConfidentialCredits.index.toByte())
+      writeByte(11.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1233,10 +1220,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.DisableNonConfidentialCredits.index.toInt())
-      .writeByte(12)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.DisableNonConfidentialCredits.index.toByte())
+      writeByte(12.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1290,16 +1277,16 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(rangeRecord, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.ConfidentialTransferWithFee.index.toInt())
-      .writeByte(13)
-      .write(newSourceDecryptableAvailableBalance.bytes)
-      .writeByte(equalityProofInstructionOffset.toInt())
-      .writeByte(transferAmountCiphertextValidityProofInstructionOffset.toInt())
-      .writeByte(feeSigmaProofInstructionOffset.toInt())
-      .writeByte(feeCiphertextValidityProofInstructionOffset.toInt())
-      .writeByte(rangeProofInstructionOffset.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.ConfidentialTransferWithFee.index.toByte())
+      writeByte(13.toByte())
+      write(newSourceDecryptableAvailableBalance.bytes)
+      writeByte(equalityProofInstructionOffset)
+      writeByte(transferAmountCiphertextValidityProofInstructionOffset)
+      writeByte(feeSigmaProofInstructionOffset)
+      writeByte(feeCiphertextValidityProofInstructionOffset)
+      writeByte(rangeProofInstructionOffset)
+    }.readByteArray(),
   )
 
   /**
@@ -1318,11 +1305,11 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeDefaultAccountState.index.toInt())
-      .writeByte(0)
-      .writeByte(state.value.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeDefaultAccountState.index.toByte())
+      writeByte(0.toByte())
+      writeByte(state.value.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1339,11 +1326,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(freezeAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateDefaultAccountState.index.toInt())
-      .writeByte(1)
-      .writeByte(state.value.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateDefaultAccountState.index.toByte())
+      writeByte(1.toByte())
+      writeByte(state.value.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1365,14 +1352,12 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(systemProgram, isSigner = false, isWritable = false),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Reallocate.index.toInt())
-      .apply {
-        newExtensionTypes.forEach { item ->
-          writeShortLe(item.value.toInt())
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.Reallocate.index.toByte())
+      newExtensionTypes.forEach { item ->
+        writeShortLe(item.value.toShort())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1386,10 +1371,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.EnableMemoTransfers.index.toInt())
-      .writeByte(0)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.EnableMemoTransfers.index.toByte())
+      writeByte(0.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1405,10 +1390,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.DisableMemoTransfers.index.toInt())
-      .writeByte(1)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.DisableMemoTransfers.index.toByte())
+      writeByte(1.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1429,9 +1414,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(nativeMint, isSigner = false, isWritable = true),
       AccountMeta(systemProgram, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.CreateNativeMint.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.CreateNativeMint.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1445,9 +1430,9 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeNonTransferableMint.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeNonTransferableMint.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1469,18 +1454,16 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeInterestBearingMint.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (rateAuthority != null) {
-          write(rateAuthority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeInterestBearingMint.index.toByte())
+      writeByte(0.toByte())
+      if (rateAuthority != null) {
+        write(rateAuthority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .writeShortLe(rate.toInt())
-      .readByteArray(),
+      writeShortLe(rate)
+    }.readByteArray(),
   )
 
   /**
@@ -1497,11 +1480,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(rateAuthority, isSigner = true, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateRateInterestBearingMint.index.toInt())
-      .writeByte(1)
-      .writeShortLe(rate.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateRateInterestBearingMint.index.toByte())
+      writeByte(1.toByte())
+      writeShortLe(rate)
+    }.readByteArray(),
   )
 
   /**
@@ -1520,10 +1503,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.EnableCpiGuard.index.toInt())
-      .writeByte(0)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.EnableCpiGuard.index.toByte())
+      writeByte(0.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1538,10 +1521,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(token, isSigner = false, isWritable = true),
       AccountMeta(owner, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.DisableCpiGuard.index.toInt())
-      .writeByte(1)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.DisableCpiGuard.index.toByte())
+      writeByte(1.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1559,10 +1542,10 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializePermanentDelegate.index.toInt())
-      .write(delegate.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.InitializePermanentDelegate.index.toByte())
+      write(delegate.bytes)
+    }.readByteArray(),
   )
 
   /**
@@ -1583,24 +1566,20 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeTransferHook.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeTransferHook.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .apply {
-        if (targetProgramId != null) {
-          write(targetProgramId.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (targetProgramId != null) {
+        write(targetProgramId.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1622,17 +1601,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateTransferHook.index.toInt())
-      .writeByte(1)
-      .apply {
-        if (targetProgramId != null) {
-          write(targetProgramId.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateTransferHook.index.toByte())
+      writeByte(1.toByte())
+      if (targetProgramId != null) {
+        write(targetProgramId.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1653,24 +1630,20 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeConfidentialTransferFee.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeConfidentialTransferFee.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .apply {
-        if (withdrawWithheldAuthorityElGamalPubkey != null) {
-          write(withdrawWithheldAuthorityElGamalPubkey.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (withdrawWithheldAuthorityElGamalPubkey != null) {
+        write(withdrawWithheldAuthorityElGamalPubkey.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1701,12 +1674,12 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(record, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.WithdrawWithheldTokensFromMintForConfidentialTransferFee.index.toInt())
-      .writeByte(1)
-      .writeByte(proofInstructionOffset.toInt())
-      .write(newDecryptableAvailableBalance.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.WithdrawWithheldTokensFromMintForConfidentialTransferFee.index.toByte())
+      writeByte(1.toByte())
+      writeByte(proofInstructionOffset)
+      write(newDecryptableAvailableBalance.bytes)
+    }.readByteArray(),
   )
 
   /**
@@ -1734,13 +1707,13 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(record, isSigner = false, isWritable = false),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.WithdrawWithheldTokensFromAccountsForConfidentialTransferFee.index.toInt())
-      .writeByte(2)
-      .writeByte(numTokenAccounts.toInt())
-      .writeByte(proofInstructionOffset.toInt())
-      .write(newDecryptableAvailableBalance.bytes)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.WithdrawWithheldTokensFromAccountsForConfidentialTransferFee.index.toByte())
+      writeByte(2.toByte())
+      writeByte(numTokenAccounts.toByte())
+      writeByte(proofInstructionOffset)
+      write(newDecryptableAvailableBalance.bytes)
+    }.readByteArray(),
   )
 
   /**
@@ -1757,10 +1730,10 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.HarvestWithheldTokensToMintForConfidentialTransferFee.index.toInt())
-      .writeByte(3)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.HarvestWithheldTokensToMintForConfidentialTransferFee.index.toByte())
+      writeByte(3.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1773,10 +1746,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.EnableHarvestToMint.index.toInt())
-      .writeByte(4)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.EnableHarvestToMint.index.toByte())
+      writeByte(4.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1789,10 +1762,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.DisableHarvestToMint.index.toInt())
-      .writeByte(5)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.DisableHarvestToMint.index.toByte())
+      writeByte(5.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1811,9 +1784,9 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(destinationAccount, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.WithdrawExcessLamports.index.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.WithdrawExcessLamports.index.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -1835,24 +1808,20 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeMetadataPointer.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeMetadataPointer.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .apply {
-        if (metadataAddress != null) {
-          write(metadataAddress.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (metadataAddress != null) {
+        write(metadataAddress.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1869,17 +1838,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(metadataPointerAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateMetadataPointer.index.toInt())
-      .writeByte(1)
-      .apply {
-        if (metadataAddress != null) {
-          write(metadataAddress.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateMetadataPointer.index.toByte())
+      writeByte(1.toByte())
+      if (metadataAddress != null) {
+        write(metadataAddress.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1901,24 +1868,20 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeGroupPointer.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeGroupPointer.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .apply {
-        if (groupAddress != null) {
-          write(groupAddress.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (groupAddress != null) {
+        write(groupAddress.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1935,17 +1898,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(groupPointerAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateGroupPointer.index.toInt())
-      .writeByte(1)
-      .apply {
-        if (groupAddress != null) {
-          write(groupAddress.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateGroupPointer.index.toByte())
+      writeByte(1.toByte())
+      if (groupAddress != null) {
+        write(groupAddress.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -1967,24 +1928,20 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeGroupMemberPointer.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeGroupMemberPointer.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .apply {
-        if (memberAddress != null) {
-          write(memberAddress.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (memberAddress != null) {
+        write(memberAddress.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2001,17 +1958,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(groupMemberPointerAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateGroupMemberPointer.index.toInt())
-      .writeByte(1)
-      .apply {
-        if (memberAddress != null) {
-          write(memberAddress.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateGroupMemberPointer.index.toByte())
+      writeByte(1.toByte())
+      if (memberAddress != null) {
+        write(memberAddress.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2032,18 +1987,16 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializeScaledUiAmountMint.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializeScaledUiAmountMint.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .writeLongLe(multiplier.toRawBits())
-      .readByteArray(),
+      writeLongLe(multiplier.toRawBits())
+    }.readByteArray(),
   )
 
   /**
@@ -2062,12 +2015,12 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UpdateMultiplierScaledUiMint.index.toInt())
-      .writeByte(1)
-      .writeLongLe(multiplier.toRawBits())
-      .writeLongLe(effectiveTimestamp)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.UpdateMultiplierScaledUiMint.index.toByte())
+      writeByte(1.toByte())
+      writeLongLe(multiplier.toRawBits())
+      writeLongLe(effectiveTimestamp)
+    }.readByteArray(),
   )
 
   /**
@@ -2081,17 +2034,15 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(mint, isSigner = false, isWritable = true),
     ),
-    data = Buffer()
-      .writeByte(Instruction.InitializePausableConfig.index.toInt())
-      .writeByte(0)
-      .apply {
-        if (authority != null) {
-          write(authority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.InitializePausableConfig.index.toByte())
+      writeByte(0.toByte())
+      if (authority != null) {
+        write(authority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2106,10 +2057,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Pause.index.toInt())
-      .writeByte(1)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.Pause.index.toByte())
+      writeByte(1.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -2124,10 +2075,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.Resume.index.toInt())
-      .writeByte(2)
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.Resume.index.toByte())
+      writeByte(2.toByte())
+    }.readByteArray(),
   )
 
   /**
@@ -2153,25 +2104,19 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(mintAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0xd2.toByte(), 0xe1.toByte(), 0x1e.toByte(), 0xa2.toByte(), 0x58.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0xd2.toByte(), 0xe1.toByte(), 0x1e.toByte(), 0xa2.toByte(), 0x58.toByte(),
           0xb8.toByte(), 0x4d.toByte(), 0x8d.toByte()))
-      .apply {
-        val bytes = name.encodeToByteArray()
-        writeIntLe(bytes.size)
-        write(bytes)
-      }
-      .apply {
-        val bytes = symbol.encodeToByteArray()
-        writeIntLe(bytes.size)
-        write(bytes)
-      }
-      .apply {
-        val bytes = uri.encodeToByteArray()
-        writeIntLe(bytes.size)
-        write(bytes)
-      }
-      .readByteArray(),
+      val nameBytes = name.encodeToByteArray()
+      writeIntLe(nameBytes.size)
+      write(nameBytes)
+      val symbolBytes = symbol.encodeToByteArray()
+      writeIntLe(symbolBytes.size)
+      write(symbolBytes)
+      val uriBytes = uri.encodeToByteArray()
+      writeIntLe(uriBytes.size)
+      write(uriBytes)
+    }.readByteArray(),
   )
 
   /**
@@ -2199,16 +2144,14 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(metadata, isSigner = false, isWritable = true),
       AccountMeta(updateAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0xdd.toByte(), 0xe9.toByte(), 0x31.toByte(), 0x2d.toByte(), 0xb5.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0xdd.toByte(), 0xe9.toByte(), 0x31.toByte(), 0x2d.toByte(), 0xb5.toByte(),
           0xca.toByte(), 0xdc.toByte(), 0xc8.toByte()))
-      .write(field.serialize())
-      .apply {
-        val bytes = value.encodeToByteArray()
-        writeIntLe(bytes.size)
-        write(bytes)
-      }
-      .readByteArray(),
+      write(field.serialize())
+      val valueBytes = value.encodeToByteArray()
+      writeIntLe(valueBytes.size)
+      write(valueBytes)
+    }.readByteArray(),
   )
 
   /**
@@ -2231,16 +2174,14 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(metadata, isSigner = false, isWritable = true),
       AccountMeta(updateAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0xea.toByte(), 0x12.toByte(), 0x20.toByte(), 0x38.toByte(), 0x59.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0xea.toByte(), 0x12.toByte(), 0x20.toByte(), 0x38.toByte(), 0x59.toByte(),
           0x8d.toByte(), 0x25.toByte(), 0xb5.toByte()))
-      .writeByte(if (idempotent) 1 else 0)
-      .apply {
-        val bytes = key.encodeToByteArray()
-        writeIntLe(bytes.size)
-        write(bytes)
-      }
-      .readByteArray(),
+      writeByte((if (idempotent) 1 else 0).toByte())
+      val keyBytes = key.encodeToByteArray()
+      writeIntLe(keyBytes.size)
+      write(keyBytes)
+    }.readByteArray(),
   )
 
   /**
@@ -2256,17 +2197,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(metadata, isSigner = false, isWritable = true),
       AccountMeta(updateAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0xd7.toByte(), 0xe4.toByte(), 0xa6.toByte(), 0xe4.toByte(), 0x54.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0xd7.toByte(), 0xe4.toByte(), 0xa6.toByte(), 0xe4.toByte(), 0x54.toByte(),
           0x64.toByte(), 0x56.toByte(), 0x7b.toByte()))
-      .apply {
-        if (newUpdateAuthority != null) {
-          write(newUpdateAuthority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (newUpdateAuthority != null) {
+        write(newUpdateAuthority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2289,26 +2228,22 @@ public object Token2022Program : TokenProgram() {
     keys = listOf(
       AccountMeta(metadata, isSigner = false, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0xfa.toByte(), 0xa6.toByte(), 0xb4.toByte(), 0xfa.toByte(), 0x0d.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0xfa.toByte(), 0xa6.toByte(), 0xb4.toByte(), 0xfa.toByte(), 0x0d.toByte(),
           0x0c.toByte(), 0xb8.toByte(), 0x46.toByte()))
-      .apply {
-        if (start != null) {
-          writeByte(1)
-          .writeLongLe(start.toLong())
-        } else {
-          writeByte(0)
-        }
+      if (start != null) {
+        writeByte(1.toByte())
+        writeLongLe(start.toLong())
+      } else {
+        writeByte(0.toByte())
       }
-      .apply {
-        if (end != null) {
-          writeByte(1)
-          .writeLongLe(end.toLong())
-        } else {
-          writeByte(0)
-        }
+      if (end != null) {
+        writeByte(1.toByte())
+        writeLongLe(end.toLong())
+      } else {
+        writeByte(0.toByte())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2329,18 +2264,16 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(mint, isSigner = false, isWritable = false),
       AccountMeta(mintAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0x79.toByte(), 0x71.toByte(), 0x6c.toByte(), 0x27.toByte(), 0x36.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0x79.toByte(), 0x71.toByte(), 0x6c.toByte(), 0x27.toByte(), 0x36.toByte(),
           0x33.toByte(), 0x00.toByte(), 0x04.toByte()))
-      .apply {
-        if (updateAuthority != null) {
-          write(updateAuthority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (updateAuthority != null) {
+        write(updateAuthority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .writeLongLe(maxSize.toLong())
-      .readByteArray(),
+      writeLongLe(maxSize.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -2356,11 +2289,11 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(group, isSigner = false, isWritable = true),
       AccountMeta(updateAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0x6c.toByte(), 0x25.toByte(), 0xab.toByte(), 0x8f.toByte(), 0xf8.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0x6c.toByte(), 0x25.toByte(), 0xab.toByte(), 0x8f.toByte(), 0xf8.toByte(),
           0x1e.toByte(), 0x12.toByte(), 0x6e.toByte()))
-      .writeLongLe(maxSize.toLong())
-      .readByteArray(),
+      writeLongLe(maxSize.toLong())
+    }.readByteArray(),
   )
 
   /**
@@ -2376,17 +2309,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(group, isSigner = false, isWritable = true),
       AccountMeta(updateAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0xa1.toByte(), 0x69.toByte(), 0x58.toByte(), 0x01.toByte(), 0xed.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0xa1.toByte(), 0x69.toByte(), 0x58.toByte(), 0x01.toByte(), 0xed.toByte(),
           0xdd.toByte(), 0xd8.toByte(), 0xcb.toByte()))
-      .apply {
-        if (newUpdateAuthority != null) {
-          write(newUpdateAuthority.bytes)
-        } else {
-          write(ByteArray(32))
-        }
+      if (newUpdateAuthority != null) {
+        write(newUpdateAuthority.bytes)
+      } else {
+        write(ByteArray(32))
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2410,10 +2341,10 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(group, isSigner = false, isWritable = true),
       AccountMeta(groupUpdateAuthority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .write(byteArrayOf(0x98.toByte(), 0x20.toByte(), 0xde.toByte(), 0xb0.toByte(), 0xdf.toByte(),
+    data = Buffer().apply {
+      write(byteArrayOf(0x98.toByte(), 0x20.toByte(), 0xde.toByte(), 0xb0.toByte(), 0xdf.toByte(),
           0xed.toByte(), 0x74.toByte(), 0x86.toByte()))
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   /**
@@ -2431,17 +2362,15 @@ public object Token2022Program : TokenProgram() {
       AccountMeta(destination, isSigner = false, isWritable = true),
       AccountMeta(authority, isSigner = true, isWritable = false),
     ),
-    data = Buffer()
-      .writeByte(Instruction.UnwrapLamports.index.toInt())
-      .apply {
-        if (amount != null) {
-          writeByte(1)
-          .writeLongLe(amount.toLong())
-        } else {
-          writeByte(0)
-        }
+    data = Buffer().apply {
+      writeByte(Instruction.UnwrapLamports.index.toByte())
+      if (amount != null) {
+        writeByte(1.toByte())
+        writeLongLe(amount.toLong())
+      } else {
+        writeByte(0.toByte())
       }
-      .readByteArray(),
+    }.readByteArray(),
   )
 
   public enum class AccountState(
@@ -2485,7 +2414,7 @@ public object Token2022Program : TokenProgram() {
       val buffer = Buffer()
       buffer.writeLongLe(epoch.toLong())
       buffer.writeLongLe(maximumFee.toLong())
-      buffer.writeShortLe(transferFeeBasisPoints.toInt())
+      buffer.writeShortLe(transferFeeBasisPoints.toShort())
       return buffer.readByteArray()
     }
   }
@@ -2514,7 +2443,7 @@ public object Token2022Program : TokenProgram() {
     public object Uninitialized : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(0)
+        buffer.writeShortLe(0.toShort())
         return buffer.readByteArray()
       }
     }
@@ -2528,7 +2457,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(1)
+        buffer.writeShortLe(1.toShort())
         buffer.write(transferFeeConfigAuthority.bytes)
         buffer.write(withdrawWithheldAuthority.bytes)
         buffer.writeLongLe(withheldAmount.toLong())
@@ -2543,7 +2472,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(2)
+        buffer.writeShortLe(2.toShort())
         buffer.writeLongLe(withheldAmount.toLong())
         return buffer.readByteArray()
       }
@@ -2554,7 +2483,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(3)
+        buffer.writeShortLe(3.toShort())
         buffer.write(closeAuthority.bytes)
         return buffer.readByteArray()
       }
@@ -2567,13 +2496,13 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(4)
+        buffer.writeShortLe(4.toShort())
         if (authority != null) {
           buffer.write(authority.bytes)
         } else {
           buffer.write(ByteArray(32))
         }
-        buffer.writeByte(if (autoApproveNewAccounts) 1 else 0)
+        buffer.writeByte((if (autoApproveNewAccounts) 1 else 0).toByte())
         if (auditorElgamalPubkey != null) {
           buffer.write(auditorElgamalPubkey.bytes)
         } else {
@@ -2599,15 +2528,15 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(5)
-        buffer.writeByte(if (approved) 1 else 0)
+        buffer.writeShortLe(5.toShort())
+        buffer.writeByte((if (approved) 1 else 0).toByte())
         buffer.write(elgamalPubkey.bytes)
         buffer.write(pendingBalanceLow.bytes)
         buffer.write(pendingBalanceHigh.bytes)
         buffer.write(availableBalance.bytes)
         buffer.write(decryptableAvailableBalance.bytes)
-        buffer.writeByte(if (allowConfidentialCredits) 1 else 0)
-        buffer.writeByte(if (allowNonConfidentialCredits) 1 else 0)
+        buffer.writeByte((if (allowConfidentialCredits) 1 else 0).toByte())
+        buffer.writeByte((if (allowNonConfidentialCredits) 1 else 0).toByte())
         buffer.writeLongLe(pendingBalanceCreditCounter.toLong())
         buffer.writeLongLe(maximumPendingBalanceCreditCounter.toLong())
         buffer.writeLongLe(expectedPendingBalanceCreditCounter.toLong())
@@ -2621,8 +2550,8 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(6)
-        buffer.writeByte(state.value.toInt())
+        buffer.writeShortLe(6.toShort())
+        buffer.writeByte(state.value.toByte())
         return buffer.readByteArray()
       }
     }
@@ -2630,7 +2559,7 @@ public object Token2022Program : TokenProgram() {
     public object ImmutableOwner : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(7)
+        buffer.writeShortLe(7.toShort())
         return buffer.readByteArray()
       }
     }
@@ -2640,8 +2569,8 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(8)
-        buffer.writeByte(if (requireIncomingTransferMemos) 1 else 0)
+        buffer.writeShortLe(8.toShort())
+        buffer.writeByte((if (requireIncomingTransferMemos) 1 else 0).toByte())
         return buffer.readByteArray()
       }
     }
@@ -2649,7 +2578,7 @@ public object Token2022Program : TokenProgram() {
     public object NonTransferable : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(9)
+        buffer.writeShortLe(9.toShort())
         return buffer.readByteArray()
       }
     }
@@ -2663,12 +2592,12 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(10)
+        buffer.writeShortLe(10.toShort())
         buffer.write(rateAuthority.bytes)
         buffer.writeLongLe(initializationTimestamp.toLong())
-        buffer.writeShortLe(preUpdateAverageRate.toInt())
+        buffer.writeShortLe(preUpdateAverageRate)
         buffer.writeLongLe(lastUpdateTimestamp.toLong())
-        buffer.writeShortLe(currentRate.toInt())
+        buffer.writeShortLe(currentRate)
         return buffer.readByteArray()
       }
     }
@@ -2678,8 +2607,8 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(11)
-        buffer.writeByte(if (lockCpi) 1 else 0)
+        buffer.writeShortLe(11.toShort())
+        buffer.writeByte((if (lockCpi) 1 else 0).toByte())
         return buffer.readByteArray()
       }
     }
@@ -2689,7 +2618,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(12)
+        buffer.writeShortLe(12.toShort())
         buffer.write(delegate.bytes)
         return buffer.readByteArray()
       }
@@ -2698,7 +2627,7 @@ public object Token2022Program : TokenProgram() {
     public object NonTransferableAccount : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(13)
+        buffer.writeShortLe(13.toShort())
         return buffer.readByteArray()
       }
     }
@@ -2709,7 +2638,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(14)
+        buffer.writeShortLe(14.toShort())
         buffer.write(authority.bytes)
         buffer.write(programId.bytes)
         return buffer.readByteArray()
@@ -2721,8 +2650,8 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(15)
-        buffer.writeByte(if (transferring) 1 else 0)
+        buffer.writeShortLe(15.toShort())
+        buffer.writeByte((if (transferring) 1 else 0).toByte())
         return buffer.readByteArray()
       }
     }
@@ -2735,14 +2664,14 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(16)
+        buffer.writeShortLe(16.toShort())
         if (authority != null) {
           buffer.write(authority.bytes)
         } else {
           buffer.write(ByteArray(32))
         }
         buffer.write(elgamalPubkey.bytes)
-        buffer.writeByte(if (harvestToMintEnabled) 1 else 0)
+        buffer.writeByte((if (harvestToMintEnabled) 1 else 0).toByte())
         buffer.write(withheldAmount.bytes)
         return buffer.readByteArray()
       }
@@ -2753,7 +2682,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(17)
+        buffer.writeShortLe(17.toShort())
         buffer.write(withheldAmount.bytes)
         return buffer.readByteArray()
       }
@@ -2765,7 +2694,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(18)
+        buffer.writeShortLe(18.toShort())
         if (authority != null) {
           buffer.write(authority.bytes)
         } else {
@@ -2790,7 +2719,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(19)
+        buffer.writeShortLe(19.toShort())
         if (updateAuthority != null) {
           buffer.write(updateAuthority.bytes)
         } else {
@@ -2817,7 +2746,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(20)
+        buffer.writeShortLe(20.toShort())
         if (authority != null) {
           buffer.write(authority.bytes)
         } else {
@@ -2840,7 +2769,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(21)
+        buffer.writeShortLe(21.toShort())
         if (updateAuthority != null) {
           buffer.write(updateAuthority.bytes)
         } else {
@@ -2859,7 +2788,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(22)
+        buffer.writeShortLe(22.toShort())
         if (authority != null) {
           buffer.write(authority.bytes)
         } else {
@@ -2881,7 +2810,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(23)
+        buffer.writeShortLe(23.toShort())
         buffer.write(mint.bytes)
         buffer.write(group.bytes)
         buffer.writeLongLe(memberNumber.toLong())
@@ -2892,7 +2821,7 @@ public object Token2022Program : TokenProgram() {
     public object ConfidentialMintBurn : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(24)
+        buffer.writeShortLe(24.toShort())
         return buffer.readByteArray()
       }
     }
@@ -2905,7 +2834,7 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(25)
+        buffer.writeShortLe(25.toShort())
         buffer.write(authority.bytes)
         buffer.writeLongLe(multiplier.toRawBits())
         buffer.writeLongLe(newMultiplierEffectiveTimestamp.toLong())
@@ -2920,13 +2849,13 @@ public object Token2022Program : TokenProgram() {
     ) : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(26)
+        buffer.writeShortLe(26.toShort())
         if (authority != null) {
           buffer.write(authority.bytes)
         } else {
           buffer.write(ByteArray(32))
         }
-        buffer.writeByte(if (paused) 1 else 0)
+        buffer.writeByte((if (paused) 1 else 0).toByte())
         return buffer.readByteArray()
       }
     }
@@ -2934,7 +2863,7 @@ public object Token2022Program : TokenProgram() {
     public object PausableAccount : Extension() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeShortLe(27)
+        buffer.writeShortLe(27.toShort())
         return buffer.readByteArray()
       }
     }
@@ -2993,7 +2922,7 @@ public object Token2022Program : TokenProgram() {
     ) : TokenMetadataField() {
       public override fun serialize(): ByteArray {
         val buffer = Buffer()
-        buffer.writeByte(3)
+        buffer.writeByte(3.toByte())
         val value0Bytes = value0.encodeToByteArray()
         buffer.writeIntLe(value0Bytes.size)
         buffer.write(value0Bytes)

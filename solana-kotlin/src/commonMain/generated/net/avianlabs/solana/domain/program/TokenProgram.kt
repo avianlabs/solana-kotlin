@@ -11,11 +11,16 @@ import kotlin.Long
 import kotlin.String
 import kotlin.UByte
 import kotlin.ULong
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import kotlinx.io.writeIntLe
+import kotlinx.io.writeLongLe
+import kotlinx.io.writeShortLe
+import kotlinx.io.writeString
 import net.avianlabs.solana.domain.core.AccountMeta
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.Buffer
 
 public sealed class TokenProgram : Program {
   public abstract fun initializeMint(
@@ -267,19 +272,17 @@ public sealed class TokenProgram : Program {
         AccountMeta(mint, isSigner = false, isWritable = true),
         AccountMeta(rent, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeMint.index.toInt())
-        .writeByte(decimals.toInt())
-        .write(mintAuthority.bytes)
-        .apply {
-          if (freezeAuthority != null) {
-            writeByte(1)
-            .write(freezeAuthority.bytes)
-          } else {
-            writeByte(0)
-          }
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeMint.index.toByte())
+        writeByte(decimals.toByte())
+        write(mintAuthority.bytes)
+        if (freezeAuthority != null) {
+          writeByte(1.toByte())
+          write(freezeAuthority.bytes)
+        } else {
+          writeByte(0.toByte())
         }
-        .readByteArray(),
+      }.readByteArray(),
     )
 
     /**
@@ -316,9 +319,9 @@ public sealed class TokenProgram : Program {
         AccountMeta(owner, isSigner = false, isWritable = false),
         AccountMeta(rent, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeAccount.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeAccount.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -352,10 +355,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(multisig, isSigner = false, isWritable = true),
         AccountMeta(rent, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeMultisig.index.toInt())
-        .writeByte(m.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeMultisig.index.toByte())
+        writeByte(m.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -384,10 +387,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(destination, isSigner = false, isWritable = true),
         AccountMeta(authority, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.Transfer.index.toInt())
-        .writeLongLe(amount.toLong())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.Transfer.index.toByte())
+        writeLongLe(amount.toLong())
+      }.readByteArray(),
     )
 
     /**
@@ -415,10 +418,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(delegate, isSigner = false, isWritable = false),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.Approve.index.toInt())
-        .writeLongLe(amount.toLong())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.Approve.index.toByte())
+        writeLongLe(amount.toLong())
+      }.readByteArray(),
     )
 
     /**
@@ -437,9 +440,9 @@ public sealed class TokenProgram : Program {
         AccountMeta(source, isSigner = false, isWritable = true),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.Revoke.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.Revoke.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -465,18 +468,16 @@ public sealed class TokenProgram : Program {
         AccountMeta(owned, isSigner = false, isWritable = true),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.SetAuthority.index.toInt())
-        .writeByte(authorityType.value.toInt())
-        .apply {
-          if (newAuthority != null) {
-            writeByte(1)
-            .write(newAuthority.bytes)
-          } else {
-            writeByte(0)
-          }
+      data = Buffer().apply {
+        writeByte(Instruction.SetAuthority.index.toByte())
+        writeByte(authorityType.value.toByte())
+        if (newAuthority != null) {
+          writeByte(1.toByte())
+          write(newAuthority.bytes)
+        } else {
+          writeByte(0.toByte())
         }
-        .readByteArray(),
+      }.readByteArray(),
     )
 
     /**
@@ -503,10 +504,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(token, isSigner = false, isWritable = true),
         AccountMeta(mintAuthority, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.MintTo.index.toInt())
-        .writeLongLe(amount.toLong())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.MintTo.index.toByte())
+        writeLongLe(amount.toLong())
+      }.readByteArray(),
     )
 
     /**
@@ -534,10 +535,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(mint, isSigner = false, isWritable = true),
         AccountMeta(authority, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.Burn.index.toInt())
-        .writeLongLe(amount.toLong())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.Burn.index.toByte())
+        writeLongLe(amount.toLong())
+      }.readByteArray(),
     )
 
     /**
@@ -563,9 +564,9 @@ public sealed class TokenProgram : Program {
         AccountMeta(destination, isSigner = false, isWritable = true),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.CloseAccount.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.CloseAccount.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -590,9 +591,9 @@ public sealed class TokenProgram : Program {
         AccountMeta(mint, isSigner = false, isWritable = false),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.FreezeAccount.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.FreezeAccount.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -617,9 +618,9 @@ public sealed class TokenProgram : Program {
         AccountMeta(mint, isSigner = false, isWritable = false),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.ThawAccount.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.ThawAccount.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -658,11 +659,11 @@ public sealed class TokenProgram : Program {
         AccountMeta(destination, isSigner = false, isWritable = true),
         AccountMeta(authority, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.TransferChecked.index.toInt())
-        .writeLongLe(amount.toLong())
-        .writeByte(decimals.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.TransferChecked.index.toByte())
+        writeLongLe(amount.toLong())
+        writeByte(decimals.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -700,11 +701,11 @@ public sealed class TokenProgram : Program {
         AccountMeta(delegate, isSigner = false, isWritable = false),
         AccountMeta(owner, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.ApproveChecked.index.toInt())
-        .writeLongLe(amount.toLong())
-        .writeByte(decimals.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.ApproveChecked.index.toByte())
+        writeLongLe(amount.toLong())
+        writeByte(decimals.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -737,11 +738,11 @@ public sealed class TokenProgram : Program {
         AccountMeta(token, isSigner = false, isWritable = true),
         AccountMeta(mintAuthority, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.MintToChecked.index.toInt())
-        .writeLongLe(amount.toLong())
-        .writeByte(decimals.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.MintToChecked.index.toByte())
+        writeLongLe(amount.toLong())
+        writeByte(decimals.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -775,11 +776,11 @@ public sealed class TokenProgram : Program {
         AccountMeta(mint, isSigner = false, isWritable = true),
         AccountMeta(authority, isSigner = true, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.BurnChecked.index.toInt())
-        .writeLongLe(amount.toLong())
-        .writeByte(decimals.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.BurnChecked.index.toByte())
+        writeLongLe(amount.toLong())
+        writeByte(decimals.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -809,10 +810,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(mint, isSigner = false, isWritable = false),
         AccountMeta(rent, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeAccount2.index.toInt())
-        .write(owner.bytes)
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeAccount2.index.toByte())
+        write(owner.bytes)
+      }.readByteArray(),
     )
 
     /**
@@ -831,9 +832,9 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(account, isSigner = false, isWritable = true),
       ),
-      data = Buffer()
-        .writeByte(Instruction.SyncNative.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.SyncNative.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -857,10 +858,10 @@ public sealed class TokenProgram : Program {
         AccountMeta(account, isSigner = false, isWritable = true),
         AccountMeta(mint, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeAccount3.index.toInt())
-        .write(owner.bytes)
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeAccount3.index.toByte())
+        write(owner.bytes)
+      }.readByteArray(),
     )
 
     /**
@@ -878,10 +879,10 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(multisig, isSigner = false, isWritable = true),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeMultisig2.index.toInt())
-        .writeByte(m.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeMultisig2.index.toByte())
+        writeByte(m.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -906,19 +907,17 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(mint, isSigner = false, isWritable = true),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeMint2.index.toInt())
-        .writeByte(decimals.toInt())
-        .write(mintAuthority.bytes)
-        .apply {
-          if (freezeAuthority != null) {
-            writeByte(1)
-            .write(freezeAuthority.bytes)
-          } else {
-            writeByte(0)
-          }
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeMint2.index.toByte())
+        writeByte(decimals.toByte())
+        write(mintAuthority.bytes)
+        if (freezeAuthority != null) {
+          writeByte(1.toByte())
+          write(freezeAuthority.bytes)
+        } else {
+          writeByte(0.toByte())
         }
-        .readByteArray(),
+      }.readByteArray(),
     )
 
     /**
@@ -937,9 +936,9 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(mint, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.GetAccountDataSize.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.GetAccountDataSize.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -960,9 +959,9 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(account, isSigner = false, isWritable = true),
       ),
-      data = Buffer()
-        .writeByte(Instruction.InitializeImmutableOwner.index.toInt())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.InitializeImmutableOwner.index.toByte())
+      }.readByteArray(),
     )
 
     /**
@@ -987,10 +986,10 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(mint, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.AmountToUiAmount.index.toInt())
-        .writeLongLe(amount.toLong())
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.AmountToUiAmount.index.toByte())
+        writeLongLe(amount.toLong())
+      }.readByteArray(),
     )
 
     /**
@@ -1013,10 +1012,10 @@ public sealed class TokenProgram : Program {
       keys = listOf(
         AccountMeta(mint, isSigner = false, isWritable = false),
       ),
-      data = Buffer()
-        .writeByte(Instruction.UiAmountToAmount.index.toInt())
-        .writeUtf8(uiAmount)
-        .readByteArray(),
+      data = Buffer().apply {
+        writeByte(Instruction.UiAmountToAmount.index.toByte())
+        writeString(uiAmount)
+      }.readByteArray(),
     )
   }
 }

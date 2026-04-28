@@ -4,10 +4,12 @@ import net.avianlabs.solana.domain.program.AssociatedTokenProgram
 import net.avianlabs.solana.domain.program.SystemProgram
 import net.avianlabs.solana.domain.program.TokenProgram
 import net.avianlabs.solana.methods.TransactionResponse
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import kotlinx.io.readLongLe
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
 import net.avianlabs.solana.tweetnacl.vendor.decodeBase58
 import net.avianlabs.solana.tweetnacl.vendor.encodeToBase58String
-import okio.Buffer
 
 public data class DecodedTransaction(
   val instructions: List<DecodedInstruction>,
@@ -202,7 +204,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
       )
     }
     val data = instruction.data!!.decodeBase58()
-    val buffer = Buffer().write(data)
+    val buffer = Buffer().apply { write(data) }
     val raw = DecodedInstruction.Raw(
       program = programKey,
       accounts = accountsMeta,
@@ -233,8 +235,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
           SystemProgram.Instruction.AuthorizeNonceAccount.index -> {
             val nonceAccount = accountsMeta!![0]
             val authorizedPubkey = accountsMeta[1]
-            val newAuthorizedBytes = ByteArray(32)
-            buffer.read(newAuthorizedBytes)
+            val newAuthorizedBytes = buffer.readByteArray(32)
             DecodedInstruction.SystemProgram.AuthorizeNonceAccount(
               nonceAccount = nonceAccount.publicKey,
               authorizedPubkey = authorizedPubkey.publicKey,
@@ -246,8 +247,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
             val (from, newAccount) = accountsMeta!!
             val lamports = buffer.readLongLe()
             val space = buffer.readLongLe()
-            val ownerBytes = ByteArray(32)
-            buffer.read(ownerBytes)
+            val ownerBytes = buffer.readByteArray(32)
             DecodedInstruction.SystemProgram.CreateAccount(
               from = from.publicKey,
               newAccount = newAccount.publicKey,
@@ -259,8 +259,7 @@ public fun TransactionResponse.decode(): DecodedTransaction? {
 
           SystemProgram.Instruction.InitializeNonceAccount.index -> {
             val nonceAccount = accountsMeta!![0]
-            val authorizedBytes = ByteArray(32)
-            buffer.read(authorizedBytes)
+            val authorizedBytes = buffer.readByteArray(32)
             DecodedInstruction.SystemProgram.InitializeNonceAccount(
               nonceAccount = nonceAccount.publicKey,
               authorizedPubkey = PublicKey(authorizedBytes),

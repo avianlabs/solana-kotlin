@@ -1,14 +1,15 @@
 package net.avianlabs.solana.domain.core
 
+import kotlinx.io.Source
+import kotlinx.io.readLongLe
 import kotlinx.serialization.Serializable
-import okio.BufferedSource
 
 @Serializable
 public data class FeeCalculator(
   val lamportsPerSignature: ULong,
 ) {
   public companion object {
-    public fun read(data: BufferedSource): FeeCalculator = FeeCalculator(
+    internal fun read(data: Source): FeeCalculator = FeeCalculator(
       lamportsPerSignature = data.readLongLe().toULong(),
     )
   }

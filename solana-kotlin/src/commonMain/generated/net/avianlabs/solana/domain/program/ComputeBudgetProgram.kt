@@ -10,10 +10,15 @@ package net.avianlabs.solana.domain.program
 import kotlin.UByte
 import kotlin.UInt
 import kotlin.ULong
+import kotlinx.io.Buffer
+import kotlinx.io.readByteArray
+import kotlinx.io.writeIntLe
+import kotlinx.io.writeLongLe
+import kotlinx.io.writeShortLe
+import kotlinx.io.writeString
 import net.avianlabs.solana.domain.core.TransactionInstruction
 import net.avianlabs.solana.domain.program.Program.Companion.createTransactionInstruction
 import net.avianlabs.solana.tweetnacl.ed25519.PublicKey
-import okio.Buffer
 
 public object ComputeBudgetProgram : Program {
   public override val programId: PublicKey =
@@ -24,21 +29,21 @@ public object ComputeBudgetProgram : Program {
     programId = programId,
     keys = listOf(
     ),
-    data = Buffer()
-      .writeByte(Instruction.RequestUnits.index.toInt())
-      .writeIntLe(units.toInt())
-      .writeIntLe(additionalFee.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.RequestUnits.index.toByte())
+      writeIntLe(units.toInt())
+      writeIntLe(additionalFee.toInt())
+    }.readByteArray(),
   )
 
   public fun requestHeapFrame(bytes: UInt): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
     ),
-    data = Buffer()
-      .writeByte(Instruction.RequestHeapFrame.index.toInt())
-      .writeIntLe(bytes.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.RequestHeapFrame.index.toByte())
+      writeIntLe(bytes.toInt())
+    }.readByteArray(),
   )
 
   public fun setComputeUnitLimit(units: UInt): TransactionInstruction =
@@ -46,10 +51,10 @@ public object ComputeBudgetProgram : Program {
     programId = programId,
     keys = listOf(
     ),
-    data = Buffer()
-      .writeByte(Instruction.SetComputeUnitLimit.index.toInt())
-      .writeIntLe(units.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.SetComputeUnitLimit.index.toByte())
+      writeIntLe(units.toInt())
+    }.readByteArray(),
   )
 
   public fun setComputeUnitPrice(microLamports: ULong): TransactionInstruction =
@@ -57,10 +62,10 @@ public object ComputeBudgetProgram : Program {
     programId = programId,
     keys = listOf(
     ),
-    data = Buffer()
-      .writeByte(Instruction.SetComputeUnitPrice.index.toInt())
-      .writeLongLe(microLamports.toLong())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.SetComputeUnitPrice.index.toByte())
+      writeLongLe(microLamports.toLong())
+    }.readByteArray(),
   )
 
   public fun setLoadedAccountsDataSizeLimit(accountDataSizeLimit: UInt): TransactionInstruction =
@@ -68,10 +73,10 @@ public object ComputeBudgetProgram : Program {
     programId = programId,
     keys = listOf(
     ),
-    data = Buffer()
-      .writeByte(Instruction.SetLoadedAccountsDataSizeLimit.index.toInt())
-      .writeIntLe(accountDataSizeLimit.toInt())
-      .readByteArray(),
+    data = Buffer().apply {
+      writeByte(Instruction.SetLoadedAccountsDataSizeLimit.index.toByte())
+      writeIntLe(accountDataSizeLimit.toInt())
+    }.readByteArray(),
   )
 
   public enum class Instruction(
