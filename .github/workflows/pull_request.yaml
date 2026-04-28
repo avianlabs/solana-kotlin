@@ -24,7 +24,7 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          java-version: '18'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -58,7 +58,7 @@ jobs:
 
       - uses: actions/setup-java@v5
         with:
-          java-version: '18'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Setup Android SDK
