@@ -3,6 +3,7 @@ import co.touchlab.skie.configuration.DefaultArgumentInterop
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
+  alias(libs.plugins.androidKotlinMultiplatformLib)
   alias(libs.plugins.kotlinSerialization)
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
@@ -21,6 +22,15 @@ kotlin {
 
   jvm()
 
+  @Suppress("DEPRECATION") // AGP 9.x: 'android' overload is ambiguous with KGP's; androidLibrary still works
+  androidLibrary {
+    namespace = "net.avianlabs.solana"
+    compileSdk = libs.versions.androidCompileSdk.get().toInt()
+    minSdk = libs.versions.androidMinSdk.get().toInt()
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    withHostTestBuilder { }
+  }
+
   listOf(
     iosArm64(),
     iosSimulatorArm64(),
@@ -38,15 +48,17 @@ kotlin {
   linuxX64()
 
   sourceSets {
-    val jvmMain by getting {
+    val jvmAndroidMain by creating {
+      dependsOn(commonMain.get())
       dependencies {
         implementation(libs.ktorClientOkHttp)
         implementation(libs.bouncyCastle)
       }
     }
-    val jvmTest by getting
+    jvmMain { dependsOn(jvmAndroidMain) }
+    androidMain { dependsOn(jvmAndroidMain) }
 
-    val commonMain by getting {
+    commonMain {
       kotlin.srcDir("src/commonMain/generated")
       dependencies {
         api(project(":tweetnacl-multiplatform"))
@@ -62,31 +74,26 @@ kotlin {
         implementation(libs.kotlinLogging)
       }
     }
-    val commonTest by getting {
+    commonTest {
       dependencies {
         implementation(libs.kotlinTest)
         implementation(libs.coroutinesTest)
       }
     }
 
-    val iosMain by getting {
+    iosMain {
       dependencies {
         implementation(libs.ktorClientDarwin)
       }
     }
-    val iosTest by getting {
-    }
 
-    val nativeMain by getting {
-    }
-
-    val linuxMain by getting {
+    linuxMain {
       dependencies {
         implementation(libs.ktorClientCio)
       }
     }
 
-    val mingwMain by getting {
+    mingwMain {
       dependencies {
         implementation(libs.ktorClientWinHttp)
       }

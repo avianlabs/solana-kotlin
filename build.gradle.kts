@@ -1,6 +1,6 @@
 plugins {
   alias(libs.plugins.kotlinMultiplatform).apply(false)
-  alias(libs.plugins.androidLib).apply(false)
+  alias(libs.plugins.androidKotlinMultiplatformLib).apply(false)
   alias(libs.plugins.binaryCompatibilityValidator)
   alias(libs.plugins.nmcp)
 }
