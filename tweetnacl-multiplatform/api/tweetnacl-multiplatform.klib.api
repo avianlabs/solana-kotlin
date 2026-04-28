@@ -1,0 +1,120 @@
+// Klib ABI Dump
+// Targets: [iosArm64, iosSimulatorArm64, linuxX64, mingwX64]
+// Alias: ios => [iosArm64, iosSimulatorArm64]
+// Rendering settings:
+// - Signature version: 2
+// - Show manifest properties: true
+// - Show declarations: true
+
+// Library unique name: <net.avianlabs.solana:tweetnacl-multiplatform>
+abstract interface net.avianlabs.solana.tweetnacl/TweetNaCl { // net.avianlabs.solana.tweetnacl/TweetNaCl|null[0]
+    abstract interface SecretBox { // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox|null[0]
+        abstract fun box(kotlin/ByteArray, kotlin/ByteArray): kotlin/ByteArray? // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.box|box(kotlin.ByteArray;kotlin.ByteArray){}[0]
+        abstract fun open(kotlin/ByteArray, kotlin/ByteArray): kotlin/ByteArray? // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.open|open(kotlin.ByteArray;kotlin.ByteArray){}[0]
+
+        final object Companion { // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.Companion|null[0]
+            final const val KEY_BYTES // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.Companion.KEY_BYTES|{}KEY_BYTES[0]
+                final fun <get-KEY_BYTES>(): kotlin/Int // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.Companion.KEY_BYTES.<get-KEY_BYTES>|<get-KEY_BYTES>(){}[0]
+            final const val NONCE_BYTES // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.Companion.NONCE_BYTES|{}NONCE_BYTES[0]
+                final fun <get-NONCE_BYTES>(): kotlin/Int // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.Companion.NONCE_BYTES.<get-NONCE_BYTES>|<get-NONCE_BYTES>(){}[0]
+
+            final fun invoke(kotlin/ByteArray): net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox // net.avianlabs.solana.tweetnacl/TweetNaCl.SecretBox.Companion.invoke|invoke(kotlin.ByteArray){}[0]
+        }
+    }
+
+    abstract interface Signature { // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature|null[0]
+        abstract fun generateKey(kotlin/ByteArray): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.generateKey|generateKey(kotlin.ByteArray){}[0]
+        abstract fun isOnCurve(kotlin/ByteArray): kotlin/Boolean // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.isOnCurve|isOnCurve(kotlin.ByteArray){}[0]
+        abstract fun sign(kotlin/ByteArray, kotlin/ByteArray): kotlin/ByteArray // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.sign|sign(kotlin.ByteArray;kotlin.ByteArray){}[0]
+
+        final object Companion : net.avianlabs.solana.tweetnacl/TweetNaCl.Signature { // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion|null[0]
+            final const val PUBLIC_KEY_BYTES // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.PUBLIC_KEY_BYTES|{}PUBLIC_KEY_BYTES[0]
+                final fun <get-PUBLIC_KEY_BYTES>(): kotlin/Int // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.PUBLIC_KEY_BYTES.<get-PUBLIC_KEY_BYTES>|<get-PUBLIC_KEY_BYTES>(){}[0]
+            final const val SECRET_KEY_BYTES // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.SECRET_KEY_BYTES|{}SECRET_KEY_BYTES[0]
+                final fun <get-SECRET_KEY_BYTES>(): kotlin/Int // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.SECRET_KEY_BYTES.<get-SECRET_KEY_BYTES>|<get-SECRET_KEY_BYTES>(){}[0]
+            final const val SEED_BYTES // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.SEED_BYTES|{}SEED_BYTES[0]
+                final fun <get-SEED_BYTES>(): kotlin/Int // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.SEED_BYTES.<get-SEED_BYTES>|<get-SEED_BYTES>(){}[0]
+            final const val SIGNATURE_BYTES // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.SIGNATURE_BYTES|{}SIGNATURE_BYTES[0]
+                final fun <get-SIGNATURE_BYTES>(): kotlin/Int // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.SIGNATURE_BYTES.<get-SIGNATURE_BYTES>|<get-SIGNATURE_BYTES>(){}[0]
+
+            final fun generateKey(kotlin/ByteArray): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.generateKey|generateKey(kotlin.ByteArray){}[0]
+            final fun isOnCurve(kotlin/ByteArray): kotlin/Boolean // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.isOnCurve|isOnCurve(kotlin.ByteArray){}[0]
+            final fun sign(kotlin/ByteArray, kotlin/ByteArray): kotlin/ByteArray // net.avianlabs.solana.tweetnacl/TweetNaCl.Signature.Companion.sign|sign(kotlin.ByteArray;kotlin.ByteArray){}[0]
+        }
+    }
+}
+
+final class net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair { // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair|null[0]
+    constructor <init>(net.avianlabs.solana.tweetnacl.ed25519/PublicKey, kotlin/ByteArray) // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.<init>|<init>(net.avianlabs.solana.tweetnacl.ed25519.PublicKey;kotlin.ByteArray){}[0]
+
+    final val publicKey // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.publicKey|{}publicKey[0]
+        final fun <get-publicKey>(): net.avianlabs.solana.tweetnacl.ed25519/PublicKey // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.publicKey.<get-publicKey>|<get-publicKey>(){}[0]
+    final val secretKey // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.secretKey|{}secretKey[0]
+        final fun <get-secretKey>(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.secretKey.<get-secretKey>|<get-secretKey>(){}[0]
+
+    final fun component1(): net.avianlabs.solana.tweetnacl.ed25519/PublicKey // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.component1|component1(){}[0]
+    final fun component2(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.component2|component2(){}[0]
+    final fun copy(net.avianlabs.solana.tweetnacl.ed25519/PublicKey = ..., kotlin/ByteArray = ...): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.copy|copy(net.avianlabs.solana.tweetnacl.ed25519.PublicKey;kotlin.ByteArray){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.hashCode|hashCode(){}[0]
+    final fun sign(kotlin/ByteArray): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.sign|sign(kotlin.ByteArray){}[0]
+    final fun toString(): kotlin/String // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.toString|toString(){}[0]
+
+    final object Companion { // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.Companion|null[0]
+        final fun fromBase58(kotlin/String): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.Companion.fromBase58|fromBase58(kotlin.String){}[0]
+        final fun fromSecretKeyBytes(kotlin/ByteArray): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.Companion.fromSecretKeyBytes|fromSecretKeyBytes(kotlin.ByteArray){}[0]
+        final fun generate(): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.Companion.generate|generate(){}[0]
+    }
+}
+
+final class net.avianlabs.solana.tweetnacl.ed25519/PublicKey { // net.avianlabs.solana.tweetnacl.ed25519/PublicKey|null[0]
+    constructor <init>(kotlin/ByteArray) // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.<init>|<init>(kotlin.ByteArray){}[0]
+
+    final val bytes // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.bytes|{}bytes[0]
+        final fun <get-bytes>(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.bytes.<get-bytes>|<get-bytes>(){}[0]
+
+    final fun component1(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.component1|component1(){}[0]
+    final fun copy(kotlin/ByteArray = ...): net.avianlabs.solana.tweetnacl.ed25519/PublicKey // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.copy|copy(kotlin.ByteArray){}[0]
+    final fun equals(kotlin/Any?): kotlin/Boolean // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.equals|equals(kotlin.Any?){}[0]
+    final fun hashCode(): kotlin/Int // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.hashCode|hashCode(){}[0]
+    final fun isOnCurve(): kotlin/Boolean // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.isOnCurve|isOnCurve(){}[0]
+    final fun toBase58(): kotlin/String // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.toBase58|toBase58(){}[0]
+    final fun toByteArray(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.toByteArray|toByteArray(){}[0]
+    final fun toString(): kotlin/String // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.toString|toString(){}[0]
+
+    final object Companion { // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.Companion|null[0]
+        final fun fromBase58(kotlin/String): net.avianlabs.solana.tweetnacl.ed25519/PublicKey // net.avianlabs.solana.tweetnacl.ed25519/PublicKey.Companion.fromBase58|fromBase58(kotlin.String){}[0]
+    }
+}
+
+final object net.avianlabs.solana.tweetnacl.vendor/Sha256 { // net.avianlabs.solana.tweetnacl.vendor/Sha256|null[0]
+    final fun digest(kotlin/ByteArray): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.vendor/Sha256.digest|digest(kotlin.ByteArray){}[0]
+}
+
+final fun (kotlin/ByteArray).net.avianlabs.solana.tweetnacl.vendor/encodeToBase58String(): kotlin/String // net.avianlabs.solana.tweetnacl.vendor/encodeToBase58String|encodeToBase58String@kotlin.ByteArray(){}[0]
+final fun (kotlin/ByteArray).net.avianlabs.solana.tweetnacl.vendor/encodeToBase58WithChecksum(): kotlin/String // net.avianlabs.solana.tweetnacl.vendor/encodeToBase58WithChecksum|encodeToBase58WithChecksum@kotlin.ByteArray(){}[0]
+final fun (kotlin/ByteArray).net.avianlabs.solana.tweetnacl.vendor/sha256(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.vendor/sha256|sha256@kotlin.ByteArray(){}[0]
+final fun (kotlin/String).net.avianlabs.solana.tweetnacl.vendor/decodeBase58(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.vendor/decodeBase58|decodeBase58@kotlin.String(){}[0]
+final fun (kotlin/String).net.avianlabs.solana.tweetnacl.vendor/decodeBase58WithChecksum(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.vendor/decodeBase58WithChecksum|decodeBase58WithChecksum@kotlin.String(){}[0]
+final fun (kotlin/String).net.avianlabs.solana.tweetnacl.vendor/sha256(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.vendor/sha256|sha256@kotlin.String(){}[0]
+final fun net.avianlabs.solana.tweetnacl/secureRandomBytes(kotlin/Int): kotlin/ByteArray // net.avianlabs.solana.tweetnacl/secureRandomBytes|secureRandomBytes(kotlin.Int){}[0]
+
+// Targets: [ios]
+final val net.avianlabs.solana.tweetnacl.ed25519/data // net.avianlabs.solana.tweetnacl.ed25519/data|@net.avianlabs.solana.tweetnacl.ed25519.PublicKey{}data[0]
+    final fun (net.avianlabs.solana.tweetnacl.ed25519/PublicKey).<get-data>(): platform.Foundation/NSData // net.avianlabs.solana.tweetnacl.ed25519/data.<get-data>|<get-data>@net.avianlabs.solana.tweetnacl.ed25519.PublicKey(){}[0]
+
+// Targets: [ios]
+final val net.avianlabs.solana.tweetnacl.ed25519/secretKeyData // net.avianlabs.solana.tweetnacl.ed25519/secretKeyData|@net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair{}secretKeyData[0]
+    final fun (net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair).<get-secretKeyData>(): platform.Foundation/NSData // net.avianlabs.solana.tweetnacl.ed25519/secretKeyData.<get-secretKeyData>|<get-secretKeyData>@net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair(){}[0]
+
+// Targets: [ios]
+final fun (kotlin/ByteArray).net.avianlabs.solana.tweetnacl.ed25519/toNSData(): platform.Foundation/NSData // net.avianlabs.solana.tweetnacl.ed25519/toNSData|toNSData@kotlin.ByteArray(){}[0]
+
+// Targets: [ios]
+final fun (net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair.Companion).net.avianlabs.solana.tweetnacl.ed25519/fromSecretKeyData(platform.Foundation/NSData): net.avianlabs.solana.tweetnacl.ed25519/Ed25519Keypair // net.avianlabs.solana.tweetnacl.ed25519/fromSecretKeyData|fromSecretKeyData@net.avianlabs.solana.tweetnacl.ed25519.Ed25519Keypair.Companion(platform.Foundation.NSData){}[0]
+
+// Targets: [ios]
+final fun (platform.Foundation/NSData).net.avianlabs.solana.tweetnacl.ed25519/toKotlinByteArray(): kotlin/ByteArray // net.avianlabs.solana.tweetnacl.ed25519/toKotlinByteArray|toKotlinByteArray@platform.Foundation.NSData(){}[0]
+
+// Targets: [ios]
+final fun net.avianlabs.solana.tweetnacl.ed25519/PublicKey(platform.Foundation/NSData): net.avianlabs.solana.tweetnacl.ed25519/PublicKey // net.avianlabs.solana.tweetnacl.ed25519/PublicKey|PublicKey(platform.Foundation.NSData){}[0]
