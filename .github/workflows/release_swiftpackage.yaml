@@ -49,7 +49,7 @@ jobs:
           restore-keys: ${{ runner.os }}-konan-
 
       - name: Create Swift package
-        run: ./gradlew -Psnapshot=false :solana-kotlin:createSwiftPackage
+        run: ./gradlew -Psnapshot=false :solana-kotlin:packageSwiftDistribution
 
       - name: Upload artifact to release
         uses: softprops/action-gh-release@v2

@@ -8,7 +8,6 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
-  alias(libs.plugins.multiplatform.swiftpackage)
   alias(libs.plugins.skie)
 }
 
@@ -98,15 +97,6 @@ cklib {
       )
     )
   }
-}
-
-multiplatformSwiftPackage {
-  swiftToolsVersion("5.10")
-  targetPlatforms {
-    iOS { v("17") }
-  }
-  packageName("TweetNaClMultiplatform")
-  distributionMode { local() }
 }
 
 signing {

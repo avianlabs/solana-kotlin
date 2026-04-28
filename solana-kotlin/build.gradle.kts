@@ -1,5 +1,6 @@
 import co.touchlab.skie.configuration.ClassInterop
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
@@ -8,7 +9,6 @@ plugins {
   alias(libs.plugins.mavenPublish)
   alias(libs.plugins.dokka)
   signing
-  alias(libs.plugins.multiplatform.swiftpackage)
   alias(libs.plugins.skie)
 }
 
@@ -31,6 +31,7 @@ kotlin {
     withHostTestBuilder { }
   }
 
+  val xcframework = XCFramework("SolanaKotlin")
   listOf(
     iosArm64(),
     iosSimulatorArm64(),
@@ -41,6 +42,7 @@ kotlin {
       baseName = "SolanaKotlin"
       export(project(":tweetnacl-multiplatform"))
       isStatic = true
+      xcframework.add(this)
     }
   }
 
@@ -116,14 +118,45 @@ skie {
   }
 }
 
-multiplatformSwiftPackage {
-  swiftToolsVersion("5.10")
-  targetPlatforms {
-    iOS { v("17") }
+val packageSwiftDistribution by tasks.registering {
+  group = "distribution"
+  description = "Builds SolanaKotlin XCFramework, zips it, and renders Package.swift"
+
+  val xcFrameworkTask = tasks.named("assembleSolanaKotlinReleaseXCFramework")
+  dependsOn(xcFrameworkTask)
+
+  val xcFrameworkParent = layout.buildDirectory.dir("XCFrameworks/release")
+  val outputDir = layout.projectDirectory.dir("swiftpackage")
+  val versionStr = project.version.toString()
+  val template = layout.projectDirectory.file("swiftpackage/Package.swift.template")
+
+  inputs.dir(xcFrameworkParent)
+  inputs.file(template)
+  inputs.property("version", versionStr)
+  outputs.file(outputDir.file("Package.swift"))
+  outputs.file(outputDir.file("SolanaKotlin.zip"))
+
+  doLast {
+    val zipFile = outputDir.file("SolanaKotlin.zip").asFile
+    zipFile.parentFile.mkdirs()
+    zipFile.delete()
+    ant.withGroovyBuilder {
+      "zip"("destfile" to zipFile) {
+        "fileset"("dir" to xcFrameworkParent.get().asFile) {
+          "include"("name" to "SolanaKotlin.xcframework/**")
+        }
+      }
+    }
+    val checksum = providers.exec {
+      commandLine("swift", "package", "compute-checksum", zipFile.absolutePath)
+    }.standardOutput.asText.get().trim()
+    val url =
+      "https://github.com/avianlabs/solana-kotlin/releases/download/$versionStr/SolanaKotlin.zip"
+    val rendered = template.asFile.readText()
+      .replace("\${RELEASE_URL}", url)
+      .replace("\${CHECKSUM}", checksum)
+    outputDir.file("Package.swift").asFile.writeText(rendered)
   }
-  packageName("SolanaKotlin")
-  zipFileName("SolanaKotlin")
-  distributionMode { remote("https://github.com/avianlabs/solana-kotlin/releases/download/$version") }
 }
 
 signing {
