@@ -101,9 +101,13 @@ class ProgramGenerator(
           addType(generateInstructionEnum())
         }
 
-        // Add abstract method declarations for shared instructions
+        // Add abstract method declarations for shared instructions only.
+        // Instructions that aren't shared (only in base, or signatures diverged) stay
+        // as regular methods on the base companion below.
         program.instructions.forEach { instruction ->
-          addFunction(generateAbstractMethod(instruction))
+          if (config.isSharedInstruction(instruction.name)) {
+            addFunction(generateAbstractMethod(instruction))
+          }
         }
       }
       // Add companion object with the base program implementation
@@ -197,6 +201,13 @@ class ProgramGenerator(
 
   private fun addInstructionMethods(builder: TypeSpec.Builder, isBaseProgram: Boolean) {
     program.instructions.forEach { instruction ->
+      if (instruction.hasUnsupportedTypes()) {
+        System.err.println(
+          "  ⚠ Skipping ${program.name}.${instruction.name} — argument types not yet supported by codegen"
+        )
+        return@forEach
+      }
+
       builder.addFunction(generateInstructionFunction(instruction))
 
       DeprecationMapper.getDeprecationsForInstruction(instruction.name).forEach { deprecation ->

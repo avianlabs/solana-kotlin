@@ -7,12 +7,10 @@
 
 package net.avianlabs.solana.domain.program
 
-import kotlin.Any
 import kotlin.Long
 import kotlin.String
 import kotlin.UByte
 import kotlin.ULong
-import kotlin.collections.List
 import kotlinx.io.Buffer
 import kotlinx.io.readByteArray
 import kotlinx.io.writeIntLe
@@ -142,8 +140,6 @@ public sealed class TokenProgram : Program {
     rent: PublicKey,
   ): TransactionInstruction
 
-  public abstract fun syncNative(account: PublicKey, rent: PublicKey): TransactionInstruction
-
   public abstract fun initializeAccount3(
     account: PublicKey,
     mint: PublicKey,
@@ -179,8 +175,6 @@ public sealed class TokenProgram : Program {
     authority: PublicKey,
     amount: ULong?,
   ): TransactionInstruction
-
-  public abstract fun batch(`data`: List<Any>): TransactionInstruction
 
   public enum class AuthorityType(
     public val `value`: UByte,
@@ -843,7 +837,7 @@ public sealed class TokenProgram : Program {
      * `system_instruction::transfer` to move lamports to a wrapped token
      * account, and needs to have its token `amount` field updated.
      */
-    public override fun syncNative(account: PublicKey, rent: PublicKey): TransactionInstruction =
+    public fun syncNative(account: PublicKey, rent: PublicKey = RENT): TransactionInstruction =
         createSyncNativeInstruction(account = account, rent = rent, programId = programId)
 
     internal fun createSyncNativeInstruction(
@@ -1102,26 +1096,6 @@ public sealed class TokenProgram : Program {
           writeLongLe(amount.toLong())
         } else {
           writeByte(0.toByte())
-        }
-      }.readByteArray(),
-    )
-
-    /**
-     * Executes a batch of instructions. The instructions to be executed are
-     * specified in sequence on the instruction data.
-     */
-    public override fun batch(`data`: List<Any>): TransactionInstruction =
-        createBatchInstruction(data = data, programId = programId)
-
-    internal fun createBatchInstruction(`data`: List<Any>, programId: PublicKey):
-        TransactionInstruction = createTransactionInstruction(
-      programId = programId,
-      keys = listOf(
-      ),
-      data = Buffer().apply {
-        writeByte(Instruction.Batch.index.toByte())
-        data.forEach { item ->
-          write(item.serialize())
         }
       }.readByteArray(),
     )
