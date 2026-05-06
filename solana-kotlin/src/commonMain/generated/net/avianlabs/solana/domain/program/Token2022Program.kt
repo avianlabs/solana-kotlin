@@ -469,8 +469,7 @@ public object Token2022Program : TokenProgram() {
    * `system_instruction::transfer` to move lamports to a wrapped token
    * account, and needs to have its token `amount` field updated.
    */
-  public override fun syncNative(account: PublicKey): TransactionInstruction =
-      createTransactionInstruction(
+  public fun syncNative(account: PublicKey): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
       AccountMeta(account, isSigner = false, isWritable = true),

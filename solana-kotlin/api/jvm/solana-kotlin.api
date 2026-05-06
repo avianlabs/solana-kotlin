@@ -927,13 +927,13 @@ public final class net/avianlabs/solana/domain/program/Token2022Program : net/av
 	public fun revoke (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun setAuthority (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/domain/program/TokenProgram$AuthorityType;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun setTransferFee-iw7Vnr0 (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;SJ)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
-	public fun syncNative (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public final fun syncNative (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun thawAccount (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun transfer-ARK9YDc (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;J)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun transferChecked-TpV2jgs (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;JB)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun transferCheckedWithFee-csFvPGA (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;JBJ)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun uiAmountToAmount (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Ljava/lang/String;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
-	public final fun unwrapLamports-nRXsjtY (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lkotlin/ULong;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public fun unwrapLamports-nRXsjtY (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lkotlin/ULong;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun updateConfidentialTransferMint (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;ZLnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun updateDefaultAccountState (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/domain/program/Token2022Program$AccountState;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun updateGroupMemberPointer (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
@@ -946,7 +946,7 @@ public final class net/avianlabs/solana/domain/program/Token2022Program : net/av
 	public final fun updateTokenMetadataField (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/domain/program/Token2022Program$TokenMetadataField;Ljava/lang/String;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun updateTokenMetadataUpdateAuthority (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun updateTransferHook (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
-	public final fun withdrawExcessLamports (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public fun withdrawExcessLamports (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun withdrawWithheldTokensFromAccounts-jDvRwcg (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;B)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun withdrawWithheldTokensFromAccountsForConfidentialTransferFee-5LfCyhE (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;BB[B)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public final fun withdrawWithheldTokensFromMint (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
@@ -1586,11 +1586,12 @@ public abstract class net/avianlabs/solana/domain/program/TokenProgram : net/avi
 	public abstract fun mintToChecked-uay8ffw (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;JB)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public abstract fun revoke (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public abstract fun setAuthority (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/domain/program/TokenProgram$AuthorityType;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
-	public abstract fun syncNative (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public abstract fun thawAccount (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public abstract fun transfer-ARK9YDc (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;J)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public abstract fun transferChecked-TpV2jgs (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;JB)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public abstract fun uiAmountToAmount (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Ljava/lang/String;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public abstract fun unwrapLamports-nRXsjtY (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lkotlin/ULong;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public abstract fun withdrawExcessLamports (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 }
 
 public final class net/avianlabs/solana/domain/program/TokenProgram$AccountState : java/lang/Enum {
@@ -1653,17 +1654,21 @@ public final class net/avianlabs/solana/domain/program/TokenProgram$Companion : 
 	public fun mintToChecked-uay8ffw (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;JB)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun revoke (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun setAuthority (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/domain/program/TokenProgram$AuthorityType;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
-	public fun syncNative (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public final fun syncNative (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public static synthetic fun syncNative$default (Lnet/avianlabs/solana/domain/program/TokenProgram$Companion;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;ILjava/lang/Object;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun thawAccount (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun transfer-ARK9YDc (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;J)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun transferChecked-TpV2jgs (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;JB)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 	public fun uiAmountToAmount (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Ljava/lang/String;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public fun unwrapLamports-nRXsjtY (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lkotlin/ULong;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
+	public fun withdrawExcessLamports (Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;Lnet/avianlabs/solana/tweetnacl/ed25519/PublicKey;)Lnet/avianlabs/solana/domain/core/TransactionInstruction;
 }
 
 public final class net/avianlabs/solana/domain/program/TokenProgram$Instruction : java/lang/Enum {
 	public static final field AmountToUiAmount Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field Approve Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field ApproveChecked Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
+	public static final field Batch Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field Burn Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field BurnChecked Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field CloseAccount Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
@@ -1686,6 +1691,8 @@ public final class net/avianlabs/solana/domain/program/TokenProgram$Instruction 
 	public static final field Transfer Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field TransferChecked Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static final field UiAmountToAmount Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
+	public static final field UnwrapLamports Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
+	public static final field WithdrawExcessLamports Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getIndex-w2LRezQ ()B
 	public static fun valueOf (Ljava/lang/String;)Lnet/avianlabs/solana/domain/program/TokenProgram$Instruction;
