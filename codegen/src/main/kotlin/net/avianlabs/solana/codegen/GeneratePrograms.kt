@@ -3,8 +3,11 @@ package net.avianlabs.solana.codegen
 import kotlinx.serialization.json.Json
 import net.avianlabs.solana.codegen.generator.ProgramGenerator
 import net.avianlabs.solana.codegen.generator.SharedInterfaceConfig
+import net.avianlabs.solana.codegen.generator.hasUnsupportedTypes
+import net.avianlabs.solana.codegen.generator.signaturesCompatible
 import net.avianlabs.solana.codegen.generator.toPascalCase
 import net.avianlabs.solana.codegen.idl.EnumVariantTypeNode
+import net.avianlabs.solana.codegen.idl.InstructionNode
 import net.avianlabs.solana.codegen.idl.ProgramNode
 import net.avianlabs.solana.codegen.idl.RootNode
 import java.io.File
@@ -61,8 +64,15 @@ fun main() {
       ?: error("Base IDL file not found: ${config.baseIdlFile}")
     val baseProgram = baseRoot.program
 
-    // Collect instruction names from the base program
-    val sharedInstructionNames = baseProgram.instructions.map { it.name }.toSet()
+    // Only treat an instruction as "shared" if every implementing program has it
+    // with a compatible signature. Instructions that exist only in the base program,
+    // or whose signatures have diverged across implementations, become regular
+    // (non-overriding) methods on each program rather than abstract on the parent.
+    val sharedInstructionNames = computeSharedInstructionNames(
+      baseProgram = baseProgram,
+      implementingProgramKeys = config.implementingProgramKeys,
+      parsedIdls = parsedIdls,
+    )
 
     // Collect defined type names referenced in base instruction parameters
     val sharedDefinedTypeNames = collectReferencedDefinedTypes(baseProgram)
@@ -113,6 +123,28 @@ fun main() {
   }
 
   println("\n✓ Code generation complete!")
+}
+
+private fun computeSharedInstructionNames(
+  baseProgram: ProgramNode,
+  implementingProgramKeys: Set<String>,
+  parsedIdls: Map<String, RootNode>,
+): Set<String> {
+  val implementingPrograms = parsedIdls.values
+    .flatMap { listOf(it.program) + it.additionalPrograms }
+    .filter { it.publicKey in implementingProgramKeys }
+  val nonBasePrograms = implementingPrograms.filter { it.publicKey != baseProgram.publicKey }
+
+  return baseProgram.instructions
+    .filter { instruction: InstructionNode ->
+      if (instruction.hasUnsupportedTypes()) return@filter false
+      nonBasePrograms.all { other ->
+        val match = other.instructions.find { it.name == instruction.name } ?: return@all false
+        !match.hasUnsupportedTypes() && signaturesCompatible(instruction, match)
+      }
+    }
+    .map { it.name }
+    .toSet()
 }
 
 private fun collectMergedDefinedTypes(
