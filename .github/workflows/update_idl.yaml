@@ -35,7 +35,7 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         id: cpr
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ORG_BOT_TOKEN }}
           commit-message: "update Solana program IDLs and generated code"
           title: "Update Solana IDLs"
           body: |
