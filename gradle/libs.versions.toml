@@ -10,7 +10,7 @@ androidJunit5 = "2.0.1"
 binaryCompatibilityValidator = "0.18.1"
 detekt = "1.23.8"
 jacoco = "0.8.7"
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 mavenPublish = "0.36.0"
 skie = "0.10.11"
 
@@ -23,7 +23,7 @@ kotlinxCoroutines = "1.10.2"
 kotlinxIo = "0.9.0"
 kotlinLogging = "7.0.14"
 ktor = "3.2.0"
-serialization = "1.10.0"
+serialization = "1.11.0"
 
 [libraries]
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
