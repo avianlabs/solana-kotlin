@@ -99,7 +99,7 @@ final class <#A: kotlin/Any?> net.avianlabs.solana.client/Response { // net.avia
         }
 
         final class Context { // net.avianlabs.solana.client/Response.RPC.Context|null[0]
-            constructor <init>(kotlin/ULong, kotlin/String?) // net.avianlabs.solana.client/Response.RPC.Context.<init>|<init>(kotlin.ULong;kotlin.String?){}[0]
+            constructor <init>(kotlin/ULong, kotlin/String? = ...) // net.avianlabs.solana.client/Response.RPC.Context.<init>|<init>(kotlin.ULong;kotlin.String?){}[0]
 
             final val apiVersion // net.avianlabs.solana.client/Response.RPC.Context.apiVersion|{}apiVersion[0]
                 final fun <get-apiVersion>(): kotlin/String? // net.avianlabs.solana.client/Response.RPC.Context.apiVersion.<get-apiVersion>|<get-apiVersion>(){}[0]

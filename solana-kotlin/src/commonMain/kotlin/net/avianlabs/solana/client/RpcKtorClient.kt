@@ -29,6 +29,7 @@ public class RpcKtorClient(
     ignoreUnknownKeys = true
     isLenient = true
     allowSpecialFloatingPointValues = true
+    explicitNulls = false
   }
 
   internal val ktorClient: HttpClient = httpClient.config {

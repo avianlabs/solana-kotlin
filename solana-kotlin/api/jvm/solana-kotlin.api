@@ -91,6 +91,7 @@ public final class net/avianlabs/solana/client/Response$RPC$Companion {
 
 public final class net/avianlabs/solana/client/Response$RPC$Context {
 	public static final field Companion Lnet/avianlabs/solana/client/Response$RPC$Context$Companion;
+	public synthetic fun <init> (JLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public synthetic fun <init> (JLjava/lang/String;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1-s-VKNKU ()J
 	public final fun component2 ()Ljava/lang/String;

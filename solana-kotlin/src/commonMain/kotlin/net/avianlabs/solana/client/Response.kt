@@ -18,7 +18,7 @@ public data class Response<T>(
     @Serializable
     public data class Context(
       val slot: ULong,
-      val apiVersion: String?,
+      val apiVersion: String? = null,
     )
   }
 }
