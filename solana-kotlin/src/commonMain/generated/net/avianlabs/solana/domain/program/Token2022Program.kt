@@ -469,8 +469,7 @@ public object Token2022Program : TokenProgram() {
    * `system_instruction::transfer` to move lamports to a wrapped token
    * account, and needs to have its token `amount` field updated.
    */
-  public override fun syncNative(account: PublicKey): TransactionInstruction =
-      createTransactionInstruction(
+  public fun syncNative(account: PublicKey): TransactionInstruction = createTransactionInstruction(
     programId = programId,
     keys = listOf(
       AccountMeta(account, isSigner = false, isWritable = true),
@@ -1773,7 +1772,7 @@ public object Token2022Program : TokenProgram() {
    * owned account by sending them to any other account, leaving behind only
    * lamports for rent exemption.
    */
-  public fun withdrawExcessLamports(
+  public override fun withdrawExcessLamports(
     sourceAccount: PublicKey,
     destinationAccount: PublicKey,
     authority: PublicKey,
@@ -2350,7 +2349,7 @@ public object Token2022Program : TokenProgram() {
   /**
    * Transfer lamports from a native SOL account to a destination account.
    */
-  public fun unwrapLamports(
+  public override fun unwrapLamports(
     source: PublicKey,
     destination: PublicKey,
     authority: PublicKey,
